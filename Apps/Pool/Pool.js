@@ -9,10 +9,10 @@ Version 1.01
 
 
 */
-import {$, $$, $R} from "../../src/DOM/geeQry.jsm";
-import {startMouse} from "../../src/DOM/mouse.jsm";
-import {simpleKeyboard} from "../../src/DOM/keyboard.jsm";
-import {StartAudio} from "./Synth.jsm";
+import {$, $$, $R} from "../../src/DOM/geeQry.js";
+import {startMouse} from "../../src/DOM/mouse.js";
+import {simpleKeyboard} from "../../src/DOM/keyboard.js";
+import {StartAudio} from "./Synth.js";
 
 const playerAName = "Mark";
 const playerBName = "Gaye";

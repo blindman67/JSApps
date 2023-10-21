@@ -1,5 +1,5 @@
 
-import {events} from "../utils/events.jsm";
+import {events} from "../utils/events.js";
 const keyboard = (()=>{
 	const modeStack = [];
 	const modes = {};

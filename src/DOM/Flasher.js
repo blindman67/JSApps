@@ -1,4 +1,4 @@
-import {$, $$, $R} from "../../src/DOM/geeQry.jsm";
+import {$, $$, $R} from "../../src/DOM/geeQry.js";
 export {Flasher};
 
 function Flasher(element, parent = document.body) {
