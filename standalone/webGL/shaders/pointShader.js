@@ -1,4 +1,4 @@
-import {glUtils} from "../glUtils.jsm";
+import {glUtils} from "../glUtils.js";
 export {pointShader};
 function pointShader(opts = {}) {
 	Object.assign(opts, {

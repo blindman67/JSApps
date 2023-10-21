@@ -1,4 +1,4 @@
-import {glUtils} from "../glUtils.jsm";
+import {glUtils} from "../glUtils.js";
 export {fisheyeShader};
 function fisheyeShader(opts = {}) {
 	Object.assign(opts, { ...opts});

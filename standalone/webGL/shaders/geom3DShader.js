@@ -1,4 +1,4 @@
-import {glUtils} from "../glUtils.jsm";
+import {glUtils} from "../glUtils.js";
 export {geom3DShader, geom3DInstShader};
 
 function MeshBuffer() {

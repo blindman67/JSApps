@@ -1,4 +1,4 @@
-import {glUtils} from "../glUtils.jsm";
+import {glUtils} from "../glUtils.js";
 export {spriteShader};
 function spriteShader(opts = {}) {
 	Object.assign(opts, {

@@ -1,4 +1,4 @@
-import {$} from "../DOM/geeQry.jsm";
+import {$} from "../DOM/geeQry.js";
 
 
 const subSpriteHeader = [...[..."0PV30SUB0SPR"].map(c => c === "0" ? 0xFF : c.charCodeAt(0))].reverse();

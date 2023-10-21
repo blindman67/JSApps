@@ -1,4 +1,4 @@
-import {} from "./MathExtensions.jsm";
+import {} from "./MathExtensions.js";
 const ROT_ORIGINS = [[0, 0], [1, 0], [1, 1], [0, 1]];
 const ROT_AXIS = [[1, 0, 0, 1], [0, 1, -1, 0], [-1, 0, 0, -1], [0, -1, 1, 0]];
 const Canvas2DUtils = {

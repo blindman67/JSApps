@@ -1,4 +1,4 @@
-import {glUtils} from "../glUtils.jsm";
+import {glUtils} from "../glUtils.js";
 export {skyShader};
 function skyShader(opts = {}) {
 	Object.assign(opts, {

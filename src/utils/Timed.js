@@ -1,4 +1,4 @@
-import {} from "./MathExtensions.jsm";
+import {} from "./MathExtensions.js";
 export {Timed, KeyFrames};
 function Timed() {
 	this.currentTime = 0;

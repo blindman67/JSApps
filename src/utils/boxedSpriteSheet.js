@@ -1,4 +1,4 @@
-import {$} from "../DOM/geeQry.jsm";
+import {$} from "../DOM/geeQry.js";
 
 function getSprite(px, idx, stride) {
 	var w = 0, h = 0, xx, yy;

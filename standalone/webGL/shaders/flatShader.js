@@ -1,4 +1,4 @@
-import {glUtils} from "../glUtils.jsm";
+import {glUtils} from "../glUtils.js";
 export {flatShader};
 function flatShader(opts = {}) {
 	Object.assign(opts, {color: [1,1,1,1], ...opts});

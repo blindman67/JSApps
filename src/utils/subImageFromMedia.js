@@ -1,4 +1,4 @@
-import {$} from "../DOM/geeQry.jsm";
+import {$} from "../DOM/geeQry.js";
 	
 function subImageFromMedia(media, {
 		width = media.naturalWidth,
