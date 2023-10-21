@@ -1,4 +1,4 @@
-import {intro} from "./intro.js";
+import {intro} from "./Intro.js";
 import {play} from "./play.js";
 
 const states = {};
