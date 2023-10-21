@@ -3,4 +3,4 @@ JavaScript coding experiments
 
 # Copyright
 
-All content is copywrite Blindman67 2023.
+All content is Copyright Blindman67 2023.
