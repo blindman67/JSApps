@@ -1,5 +1,5 @@
-import {} from "./utils/MathExtensions.jsm";
-import {} from "./Vec3.jsm";
+import {} from "./utils/MathExtensions.js";
+import {} from "./Vec3.js";
 export {MeshBuilder};
 function MeshBuilder() {
 	

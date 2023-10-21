@@ -1,5 +1,5 @@
-import {} from "./utils/MathExtensions.jsm";
-import {} from "./Vec3.jsm";
+import {} from "./utils/MathExtensions.js";
+import {} from "./Vec3.js";
 export {Quant};
 const EPSOLON = 1e-6;
 function Quant(x= 0, y= 0, z= 0, w = 1) {

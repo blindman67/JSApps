@@ -1,5 +1,5 @@
-import {} from "./utils/MathExtensions.jsm";
-import {Vec2} from "./Vec2.jsm";
+import {} from "./utils/MathExtensions.js";
+import {Vec2} from "./Vec2.js";
 export {Mat2};
 
 

@@ -1,5 +1,5 @@
-import {} from "./utils/MathExtensions.jsm";
-import {Vec3} from "./Vec3.jsm";
+import {} from "./utils/MathExtensions.js";
+import {Vec3} from "./Vec3.js";
 
 const AXIS_IDX = {x: 0, y: 1, z: 2};
 const v1 = new Vec3(), v2 = new Vec3(), v3 = new Vec3(), v4 = new Vec3(), v5 = new Vec3(), v6 = new Vec3(), v7 = new Vec3();

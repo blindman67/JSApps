@@ -1,5 +1,5 @@
-import {} from "./utils/MathExtensions.jsm";
-import {Vec3} from "./Vec3.jsm";
+import {} from "./utils/MathExtensions.js";
+import {Vec3} from "./Vec3.js";
 export {Mat4};
 
 // Mat array Index as axis eg XAX is x axis x component

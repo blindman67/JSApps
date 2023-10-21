@@ -1,5 +1,5 @@
-import {$,$$} from "../code/geeQry.jsm";
-import {display} from "../code/display.jsm";
+import {$,$$} from "../code/geeQry.js";
+import {display} from "../code/display.js";
 const overlays = {};
 function Overlay(resolutionScale) {
 	const canvas = $("canvas",{className: "canvasOverlay"});

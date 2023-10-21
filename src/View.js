@@ -1,6 +1,6 @@
-// import {} from "./utils/MathExtensions.jsm";
-import {Vec2} from "./Vec2.jsm";
-import {Mat2} from "./Mat2.jsm";
+// import {} from "./utils/MathExtensions.js";
+import {Vec2} from "./Vec2.js";
+import {Mat2} from "./Mat2.js";
 export {View};
 
 function View() {

@@ -1,5 +1,5 @@
-import "./utils/MathExtensions.jsm";
-import {Vec2} from "./Vec2.jsm";
+import "./utils/MathExtensions.js";
+import {Vec2} from "./Vec2.js";
 
 export {Physics2D, Shapes2D};
 const Shapes2D = {

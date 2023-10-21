@@ -1,6 +1,6 @@
-// import {} from "./utils/MathExtensions.jsm";
-import {Vec3} from "./Vec3.jsm";
-import {Mat4} from "./Mat4.jsm";
+// import {} from "./utils/MathExtensions.js";
+import {Vec3} from "./Vec3.js";
+import {Mat4} from "./Mat4.js";
 export {Projection};
 	
 function Projection(fov = Math.PI / 3, near = 1, far = 100) {

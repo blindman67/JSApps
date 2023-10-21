@@ -1,4 +1,4 @@
-import {Vec3} from "./Vec3.jsm";
+import {Vec3} from "./Vec3.js";
 export {Plane, PlanePath};
 
 function Plane(origin = new Vec3(0,0,0), xAxis = new Vec3(1,0,0), zAxis = new Vec3(0,0,1)) {

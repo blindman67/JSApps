@@ -1,6 +1,6 @@
-import {$,$$} from "../code/geeQry.jsm";
-import {events} from "../code/events.jsm";
-import {renderer} from "../code/renderer.jsm";
+import {$,$$} from "../code/geeQry.js";
+import {events} from "../code/events.js";
+import {renderer} from "../code/renderer.js";
 
 const display = (() => {
 	const PAUSE_MONITOR_TIME = 100;

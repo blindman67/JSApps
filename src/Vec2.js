@@ -1,4 +1,4 @@
-import {} from "./utils/MathExtensions.jsm";
+import {} from "./utils/MathExtensions.js";
 const V2 = (x = 0, y = 0) => ({x, y}); // best to avoid creating these in performant code
 export {Vec2, V2};
 function Vec2(x = 1, y = 0) {

@@ -1,4 +1,4 @@
-import {} from "../code/MathExtensions.jsm";
+import {} from "../code/MathExtensions.js";
 
 
 function Block(sprIdx) {

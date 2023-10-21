@@ -1,7 +1,7 @@
-import {} from "./utils/MathExtensions.jsm";
-import {$, $$, $R} from "./DOM/geeQry.jsm";
-import {Vec2} from "./Vec2.jsm";
-import {renderer} from "./webGL/renderer.jsm";
+import {} from "./utils/MathExtensions.js";
+import {$, $$, $R} from "./DOM/geeQry.js";
+import {Vec2} from "./Vec2.js";
+import {renderer} from "./webGL/renderer.js";
 export {DebugCanvas};
 const wV1 = new Vec2();
 const wV2 = new Vec2();

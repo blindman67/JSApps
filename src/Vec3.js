@@ -1,4 +1,4 @@
-import {} from "./utils/MathExtensions.jsm";
+import {} from "./utils/MathExtensions.js";
 
 const vec3Ident = {x: 1, y: 0, z: 0};
 const V3 = (x=0,y=0,z=0) => ({x,y,z});
