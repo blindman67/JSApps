@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>2D_Verlet_Intergration</title>
+		<style>
+			* {
+  font-family: arial;
+}
+canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+#clickInfo {
+  position: absolute; 
+  top: 10px; 
+  left: 10px;  
+}
+#titleInfo {
+  position: absolute; 
+  top: 10px; 
+  left: 40%; 
+  font-size: xx-large;
+}
+#SOLink {
+  position: absolute; 
+  top: 10px; 
+  right: 10px; 
+
+}
+		</style>
+    </head>
+    <body style = "font-family:monospace">
+		<canvas id="canvas" width="400" height="180" ></canvas>
+<div id="clickInfo">Click page to stir balls</div>
+<div id="titleInfo">2D Verlet Intergration</div>
+<a id="SOLink" href="https://stackoverflow.com/a/65462999/3877726" target="_blank" title="Open StackOverflow related answer in new tab">Learn more at StackOverflow</a>
+		<script>
+			const ctx = canvas.getContext("2d"); 
+const BOUNCE = 0.75;
+const resolveSteps = 5;
+var oldTime = 0;
+const $setOf = (count, fn = (i) => i) => {var a = [], i = 0; while (i < count) { a.push(fn(i++)) } return a };
+const $rand  = (min = 1, max = min + (min = 0)) => Math.random() * (max - min) + min;
+const $randP  = (min = 1, max = min + (min = 0), p = 2) => Math.random() ** p * (max - min) + min;
+var W = canvas.width, H = canvas.height;
+const BALL_COUNT = 280;
+var BALL_RADIUS = 15, BALL_MIN_RADIUS = 6;
+const GRAV = 0.5 / resolveSteps;
+resizeCanvas();
+requestAnimationFrame(updateFrame);
+addEventListener("resize", resizeCanvas) 
+function resizeCanvas() {
+  W = canvas.width = innerWidth;
+  H = canvas.height = innerHeight;
+  const size = (W * H) ** 0.5 * 0.3;
+  BALL_MIN_RADIUS = (BALL_RADIUS = size * 0.1) * 0.50;
+}
+ 
+
+canvas.addEventListener("click", () => {
+  balls.forEach(b => {
+    b.px = b.x + (Math.random() * 18 - 9);
+    b.py = b.y + (Math.random() * -18);
+  })
+});
+class Ball {
+  constructor({x, y, vx, vy, radius}) {
+    this.x = x;
+    this.y = y;
+    this.px = x - vx;
+    this.py = y - vy;
+    this.vx = vx;
+    this.vy = vy;
+    this.radius = radius;
+    this.mass = radius * radius * Math.PI * (4 / 3); // use sphere volume as mass
+  }
+  render(ctx) {
+    ctx.moveTo(this.x + this.radius, this.y);
+    ctx.arc(this.x, this.y, this.radius, Math.PI * 2, false);
+  }
+  move() {
+    this.vx = this.x - this.px;
+    this.vy = this.y - this.py;
+    this.vy += GRAV;
+    this.px = this.x;
+    this.py = this.y;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.checkWall();
+  }
+  checkWall() {
+    const ball = this;
+    const top = ball.radius;
+    const left = ball.radius;
+    const bottom = H - ball.radius;
+    const right = W - ball.radius;
+    if (ball.x > right) {
+      const away = (ball.x - right) * BOUNCE;
+      ball.x = right - away;
+      ball.vx = -Math.abs(ball.vx) * BOUNCE;
+      ball.px = ball.x - ball.vx;
+    } else if (ball.x < left) {
+      const away = (ball.x - left) * BOUNCE;
+      ball.x = left + away;
+      ball.vx = Math.abs(ball.vx) * BOUNCE;
+      ball.px = ball.x - ball.vx;
+    }
+    if (ball.y > bottom) {
+      const away = (ball.y - bottom) * BOUNCE;
+      ball.y = bottom - away;
+      ball.vy = -Math.abs(ball.vy) * BOUNCE;
+      ball.py = ball.y - ball.vy;
+    } else if (ball.y < top) {
+      const away = (ball.y - top) * BOUNCE;
+      ball.y = top + away;
+      ball.vy = Math.abs(ball.vy) * BOUNCE;
+      ball.py = ball.y - ball.vy;
+    }
+  }
+  collisions() {
+    var b, dx, dy, nx, ny, cpx, cpy, p, d, i = 0;
+    var {x, y, vx, vy, px, py, radius: r, mass: m} = this;
+    while (i < balls.length) {
+      b = balls[i++];
+      if (this !== b) {
+        const rr = r + b.radius;
+        if (x + rr > b.x && x < b.x + rr && y + rr > b.y && y < b.y + rr) {
+          dx = x - b.x;
+          dy = y - b.y;
+          d = (dx * dx + dy * dy) ** 0.5;
+          if (d < rr) {
+            nx = (b.x - x) / d;
+            ny = (b.y - y) / d;
+            p = 2 * (vx * nx + vy * ny - b.vx * nx - b.vy * ny) / (m + b.mass);
+            cpx = (x * b.radius + b.x * r) / rr;
+            cpy = (y * b.radius + b.y * r) / rr;
+            x = cpx + r * (x - b.x) / d;
+            y = cpy + r * (y - b.y) / d;
+            b.x = cpx + b.radius * (b.x - x) / d;
+            b.y = cpy + b.radius * (b.y - y) / d;
+            px = x - (vx -= p * b.mass * nx);
+            py = y - (vy -= p * b.mass * ny);
+            b.px = b.x - (b.vx += p * m * nx);
+            b.py = b.y - (b.vy += p * m * ny);
+          }
+        }
+      }
+    }
+    this.x = x;
+    this.y = y;
+    this.px = px;
+    this.py = py;
+    this.vx = vx;
+    this.vy = vy;
+    this.checkWall();
+  }
+}
+const balls = (() => {
+  return $setOf(BALL_COUNT, () => new Ball({
+    x: $rand(BALL_RADIUS, W - BALL_RADIUS),
+    y: $rand(BALL_RADIUS, H - BALL_RADIUS),
+    vx: $rand(-2, 2),
+    vy: $rand(-2, 2),
+    radius: $randP(BALL_MIN_RADIUS, BALL_RADIUS, 4),
+  }));
+})();
+
+function updateFrame(ts) {
+  var i = 0, j = resolveSteps;
+  ctx.clearRect(0, 0, W, H);
+
+  while (i < balls.length) { balls[i++].move() }
+  while (j--) {
+    i = 0;
+    while (i < balls.length) { balls[i++].collisions(balls) }
+  }
+  ctx.fillStyle = "#0F0";
+  ctx.beginPath();
+  i = 0;
+  while (i < balls.length) { balls[i++].render(ctx) }
+  ctx.fill();
+  requestAnimationFrame(updateFrame)
+}
+  
+
+		</script>
+	</body>
+<html>

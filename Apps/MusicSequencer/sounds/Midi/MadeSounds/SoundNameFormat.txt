@@ -1,0 +1,14 @@
+
+Sound name format
+
+SoundName_NoteName_iconNumber.wav
+
+Example
+
+guitar_Fs5_ic3.wav 
+
+SoundName: "guitar"
+NoteName: "Fs5"
+iconNumber: "ic3" is icon 3
+.wav
+

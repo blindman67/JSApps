@@ -1,0 +1,123 @@
+.json {
+    width: 2000px;
+    font-family: monospace;
+}
+h1 {
+    margin-block-start: 0px;
+    margin-block-end: 0px;      
+}
+
+h2 {
+    margin-block-start: 0px;
+    margin-block-end: 0px;    
+}
+
+h3 {
+    margin-block-start: 0px;
+    margin-block-end: 0px;    
+}
+
+h4 {
+    margin-block-start: 0px;
+    margin-block-end: 0px;    
+}
+
+h5 {
+    margin-block-start: 0px;
+    margin-block-end: 0px;    
+}
+
+h6 {
+    margin-block-start: 0px;
+    margin-block-end: 0px;    
+}
+
+h7 {
+    margin-block-start: 0px;
+    margin-block-end: 0px;    
+}
+
+.data.level1 {
+    padding-left: 30px;
+}
+.data.level2 {
+    padding-left: 30px;
+}
+.data.level3 {
+    padding-left: 30px;
+}
+.data.level4 {
+    padding-left: 30px;
+}
+.data.level5 {
+    padding-left: 30px;
+}
+.data.string { 
+}
+
+.data.number {
+}
+
+.data.bool {
+}
+
+.data.array {
+}
+.folding {
+    cursor: pointer;
+}
+.folded {
+    display: none;
+}
+.item {
+    margin-top: 3px;
+    margin-block-end: 2px;
+    margin-block-start: 2px;
+}
+.name {  
+    text-align: left;
+    width: 170px;
+    display: inline-flex;
+    flex-direction: row;
+    margin-right: 9px;    
+    white-space: pre;
+}
+.value {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    margin-inline-start: 1px;
+}
+.data.string.name { 
+}
+
+.data.number.name {
+}
+
+.data.boolean.name {
+}
+
+.data.array.name {
+}
+
+.data.string.value { 
+    color: aqua;
+}
+
+.data.number.value {
+    color: coral;
+}   
+
+.data.boolean.value  {
+    color: chartreuse;
+}
+
+.data.array.value  {
+    color: aqua;
+}
+
+.float.img {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}
+

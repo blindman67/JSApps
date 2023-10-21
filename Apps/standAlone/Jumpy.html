@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>Jumpy</title>
+		<style>
+			
+		</style>
+    </head>
+    <body style = "font-family:monospace">
+		
+		<script>
+			/* Name: "Jumpy" */
+var imageTools = (function () {
+    var tools = {
+        canvas : function (width, height) {  // create a blank image (canvas)
+            var c = document.createElement("canvas");
+            c.width = width;
+            c.height = height;
+            return c;
+        },
+        createImage : function (width, height) {
+            var i = this.canvas(width, height);
+            i.ctx = i.getContext("2d");
+            return i;
+        },
+        loadImage : function (url, cb) {
+            var i = new Image();
+            i.src = url;
+            i.addEventListener('load', cb);
+            i.addEventListener('error', cb);
+            return i;
+        },
+        image2Canvas : function (img) {
+            var i = this.canvas(img.width, img.height);
+            i.ctx = i.getContext("2d");
+            i.drawImage(i, 0, 0);
+            return i;
+        },
+        drawSpriteLinked : function(image,spriteIndex, x, y, scale, ang, alpha) {
+            
+            var w,h,spr;
+            spr = image.sprites[spriteIndex];
+            w = spr.w; h = spr.h;
+            ctx.globalAlpha = alpha;
+            var xdx = Math.cos(ang) * scale;
+            var xdy = Math.sin(ang) * scale;
+            ctx.save();
+            ctx.transform(xdx, xdy, -xdy, xdx, x, y);
+            ctx.drawImage(image, spr.x, spr.y, w, h, -w/2, -h/2, w, h);
+            ctx.restore();
+        }, 
+        drawSprite : function(image,spriteIndex, x, y, scale, ang, alpha) {
+            var w,h,spr;
+            spr = image.sprites[spriteIndex];
+            w = spr.w; h = spr.h;
+            ctx.globalAlpha = alpha;
+            ctx.setTransform(scale, 0, 0, scale, x, y);
+            ctx.rotate(ang);
+            ctx.drawImage(image, spr.x, spr.y, w, h, -w/2, -h/2, w, h);
+        },        
+        drawSpriteSLinked : function(image,spriteIndex, x, y, scale, scaleX, ang, alpha) {
+           
+            var w,h,spr;
+            spr = image.sprites[spriteIndex];
+            w = spr.w; h = spr.h;
+            ctx.globalAlpha = alpha;
+            var xdx = Math.cos(ang) * scale;
+            var xdy = Math.sin(ang) * scale;
+            ctx.save()
+            ctx.transform(xdx * scaleX, xdy * scaleX, -xdy, xdx, x, y);
+            ctx.drawImage(image, spr.x, spr.y, w, h, -w/2, -h/2, w, h);
+            ctx.restore();
+        },
+        drawSpriteS : function(image,spriteIndex, x, y, scale, scaleX, ang, alpha) {
+            var w,h,spr;
+            spr = image.sprites[spriteIndex];
+            w = spr.w; h = spr.h;
+            ctx.globalAlpha = alpha;
+            ctx.setTransform(scale * scaleX, 0, 0, scale, x, y);
+            ctx.rotate(ang);
+            ctx.drawImage(image, spr.x, spr.y, w, h, -w/2, -h/2, w, h);
+        },
+        hex2RGBA : function(hex){
+            if(typeof hex === "string"){
+                var str = "rgba(";
+                if(hex.length === 4 || hex.length === 5){
+                    str += (parseInt(hex.substr(1,1),16) * 16) + ",";
+                    str += (parseInt(hex.substr(2,1),16) * 16) + ",";
+                    str += (parseInt(hex.substr(3,1),16) * 16) + ",";
+                    if(hex.length === 5){
+                        str += (parseInt(hex.substr(3,1),16) / 16);
+                    }else{
+                        str += "1";
+                    }
+                    return str + ")";
+                }
+                if(hex.length === 7 || hex.length === 8){
+                    str += parseInt(hex.substr(1,2),16) + ",";
+                    str += parseInt(hex.substr(3,2),16) + ",";
+                    str += parseInt(hex.substr(5,2),16) + ",";
+                    if(hex.length === 5){
+                        str += (parseInt(hex.substr(7,2),16) / 255).toFixed(3);
+                    }else{
+                        str += "1";
+                    }
+                    return str + ")";                
+                }
+                return "rgba(0,0,0,0)";
+            }
+            
+                
+        },            
+        createGradient : function(ctx, type, x, y, xx, yy, colours){
+            var i,g,c;
+            var len = colours.length;
+            if(type.toLowerCase() === "linear"){
+                g = ctx.createLinearGradient(x,y,xx,yy);
+            }else{
+                g = ctx.createRadialGradient(x,y,xx,x,y,yy);
+            }
+            for(i = 0; i < len; i++){
+                c = colours[i];
+                if(typeof c === "string"){
+                    if(c[0] === " #"){
+                        c = this.hex2RGBA(c);
+                    }
+                    g.addColorStop(Math.min(1,i / (len -1)),c); // need to clamp top to 1 due to floating point errors causes addColorStop to throw rangeError when number over 1
+                }
+            }
+            return g;
+            
+        },
+    };
+    return tools;
+})();
+
+/** ImageTools.js end **/
+/** SimpleFullCanvasMouse.js begin **/
+const CANVAS_ELEMENT_ID = "canv";
+const U = undefined;
+var w, h, cw, ch; // short cut vars 
+var canvas, ctx, mouse;
+var globalTime = 0; 
+var globalTimeInt = 0;
+var createCanvas, resizeCanvas, setGlobals;
+var L = typeof log === "function" ? log : function(d){ console.log(d); }
+createCanvas = function () {
+    var c,cs;
+    cs = (c = document.createElement("canvas")).style; 
+    c.id = CANVAS_ELEMENT_ID;    
+    cs.position = "absolute";
+    cs.top = cs.left = "0px";
+    cs.zIndex = 1000;
+    document.body.appendChild(c); 
+    return c;
+}
+var resized = false;
+resizeCanvas = function () {
+    if (canvas === U) { canvas = createCanvas(); }
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight; 
+    resized = true;
+    ctx = canvas.getContext("2d"); 
+    if (typeof setGlobals === "function") { setGlobals(); }
+}
+setGlobals = function(){ 
+    cw = (w = canvas.width) / 2; ch = (h = canvas.height) / 2; 
+    if(it !== undefined){
+        it = createIt(cw,ch,sprites);
+    }
+}
+mouse = (function(){
+    function preventDefault(e) { e.preventDefault(); }
+    var mouse = {
+        x : 0, y : 0, w : 0, alt : false, shift : false, ctrl : false, buttonRaw : 0,
+        over : false,  // mouse is over the element
+        bm : [1, 2, 4, 6, 5, 3], // masks for setting and clearing button raw bits;
+        mouseEvents : "mousemove,mousedown,mouseup,mouseout,mouseover,mousewheel,DOMMouseScroll".split(",")
+    };
+    var m = mouse;
+    function mouseMove(e) {
+        var t = e.type;
+        m.x = e.offsetX; m.y = e.offsetY;
+        if (m.x === U) { m.x = e.clientX; m.y = e.clientY; }
+        m.alt = e.altKey; m.shift = e.shiftKey; m.ctrl = e.ctrlKey;
+        if (t === "mousedown") { m.buttonRaw |= m.bm[e.which-1]; }  
+        else if (t === "mouseup") { m.buttonRaw &= m.bm[e.which + 2]; }
+        else if (t === "mouseout") { m.buttonRaw = 0; m.over = false; }
+        else if (t === "mouseover") { m.over = true; }
+        else if (t === "mousewheel") { m.w = e.wheelDelta; }
+        else if (t === "DOMMouseScroll") { m.w = -e.detail; }
+        if (m.callbacks) { m.callbacks.forEach(c => c(e)); }
+        e.preventDefault();
+    }
+    m.addCallback = function (callback) {
+        if (typeof callback === "function") {
+            if (m.callbacks === U) { m.callbacks = [callback]; }
+            else { m.callbacks.push(callback); }
+        } else { throw new TypeError("mouse.addCallback argument must be a function"); }
+    }
+    m.start = function (element, blockContextMenu) {
+        if (m.element !== U) { m.removeMouse(); }        
+        m.element = element === U ? document : element;
+        m.blockContextMenu = blockContextMenu === U ? false : blockContextMenu;
+        m.mouseEvents.forEach( n => { m.element.addEventListener(n, mouseMove); } );
+        if (m.blockContextMenu === true) { m.element.addEventListener("contextmenu", preventDefault, false); }
+    }
+    m.remove = function () {
+        if (m.element !== U) {
+            m.mouseEvents.forEach(n => { m.element.removeEventListener(n, mouseMove); } );
+            if (m.contextMenuBlocked === true) { m.element.removeEventListener("contextmenu", preventDefault);}
+            m.element = m.callbacks = m.contextMenuBlocked = U;
+        }
+    }
+    return mouse;
+})();
+var done = function(){
+    window.removeEventListener("resize",resizeCanvas)
+    mouse.remove();
+    document.body.removeChild(canvas);    
+    canvas = ctx = mouse = U;
+    L("All done!")
+}
+
+resizeCanvas(); // create and size canvas
+resized = false;
+mouse.start(canvas,true); // start mouse on canvas and block context menu
+window.addEventListener("resize",resizeCanvas); // add resize event
+function drawText(text,x,y,size,col){
+    var f = size + "px Arial";
+    if(f !== ctx.font){
+        ctx.font = f;
+    } 
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = col;
+    ctx.fillText(text,x,y);
+}
+function drawLoad(){
+    if(!resourcesReady || !canPlay){
+        drawText(message,cw,ch * 0.5, FONT_SIZE, MESSAGE_COL);
+        if (!canPlay && resourcesReady){
+            drawText("Try reloading the page.",cw,ch * 0.5 + FONT_SIZE + 8,Math.floor(FONT_SIZE /2) ,MESSAGE_COL);
+        }else{
+            
+            drawText("Loading resources." ,cw,ch * 0.5 + FONT_SIZE + 8,Math.floor(FONT_SIZE /2) ,MESSAGE_COL);
+        }
+        
+    }else{
+        if(message !== ""){
+            drawText(message,cw,ch * 0.5, FONT_SIZE, MESSAGE_COL);
+            
+        }
+    }
+}
+const FONT = "px Arial"
+const FONT_SIZE = Math.max(Math.floor(window.innerHeight/20),24)
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+function loaded(e){
+    if(e.type !== "error"){
+        this.sprites = [
+            { x : 0, y : 0, w : 74, h : 116, },
+            { x : 0, y : 126, w : 100, h : 113, },
+            { x : 75, y : 0, w : 29, h : 42, },
+            { x : 75, y : 43, w : 17, h : 22, },
+            { x : 0, y : 249, w : 42, h : 18, },
+            { x : 75, y : 66, w : 17, h : 15, },
+            { x : 75, y : 82, w : 17, h : 12, },
+            { x : 75, y : 95, w : 16, h : 9, },
+            { x : 75, y : 105, w : 7, h : 7, },
+            { x : 0, y : 268, w : 11, h : 5, },
+        ]
+        resourcesReady = true;
+        canPlay = true;
+        it = createIt(cw,ch,this );
+        message = "";
+        return;
+    }
+    resourcesReady = true;
+    message = "LOAD FAILED!"
+    
+}
+var it = null; // it is the character
+var resourcesReady = false;
+var canPlay = false;
+var message = "Please Wait..."
+const MESSAGE_COL = "white";
+//var sprites = imageTools.loadImage("GreenIt.png",loaded )
+var sprites = imageTools.loadImage("http://i.stack.imgur.com/ED6oC.png",loaded )
+var background = imageTools.createImage(8,8);
+background.ctx.fillStyle = imageTools.createGradient(ctx,"linear",0,0,8,8,["#0AF","#05A"]);
+background.ctx.fillRect(0,0,8,8);
+var ground = imageTools.createImage(8,32);
+ground.ctx.fillStyle = imageTools.createGradient(ctx,"linear",0,0,8,32,["#0A0","#450","#754"]);
+ground.ctx.fillRect(0,0,8,32);
+ground.ctx.fillStyle = "black";
+ground.ctx.fillRect(0,0,8,4);
+const GROUND_OFFSET = 32;
+const GRAV = 1;
+var landed = false;
+const MESSAGES = [
+    "Click mouse button to Jump",
+    "Click hold ... release to to add power to jump",
+    "Double click to double jump",
+    ""
+];
+var messageCount = 0;
+var fly = { // something to see
+    x : 0,
+    y : 0,
+    dx : 0,
+    dy : 0,
+    wait : 0,
+    onTheWall : false,
+    update : function(){
+        if(this.wait <= 0){
+            this.wait = Math.random() * 200+ 60;
+            this.onTheWall = Math.random() < 0.1 ? true : false;
+            if(this.onTheWall){
+                this.dx = 0;
+                this.dy = 0;
+            }else{
+                this.wait = Math.random() < 0.2 ? 10 : this.wait;
+                var x = (Math.random()-0.5) * 200;
+                var y = (Math.random()-0.5) * 200;
+                this.dx = (x - this.x) / this.wait;
+                this.dx = (y - this.y) / this.wait;
+                
+            }
+        }else{
+            this.wait -= 1;
+            this.x += this.dx;
+            this.y += this.dy;
+        }
+    }
+};
+
+/*==============================================================================================
+// Answer code
+==============================================================================================*/
+// info to define the character
+const IT = {
+    body : 0,  // sprite indexes
+    bodyFly : 1,
+    footDown : 2,
+    eyeOpen : 3,
+    foot : 4,
+    mouthOpen : 5,
+    eyeShut : 6,
+    mouthSmirk : 7,
+    eyeBall : 8,
+    mouth : 9,  // sprite index end
+    grav : GRAV, // grav accel
+    maxJumpPower : 40,
+    minJump : 10,
+    jumpPower : 30,  // mutiplys squat amount to give jump power
+    squatRate : 1,  // how quick the squat is
+    squatResist : 0.8,  // limits the amount of squat
+    landingBlinkTime : 30, // how long blink is on landing
+    blinkTime : 15, // how many frames to close eyes
+    blinkRate : 60 * 3, // 60 is one second . Time between blinks average
+    eyePos : {x : 0.13, y : -0.1}, // position as fraction of size
+    footPos : {x : 0.3, y : 0.5}, // position as fraction of size
+    lookAtGround : 1, // look ats
+    lookAtMouse : 2,
+    lookAtUser : 3,
+    lookAtFly : 4,
+    angle: 0,
+    jumpDy: 0,  // the jump up speed used to rotate It when in air
+
+}
+// Function updates the character
+const updateIt = function(){
+    if(this.blink > 0){
+        this.blink -= 1; 
+    }
+    if(this.blinkTimer > 0){
+        this.blinkTimer -= 1;
+        if(this.blinkTimer === 0){
+            this.blink = IT.blinkTime;
+        }
+    }else{
+        // the two randoms create a random number that has a gausian distrabution centered on 0.5
+        // this creates a more realistic set of numbers.
+        this.blinkTimer = Math.floor(IT.blinkRate * (Math.random() + Math.random())/2 + IT.blinkRate / 2);
+        this.lookAt = Math.random() < 0.33 ? IT.lookAtUser : (Math.random() < 0.5 ? IT.lookAtMouse : IT.lookAtFly);
+    }
+    if(!this.onGround){
+        this.squat = 0;
+        //-------------------------------------
+        // do gravity
+        this.dy += IT.grav;
+        this.y += this.dy;
+        this.x += this.dx;
+        this.x = (this.x + ctx.canvas.width) %  ctx.canvas.width;
+        var rotFraction = (this.jumpDy - this.dy) / this.jumpDy;
+
+        this.angle = this.jumpAngle * -rotFraction ; 
+
+
+        if(this.dy > 13){
+            this.lookAt = IT.lookAtGround;
+        }
+        // check for the ground
+        if(this.y + this.tall / 2 > h - GROUND_OFFSET){
+            this.y = h - GROUND_OFFSET - this.tall / 2;
+            this.blink = Math.floor(IT.landingBlinkTime * (this.dy / 20));
+            this.blinkTimer = this.blink + 30;
+            this.squat = this.dy;
+            this.dy = 0;
+            this.onGround = true;
+            this.angle = -this.jumpAngle
+        }
+    }else{
+        this.squat *= IT.squatResist;
+        
+    }
+    
+}
+// draw the character
+const drawIt = function(){
+    var bod = IT.body;
+    var spr = this.img.sprites;
+    var eye = this.blink > 0 ? IT.eyeShut : IT.eyeOpen;
+    var foot = IT.foot;
+    var footBehind = false; // draw feet behind or infront of body
+    
+    if(!this.onGround){
+        if(this.dy >= 0){
+            if(this.dy > 2){
+                bod = IT.bodyFly;
+            }
+        }else{
+            footBehind = true;
+            foot = IT.footDown;
+        }
+    }
+    var xdx = Math.cos(this.angle);
+    var xdy = Math.sin(this.angle);
+    var px = this.x;  // pivot
+    var py = this.y + 50;
+    var x = this.x ;
+    var y = this.y + this.squat;
+    var t = this.tall;
+    var f = this.fat;
+    if(footBehind){
+        if(!this.onGround){
+            var r = 1 - Math.min(1,-this.dy / 10);
+            imageTools.drawSpriteS(this.img,foot,x + f * IT.footPos.x,y - this.squat+  t * IT.footPos.y,1,-1,r,1);
+            imageTools.drawSprite(this.img,foot,x - f * IT.footPos.x,y - this.squat +  t * IT.footPos.y,1,r,1);
+        }
+    }
+    ctx.setTransform(xdx,xdy,-xdy,xdx,px,py);
+    imageTools.drawSpriteLinked(this.img,bod,x - px,y - py,1,0,1);
+    if(!footBehind){
+        if(this.onGround){
+            imageTools.drawSpriteS(this.img,foot,x + f * IT.footPos.x,y - this.squat+  t * IT.footPos.y,1,-1,0,1);
+            imageTools.drawSprite(this.img,foot,x - f * IT.footPos.x,y - this.squat +  t * IT.footPos.y,1,0,1);
+        }else{
+            var r = this.dy / 10;
+            imageTools.drawSpriteS(this.img,foot,x + f * IT.footPos.x,y - this.squat+  t * IT.footPos.y,1,-1,r,1);
+            imageTools.drawSprite(this.img,foot,x - f * IT.footPos.x,y - this.squat +  t * IT.footPos.y,1,r,1);
+        }
+    }
+    if(this.blink){
+        ctx.setTransform(xdx,xdy,-xdy,xdx,px,py);
+
+        imageTools.drawSpriteLinked(this.img,eye,x + f * IT.eyePos.x - px, y +  t * IT.eyePos.y - py,1,0,1);
+        imageTools.drawSpriteSLinked(this.img,eye,x - f * IT.eyePos.x - px, y +  t * IT.eyePos.y - py,1,-1,0,1);
+    }else{
+        ctx.setTransform(xdx,xdy,-xdy,xdx,px,py);
+        imageTools.drawSpriteLinked(this.img,eye,x + f * IT.eyePos.x - px, y +  t * IT.eyePos.y - py,1,0,1);
+        imageTools.drawSpriteSLinked(this.img,eye,x - f * IT.eyePos.x - px, y +  t * IT.eyePos.y - py,1,-1,0,1);
+        var eyeDir = 0;
+        var eyeDist = 0;
+        if(this.blink === 0){
+            if(this.lookAt === IT.lookAtGround){
+                eyeDir = Math.PI/2;
+                eyeDist = 0.3;
+            }else if(this.lookAt === IT.lookAtUser){
+                eyeDir = 0;
+                eyeDist = 0;
+            }else if(this.lookAt === IT.lookAtFly){
+                eyeDir = Math.atan2(fly.y, fly.x);
+                eyeDist = (Math.hypot(fly.y ,fly.x) /  200) * 0.3;
+  
+            }else{
+                eyeDir = Math.atan2(mouse.y - this.y, mouse.x - this.x);
+                eyeDist = (Math.hypot(this.y - mouse.y,this.x - mouse.x) / (Math.min(w,h)/2)) * 0.3;
+            
+            }
+            eyeDist = Math.max(-0.3, Math.min(0.3, eyeDist));
+            var ex,ey;
+            ex = Math.cos(eyeDir) * spr[IT.eyeOpen].w * eyeDist;
+            ey = Math.sin(eyeDir) * spr[IT.eyeOpen].h * eyeDist;
+            imageTools.drawSpriteLinked(this.img, IT.eyeBall, x + f * IT.eyePos.x + ex - px, y +  t * IT.eyePos.y + ey-py,1,0,1);
+            imageTools.drawSpriteLinked(this.img, IT.eyeBall, x - f * IT.eyePos.x + ex - px, y +  t * IT.eyePos.y + ey-py,1,0,1);
+        }
+    }
+}
+
+
+// While mouse is down squat and prep to jump
+const preJump = function(){
+    this.squat += IT.squatRate;
+    this.jumpPower += 0.5;
+    if(this.jumpPower > 30 && this.wiggle === 0) {
+       this.wiggle = 1;
+    }
+    this.jumpReady = true;
+}
+// when mouse released apply jump force
+const jumpIt = function(){
+    
+    var power = -IT.jumpPower * Math.min(IT.maxJumpPower,Math.max(IT.minJump,this.jumpPower))/IT.maxJumpPower;
+    this.dy = Math.sin(this.angle + Math.PI /2) * power;
+    this.dx = Math.cos(this.angle + Math.PI /2) * power;
+    if(this.onGround){
+        this.jumpDy = this.dy;
+        this.jumpAngle = this.angle;
+    }
+
+    this.wiggle = 0;
+    this.jumpPower = 0;
+    this.jumpReady = false;    
+    this.squat = 0;
+    this.onGround = false;
+}
+
+// creates a character
+var createIt = function(x,y,img){
+    return {
+        img : img,
+        x : x,  // position
+        y : y,
+        dx : 0, // deltat speed
+        dy : 0,
+        sqaut : 0, // for landing and pre jump slight squat
+        onGround : false,
+        jumpPower : 0,
+        blink : 0, // blink controls
+        blinkTimer : 0,
+        lookAt : "ground", /// where to look
+        jumpReady : false, // flags if ready to jump
+        tall : img.sprites[IT.body].h,   // how tall
+        fat : img.sprites[IT.body].w, // how wide
+        draw : drawIt, // functions
+        update : updateIt,
+        jump : jumpIt,
+        squatF : preJump,
+    }
+}
+
+
+
+function display(){  // put code in here
+    ctx.setTransform(1,0,0,1,0,0); // reset transform
+    ctx.globalAlpha = 1;           // reset alpha
+    ctx.drawImage(background,0,0,w,h)
+    ctx.drawImage(ground,0,h-GROUND_OFFSET,w,GROUND_OFFSET);
+    fly.update()
+    drawLoad();
+    if(canPlay){
+        if(messageCount < MESSAGES.length){
+            if(it.onGround && !landed){
+                landed = true;
+                message = MESSAGES[messageCount];
+                messageCount += 1;
+            }
+        }       
+        if(resized) {  // to prevent resize display issue
+           resized = false;
+           it.y = h - GROUND_OFFSET - it.tall / 2;
+        }
+            
+        if(it.onGround) {
+           it.angle = Math.atan2((it.y + 130)-10, it.x- mouse.x) / 3;
+           it.angle = it.angle < -1 ? -1 : it.angle > 1 ? 1 : it.angle;
+           it.angle = Math.pow(Math.abs(it.angle),0.5) * Math.sign(it.angle);
+           it.angle -= Math.PI / 4;
+           if(it.wiggle > 0.1) {
+              it.angle += Math.sin((it.wiggle * Math.PI) ** 2) * 0.01 * it.wiggle;
+              it.wiggle *= 0.95;
+           }
+        } 
+        if(mouse.buttonRaw & 1){
+            it.squatF();
+        }else{
+            if(it.jumpReady){
+                it.jump();
+                landed = false;
+            }
+        }
+
+
+        it.update();
+        it.draw();
+    }
+    //ctx.clearRect(0,0,w,h);
+}
+/*==============================================================================================
+// Answer End
+==============================================================================================*/
+
+function update(timer){ // Main update loop
+    globalTimeInt = Math.floor(globalTime = timer);
+    display();  // call demo code
+
+    requestAnimationFrame(update);
+}
+requestAnimationFrame(update);
+
+
+
+
+		</script>
+	</body>
+<html>

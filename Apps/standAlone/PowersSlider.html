@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>PowersSlider</title>
+		<style>
+			
+		</style>
+    </head>
+    <body style = "font-family:monospace">
+		
+		<script>
+			;(()=>{
+const eCurve = (v, p = 2) =>  v <= 0 ? 0 : v >= 1 ? 1 : v ** p / (v ** p + (1 - v) ** p);
+const bellCurve = (v, p = 2) =>  v <= 0 ? 0 : v >= 1 ? 0 : (v *= 2, (v = v > 1 ? 2 - v : v),  v ** p / (v ** p + (1 - v) ** p));
+const bCurve = (v, a, b) => v <= 0 ? 0 : v >= 1 ? 1 : 3*v*(1-v)*(a*(1-v)+b*v)+v*v*v; // cubic bezier curve
+Math.PI90 = Math.PI / 2;
+Math.TAU = Math.PI * 2;
+Math.PI270 = Math.PI * (3 / 2);
+
+const randUI = (min, max) => (max !== undefined ? Math.random() * (max - min) + min : Math.random() * min) | 0;
+const randPick = arr => arr.splice(randUI(arr.length), 1)[0];
+const randItem = arr => arr[randUI(arr.length)];
+const setOf = (c, cb, a = [], i = 0) => {while (i < c) { a.push(cb(i++)) } return a};
+
+const qryEl = qryEl => typeof qryEl === "string" ? query(qryEl) : qryEl;
+const tag = (tag, props = {}) => Object.assign(document.createElement(tag), props);
+const style = (el, style) => (Object.assign(el.style, style), el);
+const append = (par, ...sibs) => sibs.reduce((p, sib) => (p.appendChild(sib), p), par);
+const remove = (par, ...sibs) => sibs.map(sib => par.removeChild);
+const query = (qStr, el = document) => el.querySelector(qStr);
+const listener = (qe, name, call, opt = {}) => ((qe = qryEl(qe)).addEventListener(name, call, opt), qe);
+const elements = obj => (Object.entries(obj).forEach(([n, q]) => obj[n] = query(q)), obj);
+
+
+const keys = {
+  ArrowLeft: false,
+  ArrowRight: false,
+  ArrowUp: false,
+  ArrowDown: false,
+};
+document.addEventListener("keydown", keyEvent);
+document.addEventListener("keyup", keyEvent);
+function keyEvent(e) {
+  if (keys[e.code] !== undefined) { keys[e.code] = e.type === "keydown" }
+}
+function Touch(forElement = window) {
+	const directions = {
+		UNKNOWN: 0,
+		UP: 1,
+		RIGHT: 2,
+		DOWN: 3,
+		LEFT: 4,
+	};
+	const HANDLERS = {
+		touchmove: updatePoints,
+		touchstart: updatePoints,
+		touchend: removePoints,
+	};	
+	const points = new Map();
+	function Point(touch) {
+		this.x = this.startX = touch.pageX;
+		this.y = this.startY = touch.pageY;		
+		this.dy = this.dx = 0;
+		this.dist = 0;
+		this.dirAA = directions.UNKNOWN;
+		this.id = touch.identifier;
+        this.uid = uid++;
+	}
+	Point.prototype = {
+		update(touch) {
+			this.x = touch.pageX;
+			this.y = touch.pageY;
+			const dx = this.dx = this.x - this.startX;
+			const dy = this.dy = this.y - this.startY;
+			this.dist = (dx * dx + dy * dy) ** 0.5;
+			if (this.dist > 0) {
+				this.dirAA = Math.abs(dx) > Math.abs(dy) ?
+					(dx < 0 ? directions.LEFT : directions.RIGHT) :
+					(dy < 0 ? directions.UP : directions.DOWN);
+				this.direction = Math.atan2(dx, dy);
+			} else {
+				this.dirAA = directions.UNKNOWN;
+			}
+            
+		}
+	}
+    var preventDefault = false;
+    var hasTouched = false;
+    var uid = 0;
+	const API = {
+		directions,
+		get points() { return [...points.values()] },
+        get hasPoints() { return points.size > 0 },
+        set preventDefault(val) { if (val !== preventDefault) { preventDefault = val; defaultSet() } }, 
+        get hasTouched() { return hasTouched },
+		
+	};
+	function removePoints(updates) {
+		var idx = updates.length;
+		while (idx-- > 0) { points.delete(updates[idx].identifier) }
+	}
+	function updatePoints(updates) {
+		var p, idx = updates.length;
+		while (idx-- > 0) {
+			const touch = updates[idx];
+			const id = touch.identifier;
+			p = points.get(id);
+			!p && points.set(id, p = new Point(touch));
+			p.update(touch);
+		}
+	}
+	function defaultSet() { 
+        if (document === forElement) {
+            forElement.body.style.touchAction = preventDefault ? "none" : null;     
+        } else {
+            forElement.style.touchAction = preventDefault ? "none" : null;             
+        }
+    }			
+	function handleEvent(e) {
+		HANDLERS[e.type](e.changedTouches);
+		preventDefault && e.preventDefault();		
+        hasTouched = true;
+	}
+	forElement.addEventListener("touchstart", handleEvent, false);
+	forElement.addEventListener("touchend", handleEvent, false);
+	forElement.addEventListener("touchmove", handleEvent, false);
+	
+	
+	return API;
+}
+
+const touches = Touch(document);
+
+
+
+const styles = `
+        body { background: #CA9; }
+        .gameUI {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+        }
+        .noSwipe {
+            position: absolute;
+            font-family : arial;
+            color: black;
+            text-align: center;
+            width: 100%;
+            font-size: small;
+        }        
+        .gameHeadings {
+            position: absolute;
+            font-family : arial;
+            color: white;
+            text-align: center;
+            width: 100%;
+        }
+        .gameButtons {
+            position: absolute;
+            font-family : arial;
+            color: white;
+            text-align: center;
+            width: 10%;
+            bottom: 10px;
+            font-size: 18px;
+            padding: 1%;
+            border: 2px solid black;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #666;
+        }
+        .gameButtons:hover {
+            color: black;
+            background: #FA2;
+        }        
+        .hideGameUI {
+            display: none;
+        }
+    `;
+var uiEl, heading1, heading2;
+append(document.body, tag("style", {innerHTML: styles}));
+var canvas;
+const canvasContainer = append(
+    tag("div"),
+    canvas = tag("canvas", {width: innerWidth - 20, height: innerHeight - 20})
+);
+const ctx = canvas.getContext("2d");
+append(
+  canvasContainer, append(
+    uiEl = tag("div",{className: "gameUI"}),
+    heading1 = style(tag("h1", {textContent: "Powers of TWO", className: "gameHeadings"}), {top: "5px"}),
+    heading2 = style(tag("h3", {textContent: "Select game type to start", className: "gameHeadings"}), {bottom: "60px"}),
+    heading2 = style(tag("div", {textContent: "NOW with swipe play BETA V0.1 :(", className: "noSwipe"}), {top: "2px"}),
+    ...setOf(5, 
+             i => style(
+                    tag("div", {_game: i, textContent: (i + 4) + " by " + (i + 4), className: "gameButtons"}), 
+                {left: ((100 - (4 * 15) - 10) / 2 + i * 15) + "%"}
+    ),
+            ),
+  )
+
+)   
+append(document.body, canvasContainer);
+listener(uiEl, "mouseover", mouseOver);
+listener(uiEl, "click", uiClick);
+const instructions = {
+    shown: false,
+    textKeys: [
+      {x: 0, y: -1, text: "Up Arrow move tiles up"},
+      {x: 0, y:  1, text: "Down Arrow move tiles down"},
+      {x: -1, y:  -0.2, text: "Left Arrow tiles left"},
+      {x: 1, y:  0.2, text: "Right Arrow tiles right"},
+    ],
+    textTouch: [
+        {x: 0, y: 0, text: "Swipe Left, Right, Up, Down to play"},
+    ],
+    forTouch() {
+        instructions.text = instructions.textTouch;
+    },
+    forKeyboard() {
+        instructions.text = instructions.textKeys;
+        
+    },
+    draw(ctx) {
+        const w = ctx.canvas.width, h = ctx.canvas.height, w2 = w / 2, h2 = h / 2, wO = w2 * 0.8, hO = h2 * 0.8;
+        ctx.fillStyle = "#FFF";
+        ctx.setTransform(1,0,0,1,0,0);
+        ctx.font = 32 + "px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";        
+        ctx.fillStyle = "#FFF";
+        for (const {x, y, text} of this.text) {
+            ctx.fillText(text, w2 + x * hO, h2 + y * hO);
+        }
+    }
+}
+
+const pathRoundBox = (ctx, cx, cy, w, h, radius) => {
+    const w2 = w / 2, h2 = h / 2;
+    ctx.arc(cx - w2 + radius, cy - h2 + radius, radius, Math.PI, Math.PI270);
+    ctx.arc(cx + w2 - radius, cy - h2 + radius, radius, Math.PI270, Math.TAU);
+    ctx.arc(cx + w2 - radius, cy + h2 - radius, radius, 0, Math.PI90);
+    ctx.arc(cx - w2 + radius, cy + h2 - radius, radius, Math.PI90, Math.PI);
+}
+
+function Game(size, winTile, speed = 20, newTiles) {
+    speed = speed < 1 ? 1 : speed;
+    if (size < 4 || size > 8) { throw new Error("Invalid board size. Size limits 4 <= size <= 8") }
+    if (winTile < 32 || size > 2048) { throw new Error("Invalid win tile. Limits 32 <= size <= 2048 powers of two") }
+    const animRate = 1 / speed;
+    const tileCount = size * size;
+    const board = new Array(tileCount).fill(0);
+    const mergingTiles = [];
+    const freeTiles = [];
+    const tileOptions = setOf(tileCount,()=> [0,0,0,0]);
+    
+    const newTileVal = [];
+    const tilesPerMove = newTiles.length;
+    const topNew = newTiles[tilesPerMove - 1];
+    const newTileSet = setOf(tileCount, i => newTiles[i % tilesPerMove]);
+    const findTileCount = 14;
+    const states = {
+        over: 1,
+        inPlay: 2,
+        animating: 3,
+        win: 4,
+    };
+    var displayDirty = true;
+    var state = states.inPlay;
+    var moveCount = 0;
+    const moves = {
+        up: 0,
+        right: 1,
+        down: 2,
+        left: 3,
+    };
+    const moveIdx = [
+        (x, y) => y + x * size,
+        (x, y) => (size - 1) - x + y * size,
+        (x, y) => y + ((size - 1) - x) * size,
+        (x, y) => x + y * size,
+    ];
+    const moveDirs = [[0,-1,-size, 0], [1, 0, 1, 1], [0, 1, size, 2], [-1, 0, -1, 3]];
+    const toXYStr = (idx) => "x: " + (idx % size) + " y: " + (idx / size | 0);
+    function Tile(val, idx, growDelay = 0) {
+        this.nx = this.x = idx % size;
+        this.ny = this.y = idx / size | 0;
+        this.val = val;
+        this.anim = 0;
+        this.alpha = 1;
+        this.animate = true;
+        this.merging = false;
+        this.grow = true;
+        this.size = -growDelay;
+        this.flash = false;
+        this.flashAlpha = 0;
+    }
+    Tile.prototype = {
+        newPos(idx) {
+            this.nx = idx % size;
+            this.ny = idx / size | 0;
+            this.ax = this.x;
+            this.ay = this.y;
+            this.anim = 1;
+            this.animate = true;
+        },
+        merge(idx) {
+            this.newPos(idx);
+            this.merging = true;
+            return this;
+        },
+        mergeFlash(idx) {
+            this.animate = true;
+            this.flash = true;
+            this.flashAlpha = 1;
+            this.val *= 2;
+            return this;
+        },
+        update() {
+            if (this.merging) {
+                this.alpha -= animRate;
+                if (this.alpha <= 0) { 
+                    this.alpha = 0;
+                    this.merging = false;
+                }   
+            }
+            if (this.anim > 0) {
+                this.anim -= animRate;
+                if (this.anim <= 0) { this.anim = 0 }
+            }
+            if (this.grow) {
+                this.size += animRate;
+                if (this.size > 1) {
+                    this.size = 1;
+                    this.grow = false;
+                }
+            }
+            if (this.flash) {
+                this.flashAlpha -= animRate * 2;
+                if (this.flashAlpha < 0) {
+                    this.flashAlpha = 0;
+                    this.flash = false;
+                }
+            }
+            this.animate =  this.flash || this.grow || this.merging || this.anim > 0;
+            displayDirty = this.animate ? true : displayDirty;
+            if (this.anim > 0) { 
+                const p = eCurve(1 - this.anim);
+                this.x = (this.nx - this.ax) * p + this.ax;
+                this.y = (this.ny - this.ay) * p + this.ay;
+            } else {
+                this.x = this.nx;
+                this.y = this.ny;
+            }
+        },
+        render(target) {
+            const {ctx, scale, radius, cols, textCol, pad} = target;
+            ctx.save()
+            const hS = scale / 2;
+            var x = this.x * scale;
+            var y = this.y * scale;
+            const inScale = this.flash ?  1 + bellCurve(this.flashAlpha) * 0.1 : bCurve(this.size, 0, 1.6);
+            ctx.transform(inScale, 0, 0 , inScale, x + hS, y + hS);
+            ctx.globalAlpha = eCurve(this.alpha);
+            ctx.fillStyle = cols[this.val];
+            ctx.beginPath();
+            pathRoundBox(ctx, 0, 0, scale - pad * 2, scale - pad * 2, radius);
+
+            ctx.fill();
+            if (this.flash) {
+                ctx.globalCompositeOperation = "lighter";
+                ctx.globalAlpha = eCurve(this.flashAlpha);
+                ctx.fillStyle = "#FFF";
+                ctx.fill();
+                ctx.globalCompositeOperation = "source-over";
+                ctx.globalAlpha = 1;
+            }
+            ctx.fillStyle = textCol;
+            ctx.fillText(this.val, 0, 0 + scale * 0.05);
+            ctx.restore()
+        }
+        
+    }
+    
+    function setOptions(idx, val) {
+        var i = 0, ii, adding, xx, yy;
+        const x = idx % size;
+        const y = idx / size | 0;
+        for (const dir of moveDirs) {
+            adding = true;
+            xx = x;
+            yy = y;
+            i = idx;               
+            while (adding) {
+                xx += dir[0];
+                yy += dir[1];
+                i += dir[2];                
+                if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
+                    if (board[i] === 0) {
+                        tileOptions[i][dir[3]] = val;                        
+                    } else { break }
+                } else { break }
+                
+            }
+        }
+    }
+    function isTileOptionGood(idx, val) {
+        const opt = tileOptions[idx];
+        return   (opt[0] === val ? 1 : 0) +
+                 (opt[1] === val ? 1 : 0) +
+                 (opt[2] === val ? 1 : 0) +
+                 (opt[3] === val ? 1 : 0);
+
+    }
+    function addTile(growDelay) {
+        var i = findTileCount;
+        var mScore = 0, ppos, vval, pos, val;
+        if (newTileVal.length < 4) { newTileVal.push(...newTileSet) }
+        while (i--) {
+            pos = randPick(freeTiles);
+            val = randPick(newTileVal);
+            const sc = isTileOptionGood(pos, val);
+            if (sc) {
+                if (sc > mScore || (sc === mScore && Math.random() < 0.21)) {
+                    mScore = sc;
+                    if (ppos !== undefined) {
+                        freeTiles.push(ppos);
+                        newTileVal.push(vval);
+                    }     
+                    vval = val;
+                    ppos = pos;
+                    val = undefined;
+                    pos = undefined;
+                }
+            } 
+            if (!i || freeTiles.length === 0 || mScore === 4) {
+                if (mScore) {
+                    if (val !== undefined) {
+                        freeTiles.push(pos);
+                        newTileVal.push(val);
+                    }
+                    board[ppos] = new Tile(vval, ppos, growDelay);
+                    setOptions(ppos, vval);
+                } else {
+                    board[pos] = new Tile(val, pos, growDelay);
+                    setOptions(pos, val);
+                }
+                return;
+            } 
+            if (val !== undefined) {            
+                freeTiles.push(pos);
+                newTileVal.push(val);            
+            }
+        } 
+    }
+    function checkBoard() {
+        var i = tileCount, s = state;
+        freeTiles.length = 0;
+        tileOptions.forEach(opts => opts.fill(0));
+        while (i--) {
+            const t = board[i];
+            if (t?.val === winTile) { s = states.win }
+            else if (t === 0) { freeTiles.push(i) }
+            else if (t.val <= topNew) { setOptions(i, t.val) }
+        }
+        if (freeTiles.length < tilesPerMove && s !== states.win) { s = states.over }
+        API.state = s;
+    }
+    function move(dir) {
+        moveCount ++;
+        var x, y = 0, f, prev;
+        const move = moveIdx[dir];
+        while (y < size) {
+            f = x = 0;
+            prev = -1;
+            while (x < size) {
+                const idx = move(x, y);
+                const tile = board[idx];
+                board[idx] = 0;
+                if (tile) {
+                    const idxf = move(f, y);
+                    board[idxf] = tile;
+                    idxf !== idx && tile.newPos(idxf);
+                    if (prev > -1) {
+                        if (tile.val === board[prev].val) {
+                            board[prev].mergeFlash();
+                            mergingTiles.push(tile.merge(prev));
+                            board[idxf] = 0;
+                            f--;
+                            prev = -1;
+                        } else { prev = idxf }
+                    } else { prev = idxf }
+                    f++;
+                }
+                x++;
+            }
+            y++;
+        }
+    }
+    
+    const API = {
+        states: Object.freeze(states),
+        moves: Object.freeze(moves),
+        get displayDirty() {
+            if (state === states.animating) {
+                displayDirty = true;
+            }
+            const res = displayDirty;
+            displayDirty = false;
+            return true;//res;
+        },
+        get moveCount() { return moveCount },
+        get state() { return state },
+        set state(s) {
+            if (s !== state) {
+                if (state === states.animating && s === states.inPlay) {
+                    state = s;
+                    checkBoard();
+                    if (state === states.inPlay) {
+                        let i = 0
+                        while (i < tilesPerMove) { addTile(i++ / 2) }
+                        displayDirty = true;
+                    }
+                } else {
+                    state = s;
+                    displayDirty = true;
+                }
+            }
+        },
+        set move(dir) {
+            if (state === states.inPlay) {
+                if (dir >= 0 && dir < 4) {
+                    move(dir);
+                    API.state = states.animating;
+                }
+            }
+        },
+        reset() {
+            board.fill(0);
+            API.state = states.animating;
+            moveCount = 0;
+            checkBoard();
+        },
+        render(target) {
+            var i = 0, tail = 0, animating = false;
+            board.forEach(tile => {
+                if (tile !== 0) {
+                    tile.animate && (animating = true, tile.update());
+                    tile.render(target);
+                }
+            });
+            i = 0;
+            while (i < mergingTiles.length) {
+                const tile = mergingTiles[i];
+                tile.update();
+                tile.render(target);
+                if (tile.animate) {
+                    animating = true
+                    mergingTiles[tail++] = tile
+                }
+                i++;
+            }
+            mergingTiles.length = tail;
+            !animating && state === states.animating && (API.state = states.inPlay);
+        },
+        toString() {
+            var x, y, str, s;
+            if (state === states.over) { return "Game Over!" }
+            if (state === states.win) { return "You WON!" }
+            if (state === states.inPlay) { 
+                str = "Moves: " + moveCount + "\n";
+                str += "Target: " + winTile + "\n";
+                y = 0;
+                while (y < size) {
+                    str += "[";
+                    x = 0;
+                    s = "";
+                    while (x < size) {
+                        const tile = board[(x++) + y * size];
+                        str += s + (tile ? tile.val : "0").toString(10).padStart(4, " ");
+                        s = ",";
+                    }
+                    str += "]\n";
+                    y++;
+                }
+            }
+            return str;
+        }
+    }
+    return Object.freeze(API);
+}
+
+
+setTimeout(() => playGame(1, true), 1000);
+function mouseOver(e) {
+    if (e.target._game !== undefined) {
+        playGame(e.target._game, true);
+        heading1.classList.remove("hideGameUI");
+        heading2.classList.remove("hideGameUI");
+    }
+}
+function uiClick(e) {
+    if (e.target._game !== undefined) {
+        uiEl.classList.add("hideGameUI");
+        heading1.classList.add("hideGameUI");
+        heading2.classList.add("hideGameUI");
+        playGame(e.target._game);
+    }
+}
+
+function createBGImage(img, tiles, pad, radius) {
+    const ctx = img.getContext("2d");//, {alpha: false});
+    ctx.fillStyle = "#222";
+    ctx.beginPath();
+    pathRoundBox(ctx, img.width / 2, img.height / 2, img.width, img.height, radius + pad * 2);
+    ctx.fill();
+    var i = 0;
+    const size = img.width / tiles;
+    ctx.fillStyle = "#666";
+    while (i < tiles * tiles) {
+        const x = (i % tiles) + 0.5;
+        const y = (i / tiles | 0)  + 0.5;
+        ctx.beginPath();
+        pathRoundBox(ctx, x * size, y * size, size - pad * 2, size - pad * 2, radius);
+        ctx.fill();
+        i++;
+    }
+
+    return img
+}   
+    
+
+
+function playGame(game, showBoardOnly = false) {
+    canvas.width = innerWidth - 20;
+    canvas.height = innerHeight - 20;
+    const GAMES = [
+       [4, 512,  16, [2,4]],
+       [5, 1024, 15, [2,4]],
+       [6, 2048, 14, [2,4,8]],
+       [7, 2048, 13, [2,4,8]],
+       [8, 2048, 12, [2,4,8,16]],
+    ];
+    var showFrames = showBoardOnly ? 30 : 30 ** 2;
+    const SIZE = GAMES[game][0];
+    const g = Game(...GAMES[game]);
+    g.reset();
+    requestAnimationFrame(animLoop);
+    const minRes =  Math.min(ctx.canvas.width, ctx.canvas.height);
+    const unit =  minRes / 64;
+    const RADIUS = minRes / SIZE / 8;
+    const PAD = minRes / SIZE / 16;
+    const bgImage = createBGImage(tag("canvas", {width: minRes, height: minRes}), SIZE, PAD / 2, RADIUS + PAD / 2);
+    const renderTarget = {
+        ctx,
+        scale:  minRes / SIZE,
+        radius: RADIUS,
+        pad:    PAD,
+        textCol: "#000",
+        cols: {
+            [2]:    "#F40",
+            [4]:    "#F80",
+            [8]:    "#FA0",
+            [16]:   "#FC0",
+            [32]:   "#FF0",
+            [64]:   "#CF0",
+            [128]:  "#8F0",
+            [256]:  "#0F0",
+            [512]:  "#0F8",
+            [1024]: "#0FF",
+            [2048]: "#FFF",
+        }    
+    }
+    ctx.font = (renderTarget.scale * 0.7 | 0) + "px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+  
+    const touch = {
+        swipeDist: 32,
+        inSwipe: false,
+        direction: -1,
+        dirs: [-1, g.moves.up, g.moves.right, g.moves.down, g.moves.left],
+        lastId: -1,
+    };
+    touches.preventDefault = !showBoardOnly;
+    touches.hasTouched ? instructions.forTouch() : instructions.forKeyboard();
+    
+    
+    function animLoop() {
+        var m = -1;
+        if (keys.ArrowUp) { keys.ArrowUp = false; m = g.moves.up }
+        if (keys.ArrowRight) { keys.ArrowRight = false; m = g.moves.right }
+        if (keys.ArrowDown) { keys.ArrowDown = false; m = g.moves.down }
+        if (keys.ArrowLeft) { keys.ArrowLeft = false; m = g.moves.left }
+        if (!showBoardOnly) {
+            
+            if (touches.hasPoints) {                
+                const p = touches.points[0];
+                //console.log(p.id)
+                if (p.uid !== touch.lastId) {
+                    if (p.dist > touch.swipeDist) {
+                        touch.inSwipe = true;
+                        touch.direction = touch.dirs[p.dirAA];
+                        if (p.dist > touch.swipeDist * 2) {
+                            m = touch.direction;
+                            touch.inSwipe = false;
+                            touch.lastId = p.uid;
+
+                        }
+                    } 
+                }
+            } else if(touch.inSwipe) {
+                m = touch.direction;
+                touch.inSwipe = false;
+                
+            }
+        }
+        
+        if (m > -1) {
+            g.move = m;
+        }
+        const state = g.state;
+        if (g.displayDirty) {
+            ctx.font = (renderTarget.scale * 0.45 | 0) + "px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            if (showBoardOnly) {
+                const scale = (ctx.canvas.height - 160) / ctx.canvas.height;
+                ctx.setTransform(scale,0,0,scale,(canvas.width - SIZE * renderTarget.scale) / 2 + 80, 60);
+                ctx.drawImage(bgImage, 0, 0);              
+              
+            } else {
+                ctx.setTransform(1,0,0,1,(canvas.width - SIZE * renderTarget.scale) / 2, 0);
+                ctx.drawImage(bgImage, 0, 0);              
+            }
+            g.render(renderTarget);
+            if (!showBoardOnly && !instructions.shown) {
+                instructions.draw(ctx);
+                m !== -1 && (instructions.shown = true);
+            }
+          
+          
+            if (!(state === g.states.inPlay || state === g.states.animating)) {
+                ctx.fillStyle = "#0008";
+                ctx.setTransform(1,0,0,1,0,0);
+                ctx.fillRect(0, 0, ctx.canvas.width,  ctx.canvas.height)
+                ctx.font = (renderTarget.scale * 0.7 | 0) + "px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";        
+                ctx.fillStyle = "#FFF";
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = unit * 2;
+                ctx.lineJoin = "round";
+                const cx =  ctx.canvas.width * 0.5;
+                const cy =  ctx.canvas.height * 0.3
+                if (state === g.states.win) {
+                    ctx.strokeText("WINNER!", cx + unit / 2, cy + unit / 2);
+                    ctx.fillText("WINNER!",cx, cy)
+                    ctx.strokeStyle = "#FED";
+                    ctx.lineWidth = unit / 2;
+                    ctx.lineJoin = "round";
+                    ctx.strokeText("WINNER!", cx, cy)
+                    ctx.font = (renderTarget.scale * 0.4 | 0) + "px Arial";
+                    ctx.fillStyle = "#FFF";
+                    ctx.strokeStyle = "#000";
+                    ctx.lineWidth = unit;
+                    const mC = g.moveCount;
+                    ctx.strokeText("Moves: " + mC, cx + unit / 4, cy + unit * SIZE * 3 + unit / 4)
+                    ctx.fillText("Moves: " + mC, cx, cy + unit * SIZE * 3)
+                    
+                } else {
+                    ctx.strokeText("GAME OVER", cx + unit / 2, cy + unit / 2)
+                    ctx.fillText("GAME OVER", cx, cy)
+                    ctx.strokeStyle = "#DEF";
+                    ctx.lineWidth = unit  / 2;
+                    ctx.lineJoin = "round";
+                    ctx.strokeText("GAME OVER", cx, cy)
+                }
+                uiEl.classList.remove("hideGameUI");
+                touches.preventDefault = false;
+                return;
+            } 
+        }
+        (!showBoardOnly || showFrames-- > 0) && requestAnimationFrame(animLoop);
+    }
+}
+})();
+		</script>
+	</body>
+<html>

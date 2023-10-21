@@ -1,0 +1,897 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2019-12-07T00:22:27.817Z",
+        "id": 478261,
+        "author": "Blindman67",
+        "copyright": "All content copyright Mark Spronck. All rights reserved. 2018",
+        "scene": "painterV3Scene_478038",
+        "type": "scene"
+    },
+    "scene": {
+        "sprites": [{
+                "name": "HipB",
+                "id": 478233,
+                "x": -48.59,
+                "y": -172.42,
+                "w": 357,
+                "h": 170,
+                "rx": -0.41555,
+                "ry": 1.155857,
+                "attachedTo": 478255,
+                "attachment": {
+                    "x": 6.28,
+                    "y": 8.19,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 6
+            }, {
+                "name": "ArmB",
+                "id": 478234,
+                "x": 55.17,
+                "y": -223.66,
+                "w": 357,
+                "h": 170,
+                "rx": -0.41555,
+                "ry": 1.155857,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478254,
+                "attachment": {
+                    "x": 18.77,
+                    "y": 22.86,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 5
+            }, {
+                "name": "KneeB",
+                "id": 478235,
+                "x": 38.44,
+                "y": -146.04,
+                "w": 357,
+                "h": 170,
+                "rx": -0.02155,
+                "ry": 1.550672,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478253,
+                "attachment": {
+                    "x": 7.15,
+                    "y": 8.52,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 4
+            }, {
+                "name": "FootB",
+                "id": 478236,
+                "x": 69.85,
+                "y": -126.01,
+                "w": 357,
+                "h": 170,
+                "rx": -1.24855,
+                "ry": 0.324079,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478256,
+                "attachment": {
+                    "x": -2.37,
+                    "y": 43.55,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 3
+            }, {
+                "name": "GunB",
+                "id": 478237,
+                "x": 109.45,
+                "y": -210.25,
+                "w": 357,
+                "h": 170,
+                "rx": 0.11145,
+                "ry": 1.683264,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478257,
+                "attachment": {
+                    "x": 35.76,
+                    "y": 8.58,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 2
+            }, {
+                "name": "LegB",
+                "id": 478238,
+                "x": -8.16,
+                "y": -159.49,
+                "w": 357,
+                "h": 170,
+                "rx": -0.02155,
+                "ry": 1.550264,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478258,
+                "attachment": {
+                    "x": 42.28,
+                    "y": 19.76,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 1
+            }, {
+                "name": "Head",
+                "id": 478239,
+                "x": -3.38,
+                "y": -242.25,
+                "w": 357,
+                "h": 170,
+                "rx": -0.41555,
+                "ry": 1.15545,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478246,
+                "attachment": {
+                    "x": 84.44,
+                    "y": -29.6,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 0
+            }, {
+                "name": "LegA",
+                "id": 478240,
+                "x": -24.14,
+                "y": -134.34,
+                "w": 357,
+                "h": 170,
+                "rx": 0.42245,
+                "ry": 1.994264,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478247,
+                "attachment": {
+                    "x": 42.28,
+                    "y": 19.76,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 1
+            }, {
+                "name": "GunA",
+                "id": 478241,
+                "x": 84.37,
+                "y": -181.49,
+                "w": 357,
+                "h": 170,
+                "rx": 0.01145,
+                "ry": 1.583264,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478248,
+                "attachment": {
+                    "x": 35.76,
+                    "y": 8.58,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 2
+            }, {
+                "name": "FootA",
+                "id": 478242,
+                "x": 3.5,
+                "y": -67.19,
+                "w": 357,
+                "h": 170,
+                "rx": -0.01855,
+                "ry": 1.554079,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478249,
+                "attachment": {
+                    "x": -2.37,
+                    "y": 43.55,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 3
+            }, {
+                "name": "KneeA",
+                "id": 478243,
+                "x": 12.27,
+                "y": -101.8,
+                "w": 357,
+                "h": 170,
+                "rx": -0.01855,
+                "ry": 1.553672,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478252,
+                "attachment": {
+                    "x": 7.15,
+                    "y": 8.52,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 4
+            }, {
+                "name": "ArmA",
+                "id": 478244,
+                "x": 36.3,
+                "y": -202.34,
+                "w": 357,
+                "h": 170,
+                "rx": 0.01145,
+                "ry": 1.582857,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478251,
+                "attachment": {
+                    "x": 18.77,
+                    "y": 22.86,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 5
+            }, {
+                "name": "HipA",
+                "id": 478245,
+                "x": -59.12,
+                "y": -166.98,
+                "w": 357,
+                "h": 170,
+                "rx": -0.41555,
+                "ry": 1.155857,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "attachedTo": 478250,
+                "attachment": {
+                    "x": 6.28,
+                    "y": 8.19,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "image",
+                "src": "Hopper.png",
+                "subSpriteIdx": 6
+            }, {
+                "name": "Cutter",
+                "id": 478246,
+                "x": -58.14,
+                "y": -176.99,
+                "w": 16,
+                "h": 16,
+                "rx": -0.41555,
+                "ry": 1.155246,
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry", "x", "y"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 21, 38],
+                        "value": [-0.416, 0.306, -0.416],
+                        "curve": 0,
+                        "id": [51, 105, 27]
+                    },
+                    "ry": {
+                        "time": [0, 21, 38],
+                        "value": [1.155, 1.876, 1.155],
+                        "curve": 0,
+                        "id": [52, 106, 28]
+                    },
+                    "x": {
+                        "time": [0, 4, 6, 15, 27, 38],
+                        "value": [-58.14, -37.44, -26.72, 33.58, 39.71, 79.42],
+                        "curve": 0,
+                        "id": [85, 103, 101, 89, 91, 87]
+                    },
+                    "y": {
+                        "time": [0, 4, 6, 15, 27, 38],
+                        "value": [-176.99, -193.27, -195.55, -199.96, -154.1, -154.33],
+                        "curve": 0,
+                        "id": [86, 104, 102, 90, 92, 88]
+                    }
+                }
+            }, {
+                "name": "Cutter01",
+                "id": 478247,
+                "x": -50.58,
+                "y": -159.11,
+                "w": 16,
+                "h": 16,
+                "rx": 0.42245,
+                "ry": 1.994061,
+                "attachedTo": 478245,
+                "attachment": {
+                    "x": 25.64,
+                    "y": 32.65,
+                    "rx": 0.838,
+                    "ry": 2.409,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 15, 31, 38],
+                        "value": [0.838, 1.965, 0.792, 0.838],
+                        "curve": 0,
+                        "id": [81, 93, 107, 69]
+                    },
+                    "ry": {
+                        "time": [0, 15, 31, 38],
+                        "value": [2.409, 3.536, 2.363, 2.409],
+                        "curve": 0,
+                        "id": [82, 94, 108, 70]
+                    }
+                }
+            }, {
+                "name": "Cutter02",
+                "id": 478248,
+                "x": 56.62,
+                "y": -182.39,
+                "w": 16,
+                "h": 16,
+                "rx": 0.01145,
+                "ry": 1.583061,
+                "attachedTo": 478244,
+                "attachment": {
+                    "x": 47.06,
+                    "y": 47.22,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 23, 38],
+                        "value": [0, 0.821, 0],
+                        "curve": 0,
+                        "id": [45, 113, 33]
+                    },
+                    "ry": {
+                        "time": [0, 23, 38],
+                        "value": [1.571, 2.392, 1.571],
+                        "curve": 0,
+                        "id": [46, 114, 34]
+                    }
+                }
+            }, {
+                "name": "Cutter03",
+                "id": 478249,
+                "x": 13.27,
+                "y": -102.92,
+                "w": 16,
+                "h": 16,
+                "rx": -0.01855,
+                "ry": 1.553875,
+                "attachedTo": 478243,
+                "attachment": {
+                    "x": 17.02,
+                    "y": 17.4,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 38],
+                        "value": [0, 0],
+                        "curve": 0,
+                        "id": [57, 63]
+                    },
+                    "ry": {
+                        "time": [0, 38],
+                        "value": [1.571, 1.571],
+                        "curve": 0,
+                        "id": [58, 64]
+                    }
+                }
+            }, {
+                "name": "Cutter04",
+                "id": 478250,
+                "x": -57.62,
+                "y": -167.84,
+                "w": 16,
+                "h": 16,
+                "rx": -0.41555,
+                "ry": 1.155653,
+                "attachedTo": 478239,
+                "attachment": {
+                    "x": 16.35,
+                    "y": 130.17,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 38],
+                        "value": [0, 0],
+                        "curve": 0,
+                        "id": [79, 73]
+                    },
+                    "ry": {
+                        "time": [0, 38],
+                        "value": [1.571, 1.571],
+                        "curve": 0,
+                        "id": [80, 74]
+                    }
+                }
+            }, {
+                "name": "Cutter05",
+                "id": 478251,
+                "x": 25.71,
+                "y": -217.32,
+                "w": 16,
+                "h": 16,
+                "rx": 0.01145,
+                "ry": 1.582653,
+                "attachedTo": 478239,
+                "attachment": {
+                    "x": 112.56,
+                    "y": 118.55,
+                    "rx": 0.427,
+                    "ry": 1.998,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 23, 38],
+                        "value": [0.427, -0.491, 0.427],
+                        "curve": 0,
+                        "id": [49, 109, 29]
+                    },
+                    "ry": {
+                        "time": [0, 23, 38],
+                        "value": [1.998, 1.08, 1.998],
+                        "curve": 0,
+                        "id": [50, 110, 30]
+                    }
+                }
+            }, {
+                "name": "Cutter06",
+                "id": 478252,
+                "x": 13.1,
+                "y": -102.34,
+                "w": 16,
+                "h": 16,
+                "rx": -0.01855,
+                "ry": 1.553468,
+                "attachedTo": 478240,
+                "attachment": {
+                    "x": 105.1,
+                    "y": 44.92,
+                    "rx": -0.441,
+                    "ry": 1.13,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 15, 38],
+                        "value": [-0.441, -1.617, -0.441],
+                        "curve": 0,
+                        "id": [53, 95, 65]
+                    },
+                    "ry": {
+                        "time": [0, 15, 38],
+                        "value": [1.13, -0.046, 1.13],
+                        "curve": 0,
+                        "id": [54, 96, 66]
+                    }
+                }
+            }, {
+                "name": "Cutter12",
+                "id": 478253,
+                "x": 39.27,
+                "y": -146.57,
+                "w": 16,
+                "h": 16,
+                "rx": -0.02155,
+                "ry": 1.550468,
+                "attachedTo": 478238,
+                "attachment": {
+                    "x": 105.15,
+                    "y": 44.93,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 38],
+                        "value": [0, 0],
+                        "curve": 0,
+                        "id": [59, 61]
+                    },
+                    "ry": {
+                        "time": [0, 38],
+                        "value": [1.571, 1.571],
+                        "curve": 0,
+                        "id": [60, 62]
+                    }
+                }
+            }, {
+                "name": "Cutter11",
+                "id": 478254,
+                "x": 39.32,
+                "y": -232.91,
+                "w": 16,
+                "h": 16,
+                "rx": -0.41555,
+                "ry": 1.155653,
+                "attachedTo": 478239,
+                "attachment": {
+                    "x": 131.31,
+                    "y": 109.78,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 23, 38],
+                        "value": [0, -1.012, 0],
+                        "curve": 0,
+                        "id": [47, 111, 31]
+                    },
+                    "ry": {
+                        "time": [0, 23, 38],
+                        "value": [1.571, 0.559, 1.571],
+                        "curve": 0,
+                        "id": [48, 112, 32]
+                    }
+                }
+            }, {
+                "name": "Cutter10",
+                "id": 478255,
+                "x": -47.09,
+                "y": -173.29,
+                "w": 16,
+                "h": 16,
+                "rx": -0.41555,
+                "ry": 1.155653,
+                "attachedTo": 478239,
+                "attachment": {
+                    "x": 28.18,
+                    "y": 129.44,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 38],
+                        "value": [0, 0],
+                        "curve": 0,
+                        "id": [77, 75]
+                    },
+                    "ry": {
+                        "time": [0, 38],
+                        "value": [1.571, 1.571],
+                        "curve": 0,
+                        "id": [78, 76]
+                    }
+                }
+            }, {
+                "name": "Cutter09",
+                "id": 478256,
+                "x": 39.44,
+                "y": -147.16,
+                "w": 16,
+                "h": 16,
+                "rx": -1.24855,
+                "ry": 0.323875,
+                "attachedTo": 478235,
+                "attachment": {
+                    "x": 17.02,
+                    "y": 17.4,
+                    "rx": -1.227,
+                    "ry": 0.344,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 15, 18, 38],
+                        "value": [-1.227, -0.844, 0.144, -1.227],
+                        "curve": 0,
+                        "id": [55, 99, 117, 67]
+                    },
+                    "ry": {
+                        "time": [0, 15, 18, 38],
+                        "value": [0.344, 0.727, 1.715, 0.344],
+                        "curve": 0,
+                        "id": [56, 100, 118, 68]
+                    }
+                }
+            }, {
+                "name": "Cutter08",
+                "id": 478257,
+                "x": 81.93,
+                "y": -213.92,
+                "w": 16,
+                "h": 16,
+                "rx": 0.11145,
+                "ry": 1.683061,
+                "attachedTo": 478234,
+                "attachment": {
+                    "x": 47.06,
+                    "y": 47.22,
+                    "rx": 0.527,
+                    "ry": 2.098,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 23, 38],
+                        "value": [0.527, 1.16, 0.527],
+                        "curve": 0,
+                        "id": [43, 115, 35]
+                    },
+                    "ry": {
+                        "time": [0, 23, 38],
+                        "value": [2.098, 2.731, 2.098],
+                        "curve": 0,
+                        "id": [44, 116, 36]
+                    }
+                }
+            }, {
+                "name": "Cutter07",
+                "id": 478258,
+                "x": -42.67,
+                "y": -170.5,
+                "w": 16,
+                "h": 16,
+                "rx": -0.02155,
+                "ry": 1.550061,
+                "attachedTo": 478233,
+                "attachment": {
+                    "x": 25.64,
+                    "y": 26.14,
+                    "rx": 0.394,
+                    "ry": 1.965,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter",
+                "animated": true,
+                "namedKeys": ["rx", "ry"],
+                "keys": {
+                    "rx": {
+                        "time": [0, 7, 18, 38],
+                        "value": [0.394, 0.836, 2.745, 0.394],
+                        "curve": 0,
+                        "id": [83, 97, 119, 71]
+                    },
+                    "ry": {
+                        "time": [0, 7, 18, 38],
+                        "value": [1.965, 2.407, 4.316, 1.965],
+                        "curve": 0,
+                        "id": [84, 98, 120, 72]
+                    }
+                }
+            }
+        ],
+        "groups": [],
+        "collections": [],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            }
+        },
+        "animation": {
+            "time": 0,
+            "start": 0,
+            "end": 38,
+            "length": 120,
+            "speed": 1
+        },
+        "kinematics": []
+    }
+}

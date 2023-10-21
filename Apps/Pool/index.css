@@ -1,0 +1,61 @@
+body {
+	font-family: arial;
+    color: white;
+    user-select: none;
+    -moz-user-select: none;
+}
+.mainCanvas {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+    //background: #48C;
+
+    background: radial-gradient(circle, rgba(134,95,95,1) 0%, rgba(105,103,147,1) 27%, rgba(103,125,152,1) 63%, rgba(126,126,194,1) 100%);
+}
+.info {
+	position: absolute;
+	top: 5px;
+	left: 0px;
+    right: 0px;
+
+}
+.status {
+	position: absolute;
+	left: 0px;
+    right: 0px;
+    font-size: 32px;
+}
+.info .playerName {
+    font-size: 64px
+}
+.info .side{
+    font-size: 32px
+}
+.info .gameStatus {
+    font-size: 32px
+
+}
+.line1 {
+    top: 65px;
+}
+.line2 {
+    top: 95px;
+}
+.bottomLine {
+    position: absolute;
+    bottom: 2px;
+}
+.left {
+    position: absolute;
+    left: 10px;
+}
+.right {
+    position: absolute;
+    right: 10px;
+}
+.center {
+    position: absolute;
+    left: 40%;
+    right: 40%;
+    text-align: center;
+}

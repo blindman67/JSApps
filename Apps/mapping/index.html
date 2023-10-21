@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+
+<title>Chart</title>
+<style>
+#tooltip {
+    position:absolute;
+    background-color: #2B292E;
+    color: white;
+    font-family: sans-serif;
+    font-size: 15px;
+    pointer-events: none; /*dont trigger events on the tooltip*/
+    padding: 15px 20px 10px 20px;
+    text-align: center;
+    opacity: 0;
+    border-radius: 4px;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+#map {
+    width: 100%;
+    height: 100%;
+}
+</style>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+   
+ <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+   crossorigin=""></script>
+
+</head>
+
+<body>
+<div id="map"></div>
+<script>
+
+
+
+var myRenderer;
+renderChart();
+
+
+
+
+
+function renderChart() {
+    
+
+    var minZoom = 0;
+    var maxZoom = 18;
+
+    var map = L.map('map', {
+        minZoom: minZoom,
+        maxZoom: maxZoom
+    }).setView([-32.0876083,115.9735197], 15);
+
+    L.tileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        continuousWorld: false,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
+        minZoom: 0,
+        noWrap: true
+    }).addTo(map);
+
+    myRenderer = L.canvas({ padding: 0.5 });
+
+}
+</script>
+</body>
+
+</html>

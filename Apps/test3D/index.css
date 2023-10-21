@@ -1,0 +1,37 @@
+body {
+	font-family: arial;
+}
+.mainCanvas {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+
+}
+.loader {
+	position: absolute;
+	top: 40%;
+	left: 0px;
+	right: 0px;
+	text-align: center;
+	color: white;
+}
+.info {
+	padding: 4px;
+	background-color: rgba(0,80,170,80);
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	font-family: arial;
+	font-size: small;
+	color: white;
+}
+.info2 {
+	padding: 2px 8px;
+	background-color: rgba(170,80,0,80);
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	font-family: arial;
+	font-size: small;
+	color: white;
+}

@@ -1,0 +1,119 @@
+body {
+	font-family: arial;
+    user-select: none;
+    -moz-user-select: none;
+	background: #5C4;
+}
+.debugCanvas {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	pointer-events: none;
+}
+.mainCanvas {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+    cursor: url('./media/GameCursor.png') 29 29, pointer;
+}
+.cursorPointer {
+    cursor: pointer;
+}
+.loader {
+	position: absolute;
+	top: 40%;
+	left: 0px;
+	right: 0px;
+	text-align: center;
+	color: white;
+	pointer-events: none;
+}
+.loader.flash {
+  animation-duration: 2s;
+  animation-name: flashLoader;
+}
+
+@keyframes flashLoader {
+  from { color: red }
+  to { color: white }
+
+}
+
+.gameBonus {
+	top: 4%;
+}
+.gameOver {
+    font-size: 64px;
+    color: red;
+}
+.shipLost {
+    top: 20%;
+    font-size: 64px;
+    color: green;
+}
+.gamesComs {
+	background-color: #0006;
+	color: #0F0;
+	position: absolute;
+	bottom: 2px;
+	right: 2px;
+	pointer-events: none;
+	font-size: small;
+
+}
+.info {
+	background-color: rgb(0,72,255);
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 24px;
+	height: 4px;
+	pointer-events: none;
+}
+.slide {
+	background-color: rgb(0,255,0);
+	/*position: absolute;*/
+	height: 2px;
+    top: 1px;
+	left: 1px;
+}
+
+.tock {
+	opacity: 0.8;
+}
+.info.slow > .slide {
+	background-color: rgb(255,210,0);
+}
+.info.slow {
+	background-color: rgb(255,10,0);
+}
+
+.logger {
+    pointer-events: none;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 256px;
+    font-family: consola;
+    font-size: small;
+    background-color: #000;
+    padding-left: 5px;
+    padding-bottom: 5px;
+    overflow-x: hidden;
+}
+.logLine {
+    pointer-events: none;
+    color: #0F0;
+    overflow-x: hidden;
+    max-height: 16px;
+}
+.logError {
+    pointer-events: none;
+    color: #F00;
+    overflow-x: hidden;
+    max-height: 16px;
+}
+
+
+
+.hide { display: none; }

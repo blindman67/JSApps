@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>Blinky</title>
+		<style>
+			canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background: #59D;
+}
+#infoEl {
+  position: absolute;
+  bottom: 40px;
+  left: 0px;
+  width: 100%;
+  font-family: arial;
+  color: #fff;
+  font-size: xx-large;
+  text-align: center;
+}
+.hide {
+  display: none;
+}
+		</style>
+    </head>
+    <body style = "font-family:monospace">
+		<canvas id="canvas"></canvas>
+<div id="infoEl">Blinky will follow mouse movements</div>
+		<script>
+			/* Name: "Blinky" */var W = canvas.width = innerWidth, W2 = W / 2;   
+var H = canvas.height = innerHeight, H2 = H / 2; 
+setTimeout(()=>{
+const ctx = canvas.getContext("2d");
+Math.TAU = Math.PI * 2;
+Math.R90 = Math.PI * 0.5;
+Math.R45 = Math.PI * 0.25;
+W = canvas.width = innerWidth, W2 = W / 2;    
+H = canvas.height = innerHeight, H2 = H / 2;  
+const clamp   = (v, min = 0, max = 1) =>  Math.max(min, Math.min(max, v));
+const eCurve   = (v, p = 2, vp) =>  v < 0 ? 0 : v > 1 ? 1 : (vp = v ** p) / (vp + (1 - v) ** p);
+const randItem = (array) => array[(Math.random() * array.length) | 0];
+const rand = (m, M) => Math.random() * (M - m) + m;
+const setOf = (count, fn = (i)=>i) => {var a = [],i = 0; while (i < count) { a.push(fn(i ++)) } return a };
+const quadRoots = (a, b, c) => { // find roots for quadratic
+    if (Math.abs(a) < 1e-6) { return b != 0 ? [-c / b] : []  }
+    b /= a;
+    var d = b * b - 4 * (c / a);
+    if (d > 0) {
+        d = d ** 0.5;
+        return  [0.5 * (-b + d), 0.5 * (-b - d)]
+    }
+    return d === 0 ? [0.5 * -b] : [];
+}
+const Vec2 = { get vec() { return {x: 0, y: 0} } };
+const Matrix2 = { // 2D Warning Non Standard application of Matrix transforms.
+    get ident() { return [1, 0, 0, 1, 0, 0] },
+    invert(m, im = []) {
+		const x0 = m[0], x1 = m[1], y0 = m[2], y1 = m[3];
+		const det =  x0  * y1  - x1  * y0;
+		im[0] =  y1 / det;
+		im[1] = -x1 / det;
+		im[2] = -y0 / det;
+		im[3] =  x0 / det;
+		
+		im[4] = m[4];
+		im[5] = m[5];
+		return im;
+	},  
+	transform(m, x, y) {
+	    x -= m[4];
+	    y -= m[5];
+	    return [
+	        x * m[0] + y * m[2] + m[4],
+	        x * m[1] + y * m[3] + m[5]
+	    ];
+	}
+	
+}
+const Vec3 = { get vec() { return {x: 0, y: 0, z: 0} } };
+const Matrix3 = { // 3D Warning Non Standard application of Matrix transforms.
+    get ident() { return [1, 0, 0, 0, 1, 0, 0, 0, 1] },
+	transform(m, p, res = {}) {
+	    res.x = p.x * m[0] + p.y * m[3] + p.z * m[6];
+	    res.y = p.x * m[1] + p.y * m[4] + p.z * m[7];
+	    res.z = p.x * m[2] + p.y * m[5] + p.z * m[8];
+	    return res;
+	},
+	multiply(a, b, res = []) {
+		res[0] = a[0] * b[0] + a[3] * b[3] + a[6] * b[6];
+		res[1] = a[1] * b[0] + a[4] * b[3] + a[7] * b[6];
+		res[2] = a[2] * b[0] + a[5] * b[3] + a[8] * b[6];
+		res[3] = a[0] * b[1] + a[3] * b[4] + a[6] * b[7];
+		res[4] = a[1] * b[1] + a[4] * b[4] + a[7] * b[7];
+		res[5] = a[2] * b[1] + a[5] * b[4] + a[8] * b[7];
+		res[6] = a[0] * b[2] + a[3] * b[5] + a[6] * b[8];
+		res[7] = a[1] * b[2] + a[4] * b[5] + a[7] * b[8];
+		res[8] = a[2] * b[2] + a[5] * b[5] + a[8] * b[8];   
+		return res;
+	},
+	yaw(yaw, res = []) {
+        res[0] = Math.cos(yaw);
+        res[1] = 0;
+        res[2] = Math.sin(yaw);
+        res[3] = 0;
+        res[4] = 1;
+        res[5] = 0;        
+        res[6] = -res[2];
+        res[7] = 0;
+        res[8] = res[0];   
+        return res;
+	},
+	pitch(pitch, res = []) {
+        res[0] = 1;        
+        res[1] = 0;
+        res[2] = 0;
+        res[3] = 0;        
+        res[4] = Math.cos(pitch);
+        res[5] = Math.sin(pitch);    
+        res[6] = 0;        
+        res[7] = -res[5];
+        res[8] = res[4];  	    
+	    return res;
+	},	
+	roll(roll, res = []) {
+        res[0] = Math.cos(roll);        
+        res[1] = Math.sin(roll);
+        res[2] = 0;
+        res[3] = -res[1];        
+        res[4] = res[0];
+        res[5] = 0;    
+        res[6] = 0;        
+        res[7] = 0;
+        res[8] = 1; 	 	    
+	    return res;
+	},		
+}
+const AnimValue = (v, target, speed, curve, curveMod) => {
+    var pos = 0;
+    speed = Math.abs(speed);
+    return {
+        get v() { 
+            if (v !== target) {
+                pos += speed;
+                if (pos > 1) {
+                    v = target;
+                    pos = 0;
+                } else { return (curve?.(pos, curveMod) ?? pos) * (target - v) + v }
+            } 
+            return v;
+        },
+        set v(val) {
+            pos = 0;
+            target = v = val;
+        },
+        set target(val) {
+            if (v !== target) { v = this.v }
+            pos = 0;
+            target = val;
+        },
+        get target() { return target },
+        set speed(val) { speed = Math.abs(val) },
+    };
+    
+}
+const mouse  = {x : W2, y : H2, updated: 0, tx: 0 , ty: 0};
+function mouseEvents(e){
+	mouse.x = e.pageX;
+	mouse.y = e.pageY;
+  mouse.updated = 120;
+}
+["down","up","move"].forEach(name => document.addEventListener("mouse"+name,mouseEvents));
+
+const EYE_SCALE = 0.3;
+const EYE_RADIUS = 120;  // in pixels
+const NOSE_RADIUS = 60;  // in pixels
+const BLINK_HOLD = 5;   // in frames
+const BLINK_MAX_DELAY = 320;  // in frames
+
+
+const EyeExpressions = {
+    normal: {
+        top: -0.1,  
+        bot: 0.2,   
+    },
+    surprized: {
+        top: -0.2, 
+        bot: 0.25,  
+    },   
+    sleepy: {
+        top: 0, 
+        bot: 0.2,  
+    },     
+    sleepy2: {
+        top: -0.05, 
+        bot: 0.25,  
+    },     
+}
+const namedExpressions = Object.keys(EyeExpressions);
+
+
+
+const Renderer = {
+    mark(dir, elv, mark = {}) {
+        const eS = Math.sin(elv);
+        mark.x = Math.cos(dir) * eS; 
+        mark.y = Math.sin(dir) * eS;
+        mark.z = Math.cos(elv);
+        return mark;
+    },
+    markLookat(from, to, maxD, maxE, mark = {}) {
+        const x = to.x - from.x;
+        const y = to.y - from.y;
+        const z = to.z - from.z;
+        const len = (x * x + y * y) ** 0.5;
+        const dir = Math.atan2(y, x);
+        const e = Math.atan2(len, z);
+        const elv = e < -maxD ? -maxD : e > maxD ? maxD : e;
+        const eS = Math.sin(elv);
+        mark.x = -Math.cos(dir) * eS; 
+        mark.y = -Math.sin(dir) * eS;
+        mark.z = Math.cos(elv);        
+        return mark;
+    },
+    
+    // Draws a sliced section of the shere
+    // ctx is 2D context, Path2D, or object that implements appropreate calls
+    // r is radius in pixels
+    // mark is 3D point on sphere that marks the center of the section
+    // sr is the radius of the section
+    pathSphereSection(ctx, r, sr, mark) { // sr section radius
+        if (sr >= r) {
+            ctx.moveTo(r, 0);
+            ctx.arc(0, 0, r, 0, Math.TAU);
+            return ctx;
+            return;
+        }
+        const mx = mark.x, my = mark.y, mz = mark.z;
+        var A, tx = Infinity, len = (mx * mx + my * my) ** 0.5;
+        len = len < -1 ? -1 : len > 1 ? 1 : len;
+        const R = r / sr, pheta = Math.asin(len);
+        A = Math.cos(Math.asin(1 / R)) * R;
+        const c1 = Math.sin(pheta) * A;
+        const c2 = 1 / (Math.cos(pheta) ** 2);
+        const roots = quadRoots(c2 - 1, -2 * c1 * c2, c1 * c1 * c2 + R * R - 1.001);
+        roots.length > 0 && (tx = (roots.length === 1 ? roots[0]: (roots[0] + roots[1]) * 0.5) * sr);
+        const exr = Math.abs(Math.cos(pheta)) * sr;
+        A *= sr;
+        const x = mx * A, y = my * A;
+        const eDir = Math.atan2(my, mx);
+        if (tx > r) {
+            const pSign = mz < 0 ? 1 : -1;
+            ctx.moveTo(x * pSign + Math.cos(eDir) * exr, y * pSign +  Math.sin(eDir) * exr);
+            ctx.ellipse(x * pSign, y * pSign, exr, sr, eDir, 0, Math.TAU);
+            ctx.closePath();
+        } else {
+            const size = this.radius;
+            const ab = Math.acos(tx / r);
+            const bb = Math.acos((tx - len * A) / exr);
+            const eAB = eDir - ab;
+            const rDir = eDir + Math.PI;
+            const rAB = rDir - ab;
+            const CCW = mz < 0;
+            //ctx.moveTo(Math.cos(eAB) * r, Math.sin(eAB) * r);
+            //ctx.arc(0, 0, r, eAB, eDir + ab);
+            //ctx.ellipse( x,  y, exr, sr, eDir, bb, -bb + Math.TAU, !CCW);
+            //ctx.closePath();
+            ctx.moveTo(Math.cos(rAB) * r, Math.sin(rAB) * r);
+            ctx.arc(0, 0, r, rAB, rDir + ab);
+            ctx.ellipse(-x, -y, exr, sr, rDir, bb, -bb, CCW);
+            ctx.closePath();
+        }
+        return ctx;
+    },    
+    plotEllipseOnSphere(ctx, r, e1, e2, aStart, aEnd, mat, steps) {
+        const step = (aEnd - aStart) / steps;
+        var i = aStart;
+        const p = {x: 0, y: 0, z: 0};
+        const tp = {...p};
+        if (aEnd < aStart) {
+            while (i >= aEnd) {
+                const lo = Math.cos(i) * Math.PI * e1;
+                const la = Math.sin(i) * Math.PI * e2;
+                const ca = Math.cos(la);
+                p.x = Math.sin(lo) * ca;
+                p.y = Math.sin(la);
+                p.z = Math.cos(lo) * ca;
+                Matrix3.transform(mat, p, tp);
+                if (tp.z <= 0) {
+                    const d = (1 / (tp.x * tp.x + tp.y * tp.y) ** 0.5) * r;
+                    ctx.lineTo(tp.x * d, tp.y * d);
+                } else { ctx.lineTo(tp.x * r, tp.y * r) }                
+                i += step;
+            }            
+            
+        } else {
+            while (i <= aEnd) {
+                const lo = Math.cos(i) * Math.PI * e1;
+                const la = Math.sin(i) * Math.PI * e2; 
+                const ca = Math.cos(la);
+                p.x = Math.sin(lo) * ca;
+                p.y = Math.sin(la);
+                p.z = Math.cos(lo) * ca;
+                Matrix3.transform(mat, p, tp);
+                if (tp.z <= 0) {
+                    const d = (1 / (tp.x * tp.x + tp.y * tp.y) ** 0.5) * r;
+                    ctx.lineTo(tp.x * d, tp.y * d);                    
+                } else { ctx.lineTo(tp.x * r, tp.y * r) }
+                i += step;
+            }
+        }
+    }
+}
+
+const Face = {
+    eyeBallL: {x:-EYE_RADIUS, y:-EYE_RADIUS, z: 160},
+    eyeBallR: {x: EYE_RADIUS, y:-EYE_RADIUS, z: 160},
+    noseBall: {x:  0, y: -NOSE_RADIUS / 2, z: 180+NOSE_RADIUS},
+    eyeL: Vec3.vec,
+    eyeR: Vec3.vec,
+    nose: Vec3.vec,
+    pos: {x: W2, y:H * 0.75, z:-160},
+    focusZ: 1250,
+    turn: 0,
+    nod: 0,
+    tilt: 0,
+    vTurn: Matrix3.ident,
+    vNod: Matrix3.ident,
+    vTilt: Matrix3.ident,
+    mat: Matrix3.ident, 
+    matTemp: Matrix3.ident, 
+    markL: Vec3.vec,
+    markR: Vec3.vec,
+    lidTopPos: AnimValue(EyeExpressions.normal.top,  EyeExpressions.normal.top, 0.25, eCurve),
+    lidBotPos: AnimValue(EyeExpressions.normal.bot,  EyeExpressions.normal.bot, 0.25, eCurve),
+    lidTop: 0.1,
+    lidBot: 0.2,
+    blinkOdds: BLINK_MAX_DELAY,
+    currentExpression: EyeExpressions.normal,
+    eyeSize: EYE_RADIUS,
+    noseSize: NOSE_RADIUS,
+    lightColor: "#5436",
+    irisColor: "#271",
+    pupilColor: "#000",
+    eyeColor: "#ABC",
+    skinColor: "#B95",
+    skinLight: "#DB6",
+    lidLineColor: "#642",
+    lidLineWidth: 16,
+    openIn: 0,
+    open() {
+        this.currentExpression = EyeExpressions[randItem(namedExpressions)];
+        this.focusZ = Math.random() < 0.5 ? EYE_RADIUS * 4 : EYE_RADIUS * 20;
+        this.lidTopPos.target = this.currentExpression.top;
+        this.lidBotPos.target = this.currentExpression.bot;
+    },    
+    blink() {
+        this.lidTopPos.target = 0.15;
+        this.lidBotPos.target = 0.15;
+        this.blinkOdds = BLINK_MAX_DELAY;
+        this.openIn = BLINK_HOLD;
+    },
+    update() {
+        if (this.openIn > 0) {
+            this.openIn--;
+            if (this.openIn <= 0) {
+                this.openIn = 0;
+                this.open();
+            }
+        } else {
+            this.blinkOdds --
+            if (!this.blinkOdds || Math.random() < 1 / this.blinkOdds) { this.blink() }       
+        }
+        this.turn = -(mouse.x - this.pos.x) / W ;
+        this.tilt = (mouse.x - this.pos.x) / W;
+        this.nod = (mouse.y - this.pos.y) / H;
+        
+        this.lidTop = this.lidTopPos.v;
+        this.lidBot = this.lidBotPos.v;
+        
+        Matrix3.yaw(this.turn, this.vTurn);
+        Matrix3.roll(this.tilt, this.vTilt);
+        Matrix3.pitch(this.nod, this.vNod);
+        
+        Matrix3.multiply(this.vTurn,  this.vTilt, this.matTemp);
+        Matrix3.multiply(this.matTemp, this.vNod, this.mat);
+ 
+		    Matrix3.transform(this.mat, this.eyeBallL, this.eyeL);
+		    Matrix3.transform(this.mat, this.eyeBallR, this.eyeR);
+		    Matrix3.transform(this.mat, this.noseBall, this.nose);
+		
+        this.eyeL.x += this.pos.x; 
+        this.eyeL.y += this.pos.y; 
+        this.eyeL.z += this.pos.z;
+        
+        this.eyeR.x += this.pos.x; 
+        this.eyeR.y += this.pos.y; 
+        this.eyeR.z += this.pos.z;  
+        
+        this.nose.x += this.pos.x; 
+        this.nose.y += this.pos.y; 
+        this.nose.z += this.pos.z;         
+        
+        mouse.z = this.focusZ;
+        Renderer.markLookat(this.eyeL, mouse, 0.5, 0.5, this.markL);
+        Renderer.markLookat(this.eyeR, mouse, 0.5, 0.5, this.markR);
+        
+    },
+    draw(ctx, time) {
+        if (this.eyeL.z > this.eyeR.z) {
+            if (this.nose.z < this.eyeR.z) { this.drawNose(ctx, this.nose) }
+            this.drawEye(ctx, this.eyeR, this.markR, time / 1000);  
+            if (this.nose.z < this.eyeL.z) { this.drawNose(ctx, this.nose) }
+            this.drawEye(ctx, this.eyeL, this.markL, time / 1000);
+            if (this.nose.z >= this.eyeL.z) { this.drawNose(ctx, this.nose) }
+        } else {
+            if (this.nose.z < this.eyeL.z) { this.drawNose(ctx, this.nose) }
+            this.drawEye(ctx, this.eyeL, this.markL, time / 1000);
+            if (this.nose.z < this.eyeR.z) { this.drawNose(ctx, this.nose) }
+            this.drawEye(ctx, this.eyeR, this.markR, time / 1000);    
+            if (this.nose.z > this.eyeR.z) { this.drawNose(ctx, this.nose) }            
+        }
+    },
+    drawNose(ctx, pos) {
+        ctx.setTransform(1, 0, 0, 1, pos.x, pos.y);
+        const nR = this.noseSize;
+        ctx.fillStyle = this.skinColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, nR, 0, Math.TAU);
+        ctx.fill(); 
+        ctx.fillStyle = this.lightColor;
+        ctx.globalCompositeOperation = "lighter";
+        for (const lp of nosePaths) { ctx.fill(lp) }
+        ctx.globalCompositeOperation = "source-over";           
+        
+    },
+    drawEye(ctx, pos, mark,  time) {
+        const eR = this.eyeSize;
+        ctx.setTransform(1, 0, 0, 1, pos.x, pos.y);
+        ctx.lineWidth = this.lidLineWidth;
+        
+        ctx.fillStyle = this.skinColor;
+        ctx.beginPath();
+        Renderer.pathSphereSection(ctx, EYE_RADIUS, EYE_RADIUS * 0.9, {x: -this.mat[6], y: -this.mat[7], z: this.mat[8]})
+        ctx.fill();   
+        ctx.fillStyle = this.skinLight;
+        ctx.beginPath();
+        Renderer.pathSphereSection(ctx, EYE_RADIUS, EYE_RADIUS * 0.8, {x: -this.mat[6], y: -this.mat[7], z: this.mat[8]})
+        ctx.fill();          
+        ctx.lineJoin = "round";
+        ctx.fillStyle = "#ABC";
+        ctx.strokeStyle = this.lidLineColor;
+        ctx.lineWidth = this.lidLineWidth;
+        ctx.beginPath();
+        Renderer.plotEllipseOnSphere(ctx, eR, 0.25, this.lidTop, Math.PI, 0, this.mat, 20);
+        Renderer.plotEllipseOnSphere(ctx, eR, 0.25, this.lidBot, 0, Math.PI, this.mat, 20);
+        ctx.closePath(); 
+        ctx.stroke(); 
+        ctx.save();
+        ctx.clip();
+        
+        ctx.lineWidth = 1;
+        ctx.fillStyle = this.eyeColor;
+        ctx.beginPath();
+        Renderer.pathSphereSection(ctx, eR, eR)
+        ctx.fill();
+        
+        ctx.fillStyle = this.irisColor;
+        ctx.beginPath();
+        Renderer.pathSphereSection(ctx, eR, eR / 2, mark);
+        ctx.fill();
+        ctx.fillStyle = this.pupilColor;
+        ctx.beginPath();
+        Renderer.pathSphereSection(ctx, eR, eR / 3, mark)
+        ctx.fill();    
+        
+        ctx.fillStyle = this.lightColor;
+        ctx.globalCompositeOperation = "lighter";
+        for (const lp of lightPaths) { ctx.fill(lp) }
+          
+        ctx.restore();
+    }
+}
+
+
+requestAnimationFrame(renderLoop);
+const lightMark = Renderer.mark(Math.PI + Math.R45, -Math.R45 / 2);
+const highlightMark = Renderer.mark(Math.PI + Math.R45, -Math.R45 + Math.R45 * 0.6);
+const lightPaths = [
+    Renderer.pathSphereSection(new Path2D, EYE_RADIUS, EYE_RADIUS-1, lightMark),
+    Renderer.pathSphereSection(new Path2D, EYE_RADIUS, EYE_RADIUS-2, lightMark),
+    Renderer.pathSphereSection(new Path2D, EYE_RADIUS, EYE_RADIUS / 3, highlightMark),
+    Renderer.pathSphereSection(new Path2D, EYE_RADIUS, EYE_RADIUS / 4, highlightMark),
+    Renderer.pathSphereSection(new Path2D, EYE_RADIUS, EYE_RADIUS / 6, highlightMark),
+];
+
+const nosePaths = [
+    Renderer.pathSphereSection(new Path2D, NOSE_RADIUS, NOSE_RADIUS - 2, lightMark),
+];
+
+function renderLoop(time) {
+    if (W !== innerWidth || H !== innerHeight) {
+        W2 = (W = canvas.width = innerWidth) / 2;
+        H2 = (H = canvas.height = innerHeight) / 2;
+    }
+    if (mouse.updated <= 0) {
+        mouse.tx += Math.cos(time / 500) * 0.1;
+        mouse.ty += Math.sin(time / 700) * 0.03;
+        mouse.x = Math.cos(mouse.tx)  * W2 + W2;
+        mouse.y = Math.sin(mouse.ty)  * H2 / 2 + H * 0.75;
+        Face.focusZ = EYE_RADIUS * 12;
+        infoEl.classList.remove("hide");
+      
+    } else {
+      infoEl.classList.add("hide");
+      mouse.updated --;
+    }
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0, 0, W, H);
+
+    Face.update();
+    Face.draw(ctx, time);
+    requestAnimationFrame(renderLoop);
+}
+}, 1000)
+
+		</script>
+	</body>
+<html>

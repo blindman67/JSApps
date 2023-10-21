@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>JS RUN</title>
+		<link rel="icon" type="image/png" href="icon.png" >
+		
+    </head>
+    <body style = "font-family:monospace">
+		<style>
+			textArea {
+				width: 100%;
+				height: 1em;
+			}
+			span {
+			    color: red;
+				font-weight: 700;
+			}
+			#info {
+			    color: black;
+				font-weight: 100;
+			
+			}
+			.controls {
+				position: fixed;
+				top: 4px;
+				left: 4px;
+				border: 1px solid;
+				right: 4px;
+				padding: 2px;
+				background: #8884;
+			}
+			.editors {
+				position: absolute;
+				top: 40px;
+				bottom: 4px;
+				left: 4px;
+				right: 0px;
+				overflow-y: scroll;				
+			}
+			button {
+			    font-family:monospace;
+				display: inline-block;
+				border: 1px solid black;
+				padding: 2px 8px;
+				background: #eeeeee;
+				color: #000000;
+				cursor: pointer;
+				text-align: center;
+				transition: background 100ms ease-in-out, transform 150ms ease;
+				-webkit-appearance: none;
+				-moz-appearance: none;
+			}
+
+			button:hover {
+				background: #cceecc;
+			}
+
+			button:focus {
+			}
+			.small {
+				padding: 0px 4px;
+				font-size: 8px;
+				margin-bottom: 3px;
+			}
+			p {
+				border-bottom: 1px solid;
+				margin-block-start: 1px;
+				margin-block-end: 4px;		
+			}
+
+			textarea {
+				text-indent: 2px;
+				tab-size: 4;
+				background: rgb(240, 240, 240);
+				margin: 0px;	
+				min-width: 98%;
+				width: 98%;
+			}			
+			.dark {
+				background: rgb(75 75 75);
+				color: #99ff92;
+			}		
+		</style>
+		<script src="geeQuery.js"></script>
+		<header style ="height: 50px;"></header>
+		
+		<div class="controls">
+			<button id="run">RUN</button>
+			<button id="smaller">-</button>
+			<input id="fontSize" type="number"  step ="1" min="10" max="48" value="16" style="width: 64px;">
+			<button id="larger">+</button>
+			<button id="darkTheme">Dark</button>
+			<button id="standalone">Download</button>
+			<input id="codeName" type="text" value = "JSCode" placeholder="Name of download" />
+			<span id="info"></span>
+		</div>
+		<div class="editors" id="editPannel">
+			<p>
+				<button id="openCloseHTML" class="small">+</button> HTML <span  id="storeSaveHTML"></span>
+			</p>
+			<textArea  id="html" contenteditable placeholder="HTML here" spellcheck="false">
+			</textArea >
+
+			<p>
+				<button id="openCloseStyle" class="small">+</button> CSS <span  id="storeSaveStyle"></span>
+			</p>
+			<textArea  id="style" contenteditable placeholder="CSS style block here" spellcheck="false"></textArea >
+
+			<p>
+				<button id="openCloseCode" class="small">+</button> JavaScript <span  id="storeSaveCode"></span>
+			</p>
+			<textArea id="code" spellcheck="false" placeholder="JavaScript here"></textArea>
+		</div>
+		<!---<button id="toTop">top</button>-->
+		<script src="main.js"></script>
+    </body>
+</html>
+
+

@@ -1,0 +1,19 @@
+body {
+	font-family: arial;
+}
+#root > ul > li {
+	cursor: pointer;
+	width: 300px;
+}
+#root > ul > li:hover {
+	color: #00A;
+	background-color: #FDB;
+}
+
+#root > ul > li.ignore {
+	cursor: default;
+}
+#root > ul > li.ignore:hover {
+	color: #000;
+	background-color: transparent;
+}

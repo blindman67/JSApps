@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>BoxJumper</title>
+		<style>
+			canvas { 
+    position : absolute;
+    top : 0px;
+    left : 0px;
+}
+		</style>
+    </head>
+    <body style = "font-family:monospace">
+		<canvas id = "canvas" width="640" height="640"></canvas>
+		<script>
+			/* Name: "BoxJumper" */
+// NOTE  var | 0 is the same as Math.floor(var)
+var mapArray = [
+	"#                  #",
+	"#                  #",
+	"#  ###             #",
+	"#           #      #",
+	"#       ##  #####  #",
+	"#                  #",
+	"#                  #",
+	"#    ##            #",
+	"#      ##          #",
+	"#                  #",
+	"#      #####       #",
+	"#                  #",
+	"#                  #",
+	"#       #####      #",
+	"#                  #",
+	"#                  #",
+	"#       #     ##   #",
+	"#      ###         #",
+	"#     ##### ##     #",
+	"####################",
+].map(row => row.split("").map(cell=>cell==="#" ? 1 : 0));
+
+
+var levelRows = 20;
+var levelCols = 20;
+var tileX = 32;
+var tileY = 32;
+var gameArea = {
+ canvas : document.getElementById('canvas'),
+ ctx : document.getElementById('canvas').getContext("2d"),
+ keys : {  // set them here so that can block defaults
+	"37" : false,
+	"38" : false,     // also jump
+	"39" : false,
+	"32" : false,     // jump
+ },start : function() {	 document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+	 requestAnimationFrame(updateGameArea);
+	 function keyEvent(e) { 
+		 if(gameArea.keys["" + e.keyCode] !== undefined){
+		  gameArea.keys["" + e.keyCode] = e.type === "keydown" 
+		  e.preventDefault();
+		 }
+	 }
+	 addEventListener('keydown', keyEvent);
+	 addEventListener('keyup', keyEvent);
+	 focus();
+	},
+
+	clear(){
+		var minSize = Math.min(innerWidth,innerHeight);
+		if (this.ctx.canvas.width !== minSize|| this.ctx.canvas.height !== minSize) {
+			this.ctx.canvas.width = minSize;
+			this.ctx.canvas.height = minSize;
+		}
+			
+		this.ctx.setTransform(1,0,0,1,0,0);
+		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		
+		// the next line scales the canvas rendering to fit.
+		this.ctx.setTransform(
+			minSize / (levelCols * tileX),
+			0,
+			0,
+			minSize/ (levelRows * tileY),
+			0,0
+		);
+	},
+	render() {
+		var ctx = this.ctx;
+		for(i=0;i<levelRows;i++){
+			for(j=0;j<levelCols;j++){
+				if(mapArray[i][j]==1){
+					ctx.fillStyle = "gray";
+					ctx.fillRect(j*tileX,i*tileY,tileX,tileY);
+				}
+			}
+		}
+	}
+};
+
+function updateGameArea() { 
+	gameArea.clear();
+	actor.canMove.check();
+	actor.speedX = 0;
+	if(actor.canMove.down){
+		actor.speedY += actor.gravity;
+	}
+
+	if (gameArea.keys[39] && actor.canMove.right) {
+		actor.speedX = 4;
+	}
+	if (gameArea.keys[37]  && actor.canMove.left) {
+		actor.speedX = -4;
+	}
+	if (actor.canMove.up && (gameArea.keys[32] || gameArea.keys[38])) { //jump
+		if (!actor.jumping) {
+			actor.jumping = true;
+			actor.speedY = -actor.speed * 3;
+		}
+	}
+	actor.move();  // collision is done here
+	
+	gameArea.render();
+	actor.draw();
+
+	requestAnimationFrame(updateGameArea);
+}
+
+function Player (width, height, color, x, y) { //player component
+	this.width = width;
+	this.height = height;
+	this.x = x;
+	this.y = y;
+	this.speedX=0;
+	this.speedY=0;
+	this.gravity=0.3;
+	this.speed=3;
+	this.jumping=false;
+	this.color = color;
+	this.canMove = {
+	   left : true,
+	   right : true,
+	   up : true,
+	   down : true,
+	   actor : this,
+	   clear(){
+		  this.left = true;
+		  this.right = true;
+		  this.up = true;
+		  this.down = true;
+	   },
+	   check(){
+		  this.clear();
+		  var x = this.actor.x | 0;
+		  var y = this.actor.y | 0;
+		  var cx = x / tileX | 0;
+		  var cy = y / tileY | 0;
+		  if(x % tileX === 0){
+			 if(getMap(cx-1,cy) === 1){                 
+			   this.left = false;
+			   if(y % tileY !== 0 && getMap(cx-1,cy +1) === 1){
+				  this.left = false;
+			   }
+			 }
+			 if(getMap(cx+1,cy) === 1){
+			   this.right = false;
+			   if(y % tileY !== 0 && getMap(cx+1,cy +1) === 1){
+				  this.right = false;
+			   }
+			 }
+		  }
+		  if(y % tileY === 0){
+			 if(getMap(cx,cy-1) === 1){                 
+			   this.up = false;
+			   if(x % tileX !== 0 && getMap(cx+1,cy -1) === 1){
+				  this.up = false;
+			   }
+			 }
+			 if(getMap(cx,cy+1) === 1){
+			   this.down = false;
+			   if(x % tileX !== 0 && getMap(cx+1,cy +1) === 1){
+				  this.down = false;
+			   }
+			 }
+		  }
+	   }
+	};
+
+	this.draw = function () {
+		var ctx = gameArea.ctx;
+		ctx.fillStyle = this.color;
+		ctx.fillRect(  this.x,this.y, this.width, this.height);
+	};
+	this.move = function() {
+	  var x = this.x;
+	  var y = this.y;
+	  var sx = this.speedX;
+	  var sy = this.speedY;
+	  var speed = Math.sqrt(sx * sx + sy * sy);
+	  if(speed > 0){
+		sx /= speed;
+		sy /= speed;
+		for(var i = 0; i < speed; i++){
+		  var xx = (x + sx * i) | 0;
+		  var yy = (y + sy * i) | 0;
+		  var cx = xx / tileX | 0;
+		  var cy = yy / tileY | 0;
+		  if(sy > 0){
+			if(getMap(cx,cy+1) === 1 || (xx % tileX !== 0 && getMap(cx + 1,cy+1))){
+			  this.y = y = cy * tileY;
+			  this.speedY = sy = speed < 4 ? 0 : -3;
+			  this.jumping = false;
+			}
+		  }else if(sy < 0){
+			if(getMap(cx,cy) === 1 || (xx % tileX !== 0 && getMap(cx + 1,cy))){
+			  cy += 1;
+			  this.y = y = cy * tileY;
+			  this.speedY = sy = -sy;  // changing -sy to 0 will stick momentarily to the roof.
+			}
+		  }
+		  if(sx > 0){
+			if(getMap(cx+1,cy) === 1 ||  (yy % tileY !== 0 && getMap(cx + 1,cy+1))){
+			  this.x = x = cx * tileX;
+			  this.speedX = sx = 0;
+			}
+
+		  }else if(sx < 0){
+			if(getMap(cx,cy) === 1 || (yy % tileY !== 0 && getMap(cx,cy+1))){
+			  cx += 1;
+			  this.x = x = cx * tileX;
+			  this.speedX = sx = 0;
+			}          
+		  }
+		}
+	  }
+	  this.x += this.speedX;
+	  this.y += this.speedY;
+	}
+}
+
+function getMap(x,y){
+  if(y < 0 || y >= levelRows || x < 0 || x >= levelCols){
+	 return 1;
+  }
+  return mapArray[y][x];
+}
+
+
+gameArea.start();
+actor = new Player(32, 32, "green", 32, 32);
+
+
+		</script>
+	</body>
+<html>

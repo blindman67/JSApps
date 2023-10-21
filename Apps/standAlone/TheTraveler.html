@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>TheTraveler</title>
+		<style>
+			body {
+  background: black;
+}
+canvas {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background: black;
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+}
+.compressed {
+  top: 34%;
+}
+#infoEl {
+  position: absolute;
+  bottom: 66%;
+  left: 0px;
+  width: 100%;
+  font-family: arial;
+  color: #fff;
+  font-size: xx-large;
+  letter-spacing: 0.75em;
+  text-align: center;
+}
+#infoEl2 {
+  position: absolute;
+  top: 66%;
+  left: 0px;
+  width: 100%;
+  font-family: arial;
+  color: #fff;
+  font-size: small;
+  letter-spacing: 0.5em;
+  text-align: center;
+}
+.hide {
+  display: none;
+}
+		</style>
+    </head>
+    <body style = "font-family:monospace">
+		<canvas id="canvas"></canvas>
+<div id="infoEl">TRAVELER</div>
+<div id="infoEl2">The journey is the adventure...</div>
+		<script>
+			/* Name: "TheTraveler" */document.body.style.background = "#000";
+var W = canvas.width = innerWidth, W2 = W / 2;   
+var H = canvas.height = innerHeight, H2 = H / 2; 
+setTimeout(()=>{
+const ctx = canvas.getContext("2d");
+const assign = (obj, ...objs) => Object.assign(obj, ...objs);
+const clamp   = (v, min = 0, max = 1) =>  Math.max(min, Math.min(max, v));
+const rand = (m, M) => Math.random() * (M - m) + m;
+const randItem = (array) => array[(Math.random() * array.length) | 0];
+const eCurve   = (v, p = 2, vp) =>  v < 0 ? 0 : v > 1 ? 1 : (vp = v ** p) / (vp + (1 - v) ** p);
+const fCurve   = (v) =>  v < 0 ? 0 : v > 1 ? 1 : v;
+const iCurve   = (v, p = 2) =>  v < 0 ? 0 : v > 1 ? 1 : v ** p;
+const RGB = (r, g, b, a = 255) => ({r, g, b, a});
+const hex8 = v => (clamp(v, 0, 255) | 0).toString(16).padStart(2, "0");
+const RGB2CSS = (rgb) => "#" + hex8(rgb.r) + hex8(rgb.g) + hex8(rgb.b) + hex8(rgb?.a ?? 255) 
+const lerpRGB = (a, b, v, res = {}) => (
+    res.r = (b.r - a.r) * v + a.r,
+    res.g = (b.g - a.g) * v + a.g,
+    res.b = (b.b - a.b) * v + a.b,
+    res.a = (b.a - a.a) * v + a.a,
+    res    
+);  
+  
+  
+const colGrad = (top, bot, rgbT, rgbB) => {
+    const g = ctx.createLinearGradient(0, H * top, 0, H * bot);
+    g.addColorStop(0, RGB2CSS(rgbT));
+    g.addColorStop(1, RGB2CSS(rgbB));
+    return g;
+}
+const colRadGrad = (x, y, rad, rgbT, rgbB, curve, curveMod) => {
+    var i = 0;
+    const r = (x * x + (H - y) ** 2) ** 0.5
+    const g = ctx.createRadialGradient(x, y, rad, x, y, r);
+    g.addColorStop(0, RGB2CSS(rgbT));
+    if (curve) {
+        const step = 1 / (r / 8);
+        i = step;
+        while (i < 1) {
+            g.addColorStop(curve(i, curveMod), RGB2CSS(lerpRGB(rgbT, rgbB, i)));
+            i+= step;
+        }
+    }
+    g.addColorStop(1, RGB2CSS(rgbB));
+    return g;
+}    
+const BGCol = RGB(100, 200, 255);
+const BGColA = RGB(25, 20, 5);
+const FGCol = RGB(60, 180, 80);
+const mistCol = RGB(200, 220, 250);
+const sunCol = RGB(255, 240, 230);
+const sunColA = RGB(255, 240, 230, 255);
+const sunColB = RGB(255, 240, 230, 0);
+const BGColor = colGrad(0, 1,BGCol, mistCol);
+const base = H;
+const steps = 100;
+const levels = (scale, itemOdds = 0, maxY = base, minY = base / 2, dym = -1, dyM = -10, dymSet = 1, dyMSet = 10, cDir = 20, cDirSet = 20) => ({
+    scale, itemOdds, maxY, minY, dym, dyM, dymSet, dyMSet, cDir, cDirSet
+})
+const land = {
+    get levels() { return [] },
+    get items() { return [] },
+    y: base,
+    /*maxY: base,
+    minY: base / 2,
+    dym: -1,
+    dyM: -10,
+    dymSet: 1,
+    dyMSet: 10,
+    cDir: 20,
+    cDirSet: 20,*/
+    get current() { return  levels(1) },
+    get levelSets() { return [] },
+    levelChangeOdds: 1 / 100,
+    size: 100, 
+    color: "#0F0",
+    curve: eCurve,
+    curveData: 2,
+    pos: 0,
+
+    init() {
+        this.levelSets.push({...this.current});
+        var i = 0
+        this.y = rand(this.current.minY, this.current.maxY);
+        while (i < this.size) {
+            this.levels.push(this.next());
+            this.items.push(0);
+            i++;
+            
+        }
+        return this;
+    },
+    next() {
+        const C = this.current;
+        if (this.y < C.minY) {
+            this.y += Math.abs(rand(C.dym, C.dyM));
+            return this.y;
+            
+        }
+        if (this.y > C.maxY) {
+            this.y -= Math.abs(rand(C.dym, C.dyM));
+            return this.y;
+            
+        }        
+        const range = C.maxY - C.minY
+        this.y += rand(C.dym, C.dyM);
+        this.dyM += rand(-1,1);
+        this.cDir -= 1;
+        if (this.y < C.minY) {
+            C.dym = rand(0, C.dymSet);
+            C.dyM = rand(C.dym, C.dyMSet);
+            this.y = C.minY + 1;
+            C.cDir = C.cDirSet;
+        } else if (this.y > C.maxY) {
+            C.dym = -rand(0, C.dymSet);
+            C.dyM = -rand(C.dym, C.dyMSet);
+            this.y = C.maxY - 1;
+            C.cDir = C.cDirSet;
+        } else if (C.cDir <= 0 || Math.random() < 1 / C.cDir) {
+            C.cDir = C.cDirSet;
+            const s = Math.sign(-C.dyM);
+            C.dym = rand(0, C.dymSet) * s;
+            C.dyM = rand(C.dym, C.dyMSet) * s;                
+        }
+        return  this.curve((this.y - C.minY) / range, this.curveData) * range + C.minY;
+        //return this.y;
+    },
+    update() {
+        const C = this.current;
+        const y = this.levels[this.size -1] = this.next();
+        if (y > (C.minY + C.maxY) / 2) {
+            this.items[this.size -1] = Math.random() < C.itemOdds ? rand(1, 2) : 0;
+        } else {
+            this.items[this.size -1] = 0;
+        }
+        this.pos += 1;
+        if (Math.random() < this.levelChangeOdds) {
+            assign(C,randItem(this.levelSets));
+        }
+    },
+    draw(ctx) {
+        var pp = this.pos;
+        ctx.fillStyle = this.color;
+        const step = sW / (this.size-2);
+        const l = this.levels;
+        const t = this.items;
+        var i = 0;
+        ctx.beginPath();
+        ctx.lineTo(sW, sH);
+        ctx.lineTo(0, sH);
+        while (i < this.size - 1) {
+            const tt = t[i];
+            const y = l[i++];
+            const x = i * step;            
+            if (tt) {
+                addTree(ctx, x, y, this.current.scale, tt, pp);
+                
+            } else {
+                ctx.lineTo(x, y);
+            }
+            l[i-1] = l[i];
+            t[i-1] = t[i];
+            pp++;
+        }
+        ctx.closePath();
+        ctx.fill();
+        
+    }
+}
+function addTree(ctx, x, y, scale, val, type) {
+    if (type % 2) {
+        const tw = 4 * scale;
+        const tww = 14 * scale * val;
+        const th = 10 * scale;
+        const thh = 40 * scale * val;
+        ctx.lineTo(x - tww, y - th + tw);
+        ctx.lineTo(x, y - thh);
+        
+        ctx.lineTo(x + tww, y - th + tw);
+       
+    } else {
+        const tw = 4 * scale;
+        const tww = 14 * scale * val;
+        const th = 20 * scale;
+        const thh = 80 * scale * val;        
+        ctx.lineTo(x - tw, y);
+        ctx.lineTo(x - tw, y - th);
+        ctx.lineTo(x - tww, y - th + tw);
+        ctx.lineTo(x, y - thh);
+        
+        ctx.lineTo(x + tww, y - th + tw);
+        ctx.lineTo(x + tw, y - th);
+        ctx.lineTo(x + tw, y);    
+    }
+    
+}
+//(maxY, minY, dym, dyM, dymSet, dyMSet, cDir, cDirSet)
+const U = undefined;
+const points = W / 4 | 0;
+const lands = [({
+        ...land, 
+        color: colGrad(0.1, 1,lerpRGB(BGColA, lerpRGB(BGCol, FGCol, 0.2), 0.7), mistCol),
+        current: levels(0.4, 0, base * 0.5, base * 0.1, U, U, 5, 10, U, 40),
+        size: points, 
+        curve: iCurve,
+        curveData: 1/2, 
+        
+    }).init(),
+    ({
+        ...land, 
+        color: colGrad(0.4, 1,lerpRGB(BGColA, lerpRGB(BGCol, FGCol, 0.4), 0.6), mistCol),
+        current: levels(0.475, 0, base * 0.6, base * 0.4, U, U, 2, 4, U, 50),
+        levelSets: [
+            levels(0.475, 0, base * 0.7, base * 0.55, U, U, 2, 10, U, 4)
+        ],
+        size: points * 0.9 | 0,        
+    }).init(),
+    ({
+        ...land, 
+        color: colGrad(0.5, 1.2,lerpRGB(BGColA, lerpRGB(BGCol, FGCol, 0.6), 0.5), mistCol),
+        current: levels(0.25, 0.1, base * 0.75, base * 0.5, U, U, 2, 5, U, 4),
+        size: points * 0.8 | 0,
+        curve: iCurve,
+        curveData: 1/2, 
+    }).init(),
+    ({
+        ...land, 
+        color: colGrad(0.6, 1.5,lerpRGB(BGColA, lerpRGB(BGCol, FGCol, 0.8), 0.4), mistCol),
+        current: levels(0.5 , 0.05,base * 0.8, base * 0.6, U, U, 2, 7, U, 3),
+        levelSets: [
+            levels(0.5 , 0.2, base * 0.85, base * 0.7, U, U, 1, 3, U, 13),
+            levels(0.5 , 0.2, base * 0.9, base * 0.74, U, U, 1, 3, U, 13),
+            levels(0.5 , 0.2, base * 0.95, base * 0.78, U, U, 1, 3, U, 13),
+        ],
+        size: points * 0.7 | 0,
+        curve: fCurve,
+        
+    }).init() ,
+    ({
+        ...land, 
+        color: colGrad(0.8, 2,lerpRGB(BGColA, lerpRGB(BGCol, FGCol, 1), 0.2), mistCol),
+        current: levels(1, 0.025, base * 0.9, base * 0.8, U, U, 1, 6, U, 40),
+        size: points * 0.6 | 0,
+        curve: fCurve,
+        
+    }).init(),   
+];
+const Sun = ({
+    x: W * 0.8,
+    y: H * 0.2,
+    col: RGB2CSS(sunCol),
+    draw(ctx) {
+        ctx.fillStyle = this.bgCol;
+        ctx.fillRect(0, 0, sW, sH);        
+        ctx.fillStyle = this.col;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 20, 0, Math.TAU);
+        ctx.fill()
+    },
+    init() {
+        this.bgCol = colRadGrad(this.x, this.y, 20, sunColA, sunColB, iCurve, 2.5);
+        return this;
+    }
+    
+}).init();
+
+requestAnimationFrame(renderLoop);
+  
+  
+const sW = W, sH = H;
+var sX = 1, sY = 1;
+const squashH = H * 0.3 | 0;
+  
+function renderLoop() {
+    if (W !== innerWidth || H !== squashH) {
+        W2 = (W = canvas.width = innerWidth) / 2;
+        H2 = (H = canvas.height = squashH) / 2;
+        sX = (W + 40) / sW;
+        sY = H / sH;
+        canvas.classList.add("compressed");
+    }  
+    ctx.setTransform(sX,0,0,sY,-20,0);
+    ctx.fillStyle = BGColor;
+    ctx.fillRect(0, 0, sW, sH);
+    Sun.draw(ctx);
+    for (const l of lands) {
+        l.update();
+        l.draw(ctx);
+    }
+    requestAnimationFrame(renderLoop);
+}  
+  
+}, 1000);
+
+
+
+
+		</script>
+	</body>
+<html>

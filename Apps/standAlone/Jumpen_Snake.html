@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>Jumpen_Snake</title>
+		<style>
+			canvas {
+  position : absolute;
+    border : 2px solid #aaa;
+    background : #9F9;
+  
+}
+body {
+    font-family : arial black;
+}
+h1 {
+    color : #5F2;
+    font-size : 1.6em;
+}
+h2 {
+    color : #5a2;
+    font-size : 1.2em;
+}
+		</style>
+    </head>
+    <body style = "font-family:monospace">
+		<canvas id="canvas"></canvas>
+<h1>Billy the apple eaten jumpen snake.</h1>
+<h2>Instructions</h2>
+Eat apples and grow.<br>
+Dont eat self.<br>
+Arrow keys control direction.<br>
+Right ctrl to jump over tail.
+		<script>
+			;(()=>{
+function log(data){console.log(data)}
+
+const playGame = (()=>{
+    const ctx = canvas.getContext("2d");
+    var plyField = 0;
+    canvas.height = canvas.width = (Math.min(innerWidth, innerHeight)/20|0)*20 - 8;
+  
+    //=====================================================================
+    // For small body iterations, this is 3+ times the speed of forEach loop
+    // and you can break out of it.
+    Array.prototype.qEach = function(cb) {var i = 0; while(i < this.length && cb(this[i], i++) !== true);}
+
+    //=====================================================================
+    // handles keyboard input     
+    const keys = {ControlRight : false, ArrowUp : false, ArrowDown : false, ArrowLeft : false, ArrowRight : false };
+    function keyEvents(e) {
+        if (keys[e.code] !== undefined) {
+            keys[e.code] = e.type === "keydown";
+            e.preventDefault();
+        }
+    }
+    ["keyup","keydown"].qEach(eName => addEventListener(eName, keyEvents));
+    const closeKeyboard = () => ["keyup","keydown"].qEach(eName => removeEventListener(eName, keyEvents));
+
+
+    //=====================================================================
+    // 2D point helpers 
+    const P2 = (x = 0, y = x === 0 ? 0 : x.y + (x = x.x, 0)) => ({x, y});
+    const addP2    = (p, p1) => (p.x += p1.x, p.y += p1.y, p);
+    const subP2    = (p, p1) => (p.x -= p1.x, p.y -= p1.y, p);
+    const divP2    = (p, p1) => (p.x /= p1.x, p.y /= p1.y, p);
+    const mulP2    = (p, p1) => (p.x *= p1.x, p.y *= p1.y, p);
+    const setP2    = (p, p1) => (p.x = p1.x, p.y = p1.y, p); 
+    const dotP2    = (p, p1) => p.x * p1.x + p.y * p1.y; 
+    const crossP2  = (p, p1) => p.x * p1.y - p.y * p1.x; 
+    const r90P2    = (p) => ([p.x, p.y] = [-p.y, p.x], p); 
+    const rn90P2   = (p) => ([p.x, p.y] = [p.y, -p.x], p); 
+    const revP2    = (p) => (p.x *= -1, p.y *= -1, p); 
+    const rotP2    = (p, r) => {const [x, y] = [p.x, p.y]; [p.x, p.y] = [x * r.x - y * r.y, x * r.y + y * r.x]; return p};
+    const setP2Dir = (p, dir) => (p.x = Math.cos(dir), p.y = Math.sin(dir), p);
+    const setP2xy  = (p, x, y = x) => (p.x = x, p.y = y, p);   
+    const floorP2  = (p) => (p.x |= 0, p.y |= 0, p);       
+    const lenP2    = (p) => Math.sqrt(p.x * p.x + p.y * p.y);
+    const dirP2    = (p) => Math.atan2(p.y, p.x);
+    const playP2   = (p) => (p.y < 0 ? (p.x > 0 ? (p.x += p.y) : p.x = 0) : (p.x < 1 ? (p.x += p.y) : p.x = 1), p);
+    const normP2   = (p) => { l = Math.sqrt(p.x * p.x + p.y * p.y); p.x /= l; p.y /= l; return p };
+    const modP2    = (p, p1) => (p.x = ((p.x % p1.x) + p1.x) % p1.x, p.y = ((p.y % p1.y) + p1.y) % p1.y, p);    
+    const equP2    = (p, p1) => (p.x === p1.x && p.y === p1.y);    
+    const mulP2U   = (p, s)  => (p.x *= s, p.y *= s, p);
+    const divP2U   = (p, s)  => (p.x /= s, p.y /= s, p);
+    const randIP2  = (p, p1) => (p.x = randI(0, p1.x), p.y = randI(0, p1.y), p);
+    const randI    = (min = 2, max = min + (min = 0)) => (Math.random() * (max - min) + min) | 0;
+    const rand     = (min = 1, max = min + (min = 0)) => Math.random() * (max - min) + min;   
+    const rand1In  = (odds) => Math.random() < (1 / odds);
+    const randItem = (a) => a[Math.random() * a.length | 0];
+    const randPick = (a) => a.splice(Math.random() * a.length | 0,1)[0];
+    const randPut  = (a, item) => a.splice(Math.random() * (a.length + 1) | 0, 0, item);
+    const shuffle  = (a) => {var b = [...a]; a.length = 0; while(b.length > 0){ a.push(b.splice((Math.random() * b.length) | 0, 1)[0]) }; return a };
+    const bezCurve = (x,a,b) => (x = x < 0 ? 0 : x > 1 ? 1 : x, a *= 3, b *= 3, a * x + (-2 * a + b) * x*x + (a - b + 1) * x*x*x);
+    const ease     = (v, p = 2) => Math.pow(v < 0 ? 0 : v > 1 ? 1 : v, p);
+    const sCurve   = (v, p = 2) => (2 / (1 + Math.pow(p,-v))) -1;
+    const eCurve   = (v, p = 2) =>  v < 0 ? 0 : v > 1 ? 1 : Math.pow(v, p) / (Math.pow(v, p) + Math.pow(1 - v, p));    
+    //=====================================================================
+    // general game settings
+    const settings = {
+        backgroundStyle : "black", 
+        appleStyle      : "red",
+        snakeBodyStyle  : ["#2F2","#2D2","#1A1"],
+        snakeHeadStyle  : "#0D0",
+        snakeEyesStyle  : "white",
+        snakeEyesInStyle: "#060",
+        snakeForkStyle  : "#F00",
+        cells           : P2(20, 20),  // count of cells across and down.
+        snakeStartLen   : 5, 
+        frameRate       : 5, // must be factor of 60.
+        resetFrameCount : 15, // number of frames to pause befor restart
+        appleGrowSpeed  : 0.05,  // per frame from 0 to 1
+        appleCount      : 10,
+        appleEatScale   : 1.8, // snake body scale after eating apple
+        appleEatAnim    : 30,  // frames for eat anim at full rate 60fps
+        jumpInterval    : 10,  // min frames between jumps
+        jumpScales      : [1.1, 1.4,1.6,1.4, 1.1], // used to scale jump. Last item is first in sequence
+    }
+    
+    //=====================================================================
+    // consts and vars used in game
+    var frameCounter     = 0; // counts frames use to check when to draw and update a frame
+    var currentDir; // current travel direction of snake
+    var currentAcceptedDir; // to fix the visual glitch between render frames and action frame
+    var restart          = true;
+    var waitForRestart   = 0;
+    var growCount        = 0;
+    var jump             = 0; // counts jump cycle
+    var eatCount         = 0; // for eat animating
+    var newAppleCount    = 0; // number of apples pending creation.
+    var score            = 0;
+    var addScore         = 0; //make score jump if inceased
+    var snakeDieScale    = 0; // to scale snake body at end
+    
+    const wp         = P2(); // genral purpose point
+    const eatMat     = P2(); // simple matrix for eat animation
+    const snakePath  = new Path2D();
+    const applePath  = new Path2D();
+    const snakeEyesPath = new Path2D();
+    const snakeEyesInPath = new Path2D();
+    const snakeForkPath = new Path2D();
+    const jumpCount  = settings.jumpScales.length;
+    //const canvas     = document.getElementById("snakes-canvas");
+    //const ctx        = canvas.getContext("2d");
+    const cellSize   = floorP2(divP2(P2(canvas.width, canvas.height), settings.cells)); // get size of each cell  
+    const cellHalf   = divP2U(P2(cellSize), 2);
+    const snake      = [];   // The snakes body
+    const apples     = []; // Does this realy need a comment.    
+    const applePool  = []; // pool of apple object ready for use.    
+    const newHeadPos = P2(); // the position of the new snake head 
+    const dirs       = {left : P2(-1,  0), right : P2( 1,  0), down : P2( 0,  1), up  : P2( 0, -1)};
+    
+
+    //=====================================================================
+    // Draw single rectangle 
+    const drawPath = (() => {
+        const wp = P2();  // a abstract register to hold intermediates P2 value
+        const orig = P2(); // origin
+        const mat = P2();  // Simple rotate and scale matrix
+        return (pos, color, path, dir = dirs.right) => { // dirs.right is identity matrix
+            ctx.fillStyle = color;
+            setP2(mat, dir);
+            addP2(mulP2(setP2(orig, pos), cellSize), cellSize);
+            if (pos.anim) {
+                mulP2U(mat, playP2(pos.anim).x);
+            } else if (pos.scale !== 1) {
+                mulP2U(mat, pos.scale);
+            } else {
+            }
+            mulP2U(mat,snakeDieScale);
+            ctx.setTransform(mat.x, mat.y, -mat.y, mat.x, orig.x, orig.y);
+            if(typeof path === "function"){
+                path(ctx,0,0,cellSize.x*2,cellSize.y* 2);
+                
+            }else{
+                ctx.fill(path);
+            }
+        }
+    })()
+    const drawPathShadow = (() => {
+        const wp = P2();  // a abstract register to hold intermediates P2 value
+        const orig = P2(); // origin
+        const mat = P2();  // Simple rotate and scale matrix
+        return (pos, color, path, dir = dirs.right) => { // dirs.right is identity matrix
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            setP2(mat, dir);
+            addP2(mulP2(setP2(orig, pos), cellSize), cellSize);   
+            
+            if (pos.anim) {
+                mulP2U(mat, playP2(pos.anim).x);
+            } else if (pos.scale !== 1) {
+                mulP2U(mat, pos.scale);
+            } else {
+            }
+            mulP2U(mat,snakeDieScale);
+            if(pos.jump) {
+                ctx.setTransform(mat.x, mat.y, -mat.y, mat.x, orig.x + cellHalf.x/2 * pos.jump, orig.y + cellHalf.y / 2 * pos.jump);
+            }else{
+                ctx.setTransform(mat.x, mat.y, -mat.y, mat.x, orig.x + cellHalf.x/2, orig.y + cellHalf.y / 2);
+            }
+            if(typeof path === "function"){
+                path(ctx,0,0,cellSize.x*2,cellSize.y* 2);
+                
+            }else{
+                ctx.fill(path);
+            }
+        }
+    })()
+    
+    
+    //=====================================================================
+    // Draw all graphics    
+    function drawAll() {    
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // set default transform
+        ctx.fillStyle = settings.backgroundStyle;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);      
+        const colors = settings.snakeBodyStyle.length;
+        var snakeSize = snake.length;
+        var dieScale = 1;
+        if(restart){
+            dieScale = waitForRestart / settings.resetFrameCount;
+        }
+        var i = 1;
+        snakeDieScale = 1;
+        for (const apple of apples) { 
+            drawPathShadow(apple, settings.appleStyle, applePath);
+        }
+        for (const apple of apples) { 
+            drawPath(apple, settings.appleStyle, applePath);
+        }
+        
+        snakeDieScale = dieScale;
+
+        while (i < snake.length) { 
+            const bod = snake[i]
+            drawPathShadow(bod, settings.snakeBodyStyle[(i-1) % colors], snakePath);
+            i++;
+
+        }
+        var keepScale = snake[0].scale;
+        snake[0].scale *= 2.2;
+        
+        drawPathShadow(snake[0], settings.snakeHeadStyle, snakePath);
+        drawPathShadow(snake[0], settings.snakeEyesStyle, snakeEyesPath, currentAcceptedDir);
+        drawPathShadow(snake[0], settings.snakeEyesInStyle, snakeEyesInPath, currentAcceptedDir);        
+        snake[0].scale = keepScale;
+        i = 0;
+        while (i < snake.length) { 
+            const bod = snake[i]
+            drawPath(bod, settings.snakeBodyStyle[(i-1) % colors], snakePath);
+            if(bod.apple){
+                bod.scale -= (settings.appleEatScale - 1) / (snakeSize * (60 / settings.frameRate));
+                if(bod.scale <= 1){
+                    bod.apple = false;
+                    bod.scale = 1;
+                }
+            }
+            i++;
+
+        }
+        var keepScale = snake[0].scale;
+        snake[0].scale *= 2.2;
+        
+ 
+        if(eatCount > 0){
+            const rot = (eatCount / settings.appleEatAnim) * 2 - 1;
+            const scale = Math.sin((eatCount / settings.appleEatAnim) * Math.PI)+ 0.5;
+            mulP2U(rotP2(setP2(eatMat,currentAcceptedDir),setP2Dir(wp,rot)),scale);
+            eatCount -= 1;
+            drawPath(snake[0], settings.snakeForkStyle, snakeForkPath, eatMat);
+        }
+        drawPathShadow(snake[0], settings.snakeEyesStyle, snakeEyesPath, currentAcceptedDir);
+        drawPath(snake[0], settings.snakeHeadStyle, snakePath);
+        drawPath(snake[0], settings.snakeEyesStyle, snakeEyesPath, currentAcceptedDir);
+        drawPath(snake[0], settings.snakeEyesInStyle, snakeEyesInPath, currentAcceptedDir);
+        snake[0].scale = keepScale;
+        var scoreScale = 1 + addScore / 10;
+        ctx.setTransform(scoreScale,0,0,scoreScale,cellSize.x/4,cellSize.y*2.5);
+        if(addScore > 0){
+            addScore -= 1;
+        }
+        
+        ctx.fillStyle = settings.appleStyle;
+        ctx.fillText(score,0,0)
+    }
+    
+    //=====================================================================
+    // Create apple at valid position (not on snake)
+    const randomApple = (apple) => {
+        var looking = true; // while looking for a pos
+        while (looking) {
+            retry : {
+                looking = false;
+                randIP2(apple, settings.cells);
+                for (const ap of apples) {  // check is on other apple
+                    if(ap !== apple && equP2(ap, apple)){
+                        looking = true; // try again
+                        break retry;
+                    }
+                }
+                for (const part of snake) {  // check is on snake
+                    if(equP2(part, apple)) {
+                        looking = true; // try again
+                        break; 
+                    } 
+                }
+                if(apple.x < 4 && apple.y < 3){
+                    looking = true; // try again
+                }
+                
+            }
+        }
+        if (apple.anim) { setP2xy(apple.anim, 0, settings.appleGrowSpeed) }
+        else { apple.anim = P2(0, settings.appleGrowSpeed) }
+        return apple;
+    }
+
+
+    //=====================================================================
+    // Move snake head along current direction. Checks for apple and head body    
+    function moveSnakeHead() {
+        // from current head move in current direction and keep in bounds 
+        modP2(addP2(setP2(newHeadPos, snake[0]), currentDir), settings.cells);
+        newHeadPos.apple = false;
+        if(jump > settings.jumpInterval - jumpCount){
+            const jpos = jump - (settings.jumpInterval - jumpCount+1);
+            newHeadPos.scale = settings.jumpScales[jpos];
+            newHeadPos.jump = newHeadPos.scale;
+        }else{
+            newHeadPos.scale = 1;
+            newHeadPos.jump = 0;
+            newHeadPos.apple = false;
+            // Check for apple
+            for (let i = 0; i < apples.length; i++) {
+                const apple = apples[i];
+                if (equP2(newHeadPos, apple)) {
+                    growCount += 1;
+                    score += 1;
+                    addScore += 2;
+                    newHeadPos.scale = settings.appleEatScale;
+                    newHeadPos.apple = true;
+                    eatCount = settings.appleEatAnim;
+                    newAppleCount += 1;
+                    applePool.push(apples.splice(i,1)[0]);
+                }
+            }
+            // check head body
+            for (let i = 1; i < snake.length; i++) {
+                if (equP2(newHeadPos,snake[i])) { 
+                    restart = true;
+                    break;
+                }
+            }   
+        }
+        if(newAppleCount && rand1In(10)){
+            apples.push(randomApple(applePool.pop()));
+            newAppleCount --;
+        }
+        // move if not restart
+        if (!restart) { 
+            if (growCount) { 
+                const head = P2(newHeadPos);
+                head.scale = newHeadPos.scale;
+                head.jump = newHeadPos.jump;
+                head.apple = newHeadPos.apple;
+                snake.unshift(head) 
+                growCount--;
+            } else { 
+                const tail = snake.pop();
+                tail.scale = newHeadPos.scale;
+                tail.jump = newHeadPos.jump;
+                tail.apple = newHeadPos.apple;
+                snake.unshift(setP2(tail, newHeadPos)) 
+                
+            }
+            jump -= jump ? 1 : 0;
+        }
+    }      
+    
+    //=====================================================================
+    // Check input and update direction    
+    function checkInput() {
+        if (keys.ArrowUp && currentDir !== dirs.down) { currentDir = dirs.up }
+        if (keys.ArrowDown && currentDir !== dirs.up) { currentDir = dirs.down }
+        if (keys.ArrowLeft && currentDir !== dirs.right) { currentDir = dirs.left }
+        if (keys.ArrowRight && currentDir !== dirs.left) { currentDir = dirs.right }        
+        keys.ArrowRight = keys.ArrowLeft = keys.ArrowDown = keys.ArrowUp = false;
+        if (keys.ControlRight && jump === 0) { 
+            jump = settings.jumpInterval;
+            keys.ControlRight = false;
+        }
+    }
+    
+    //=====================================================================
+    // Restart the game
+    function gameRestart() {
+        var i = 0;
+        newAppleCount = settings.appleCount;
+        while(i++ < newAppleCount){
+            applePool.push(randomApple(P2()));            
+        }
+        apples.length = 0;
+        snake.length = 0;
+        growCount = settings.snakeStartLen - 1;
+        snake.push(floorP2(divP2U(P2(settings.cells), 2)));// get center cell pos
+        snake[0].scale = 1;
+        restart = false;
+        currentAcceptedDir = currentDir = dirs.left;  
+        jump = 0;
+        score = 0;
+        ctx.font = (cellSize.y*3 | 0) + "px arial black"
+    }
+    
+    //=====================================================================
+    // The main render loop that contols the game    
+    function mainLoop(time) {
+        checkInput(); // call this every frame as 15fps might miss a quick tap
+        if(plyField !== innerWidth * innerHeight){
+            plyField = innerWidth * innerHeight;
+            canvas.style.top = ((innerHeight - canvas.height) / 2 | 0) + "px";
+            canvas.style.left = ((innerWidth - canvas.width) / 2 | 0) + "px";
+        }
+        requestAnimationFrame(mainLoop);
+        if (frameCounter % (60 / settings.frameRate)) { // skip frames to maintain frame rate
+            drawAll();
+            frameCounter ++;
+            return;
+        }
+        frameCounter ++;
+        currentAcceptedDir = currentDir;
+        if (restart) {  
+            if (waitForRestart === 0) { waitForRestart = settings.resetFrameCount }
+            waitForRestart -= 1;
+            if (waitForRestart <= 0) { gameRestart() }
+        } else {  
+            moveSnakeHead();    
+        }
+        drawAll();
+    }
+
+    function createImages(){
+        const w = cellSize.x / 2;
+        const h = cellSize.y / 2;
+        const x = -cellSize.x / 2;
+        const y = -cellSize.y / 2;
+        const eyeSize = - x / 2;
+        const eyeSizeIn = - x / 3;
+        const eyeP = - x/3 ;
+        snakePath.rect(x, y, -x * 2, -y * 2);
+        snakeEyesPath.arc(x / 3, y , eyeSize, 0,Math.PI * 2);
+        snakeEyesPath.moveTo(x / 3 + eyeSize, -y );
+        snakeEyesPath.arc(x / 3, -y , eyeSize, 0,Math.PI * 2);
+        snakeEyesInPath.arc(x / 2 + eyeP , y , eyeSizeIn, 0,Math.PI * 2);
+        snakeEyesInPath.moveTo(x / 2 + eyeSizeIn + eyeP, -y );
+        snakeEyesInPath.arc(x / 2 + eyeP, -y , eyeSizeIn, 0,Math.PI * 2);
+ 
+        applePath.rect(x, y, -x * 2, -y * 2);
+        
+        var f = snakeForkPath;
+        f.moveTo(0,0);
+        f.lineTo(w * 2,-h / 4);
+        f.lineTo(w * 2.2,-h / 3);
+        f.lineTo(w * 1.5,0);
+        f.lineTo(w * 2.2,h / 3);
+        f.lineTo(w * 2,h / 4);
+        f.closePath();
+    }
+    return () => {
+        createImages();
+        gameRestart()
+        requestAnimationFrame(mainLoop);
+    };
+})();
+playGame();
+
+
+
+})();
+		</script>
+	</body>
+<html>
