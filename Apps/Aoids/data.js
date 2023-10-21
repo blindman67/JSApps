@@ -71,7 +71,17 @@ const data = {
                 ["Fire a few rounds (left mouse button) to continue", "fire"],
                 "To turn your ship will face towards your mouse.",
                 ["Turn you ship 360 deg twice to continue.", "turn"],
+                "Your game will start after a few messages.",
                 "You have limited fuel to power your ship.",
+                "Right click to fire thrusters.",
+                "Gather resources by blasting rocks.",
+                "Land on asteroid to build a base.",
+                "Take off (right button hold) and blast rocks",
+                "Gather resources and protect your base.",
+                "Return to base to upgrade ship and extend your base.",
+                "Rocks are slowly spiraling in!! Defend your base.",
+                "Get ready to start",
+
             ],
         }
 
