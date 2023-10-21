@@ -171,21 +171,25 @@ const soundSettings = {
 soundSettings.COLLISION_FREQ_SPREAD = colors.map(()=> Math.random() * soundSettings.collideFreqSpread + 1 - soundSettings.collideFreqSpread * 0.5);
 var soundPlayCount = 0
 var soundsReady = false, channelReadyCount = 0;
-const synth = StartAudio();
-synth.volume = soundSettings.masterVol;
-const soundIFX = synth.loadSounds("InstancedSoundFX",() => {
-	console.log("InstancedSoundFX ready");
-	channelReadyCount++;
-	soundsReady = channelReadyCount === 2;
-	soundIFX.init(balls.length);
-	
-}, ...soundSettings.instancedSounds);
-const soundFX = synth.loadSounds("SoundFX",() => {
-	console.log("SoundFX ready");
-	channelReadyCount++;
-	soundsReady = channelReadyCount === 2;
-	soundFX.init();
-}, ... soundSettings.sounds);
+var synth, soundIFX, soundFX;
+function DelayAudioStart() {
+    synth = StartAudio();
+    synth.volume = soundSettings.masterVol;
+    soundIFX = synth.loadSounds("InstancedSoundFX",() => {
+        console.log("InstancedSoundFX ready");
+        channelReadyCount++;
+        soundsReady = channelReadyCount === 2;
+        soundIFX.init(balls.length);
+        
+    }, ...soundSettings.instancedSounds);
+    soundFX = synth.loadSounds("SoundFX",() => {
+        console.log("SoundFX ready");
+        channelReadyCount++;
+        soundsReady = channelReadyCount === 2;
+        soundFX.init();
+    }, ... soundSettings.sounds);
+    console.log("Sound started");
+}
 
 var ctx;
 const canvas = $("canvas", {className: "mainCanvas", width: innerWidth, height: innerHeight});
@@ -243,6 +247,9 @@ const defaultPlayer = {
     CUE_LIGHT_COLOR: "#CB6",
     CUE_JOIN_COLOR: "#CA2",
 };
+
+
+document.addEventListener('mousedown', DelayAudioStart, {once: true});
 
 /*var firstHit = 0;
 const game = {
