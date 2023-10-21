@@ -153,16 +153,16 @@ const soundSettings = {
 	masterVol: 1,
 	sounds: [
 	  ["cueHit","CueHitLowQ.ogg"],
-	  ["pocket","pocketLowQ.ogg"],
-	  ["pocket2","pocketLowQ2.ogg"],
+	  ["pocket","PocketLowQ.ogg"], 
+	  ["pocket2","PocketLowQ2.ogg"],
 	],
 	instancedSounds: [
 	  ["baLLCollide","BaLLCollideLowQ.ogg"],
 	],
 	soundsHigh: [
 	  ["cueHit","CueHitMono1.ogg"],
-	  ["pocket","pocket.ogg"],
-	  ["pocket2","pocket2.ogg"],
+	  ["pocket","Pocket.ogg"],
+	  ["pocket2","Pocket2.ogg"],
 	],
 	instancedSoundsHigh: [
 	  ["baLLCollide","BaLLCollideMono1.ogg"],
