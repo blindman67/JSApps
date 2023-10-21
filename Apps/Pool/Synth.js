@@ -1,7 +1,7 @@
+/* Deactivated compressor, convolver, filter and wetGain in this version of Synth.js */
+/* Only has channels InstancedSoundFX and SoundFX */
 
 const StartAudio = (() => {  
-	/* Deactivated compressor, convolver, filter and wetGain in this version of Synth.js */
-	/* Only has channels InstancedSoundFX and SoundFX */
 	var atx, currentVolume = 0, gain;
 	async function loadSampleBuffer(atx, url) { return await atx.decodeAudioData(await (await fetch(url)).arrayBuffer()) }
 	const envelopeTypes = {
@@ -31,32 +31,33 @@ const StartAudio = (() => {
 		if (envelopeTypes[type]) { return envelopeTypes[type](shape) }
 	}
 	const EnvP = (level, time) => ({level, time});
-	const envelopes = [createEnvelope("timeScale", [EnvP(1, 0)]), createEnvelope("flat")];
+	const envelopesIndexed = [createEnvelope("flat"), createEnvelope("timeScale", [EnvP(1, 0)])];
+	const envelopes = Object.freeze({fade: 1,  flat: 0});
+	
 	const channelTypes = {
 		InstancedSoundFX(samples) { // Sounds by id. Sound can be stopped using Play.stop Play.stopAll, or when new sound played with same id.
-								 // To keep resource use low limit soundCount
+								  // To keep resource use low limit soundCount
 			var canPlay = false, soundCount = 0;		
 			const active = []; 
 			const ended = idx => () => active[idx] = undefined;
-			const play = Object.assign(function (idx, name, time, duration = 0, vol = 1, freqScale = 1, panPos = 0, eIdx = 1, loop = false) {            
+			const play = Object.assign(function (idx, name, time, duration = 0, vol = 1, freqScale = 1, panPos = 0, eIdx = envelopes.flat, loop = false) {            
 				if (canPlay && idx >= 0 && idx < soundCount) {
 					active[idx]?.stop();
 					active[idx] = undefined;
-					const buffer = samples[name];
-					const startNow = time === 0;
-					time = atx.currentTime + time;
-					var stopTime = time + (duration === 0 ? buffer.duration : duration);
-					stopTime = Math.min(stopTime, time + buffer.duration * freqScale);
+					const startTime = atx.currentTime + time;
+					const buffer = samples[name];					
+					const maxDur = buffer.duration * freqScale;
+					const stopTime = Math.min(startTime + (duration === 0 ? maxDur : duration), startTime + maxDur);
 					const sample = atx.createBufferSource();
 					const pan = atx.createStereoPanner();
 					pan.pan.value = Math.min(1, Math.max(-1, panPos));
 					sample.buffer = buffer;
 					sample.loop = loop;
 					sample.playbackRate.value = 1 / freqScale;
-					const env = envelopes[eIdx](atx, vol, time, stopTime - 0.005);
+					const env = envelopesIndexed[eIdx](atx, vol, startTime, stopTime - 0.005);
 					sample.connect(env).connect(pan).connect(gain);
-					sample.addEventListener("ended", ended(idx), {once: true});
-					startNow ? sample.start() : sample.start(time);
+					sample.onended = ended(idx);  // faster than sample.addEventListener
+					time ? sample.start(startTime) : sample.start();
 					sample.stop(stopTime);
 					active[idx] = sample;
 				}
@@ -82,22 +83,21 @@ const StartAudio = (() => {
 		},
 		SoundFX(samples) {
 			var canPlay = false;		
-			const play = Object.assign(function (name, time, duration = 0, vol = 1, freqScale = 1, panPos = 0, eIdx = 1, loop = false) {            
+			const play = Object.assign(function (name, time, duration = 0, vol = 1, freqScale = 1, panPos = 0, eIdx = envelopes.flat, loop = false) {            
 				if (canPlay) {
-					const buffer = samples[name];
-					const startNow = time === 0;
-					time = atx.currentTime + time;
-					var stopTime = time + (duration === 0 ? buffer.duration : duration);
-					stopTime = Math.min(stopTime, time + buffer.duration * freqScale);
+					const startTime = atx.currentTime + time;
+					const buffer = samples[name];					
+					const maxDur = buffer.duration * freqScale;
+					const stopTime = Math.min(startTime + (duration === 0 ? maxDur : duration), startTime + maxDur);
 					const sample = atx.createBufferSource();
 					const pan = atx.createStereoPanner();
 					pan.pan.value = Math.min(1, Math.max(-1, panPos));
 					sample.buffer = buffer;
 					sample.loop = loop;
 					sample.playbackRate.value = 1 / freqScale;
-					const env = envelopes[eIdx](atx, vol, time, stopTime - 0.005);
+					const env = envelopesIndexed[eIdx](atx, vol, startTime, stopTime - 0.005);
 					sample.connect(env).connect(pan).connect(gain);
-					startNow ? sample.start() : sample.start(time);
+					time ? sample.start(startTime) : sample.start();
 					sample.stop(stopTime);
 				}
 			},{
@@ -127,16 +127,17 @@ const StartAudio = (() => {
 			}			
 			return channelTypes[type](samples);
 		},
+		envelopeIdByName(name) { return envelopes[name] ?? 0 },
 		reset() {},
 	};
 
-	function StartAudio() {
+	function StartAudio(volume = 1) {
 		if (atx) { return }
 		Synth.atx = atx = new AudioContext();
 		gain = atx.createGain();
 		gain.connect(atx.destination);
 		Synth.reset();
-		Synth.volume = 1;
+		Synth.volume = Math.min(1, Math.max(0, volume));
 		return Synth;
 	}
 	return StartAudio;

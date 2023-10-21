@@ -1,3 +1,14 @@
+/*
+Version 1.01
+17-9-2023
+    1. Added bad bounce indication when guides interact with pockets. Bounce is way too chaotic and incorrect guide prediction will frustrate player so now shows red fan off pocket edges rather than line.
+       Added BAD_BOUNCE_SIZE and  BAD_BOUNCE_SPREAD constants 
+       
+    2. Extended guide distance and added constant GUIDE_DISTANCE
+    
+
+
+*/
 import {$, $$, $R} from "../../src/DOM/geeQry.jsm";
 import {startMouse} from "../../src/DOM/mouse.jsm";
 import {simpleKeyboard} from "../../src/DOM/keyboard.jsm";
@@ -9,15 +20,25 @@ const keyboard = simpleKeyboard();
 keyboard.addKey("KeyA", "KeyS", "KeyD", "KeyW", "KeyN", "KeyP", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit0");
 const keys = keyboard.keys;
 mathExt(); // creates some additional math functions
-var allowSpinControl = true;//false;
-
-var slowDevice = false;
-const HAS_GAME_PLAY_API = false;
 const setup = location.href.split("?")[1]?.toLowerCase() ?? "";
+var allowSpinControl = true;//setup.includes("spin");//true;//false;
+var slowDevice = false;
+const renderSetup = setup.split("render[")[1]?.split("]")[0].split("_") ?? [];
+const RENDER_COMPLEX_BALLS = !renderSetup.includes("noshade");
+const HAS_GAME_PLAY_API = false;
+const RENDER_REFLEX = !renderSetup.includes("noreflect");//true && RENDER_COMPLEX_BALLS; // if true render aproximation of ball ball reflections
+
 const [tableName, sGuides, sGuideComplex] = [setup.split("_")[0], setup.includes("guides"), setup.includes("complex") ];
 const SHOW_GUIDES = sGuides;  // Show detailed guide
 const SHOW_FIRST_CONTACT_ONLY = !sGuideComplex; // if SHOW_GUIDS then only to first contact ball. Else traces first ball as well
-const POCKET_ROLL_IN_HELP = setup.includes("easy") ? 0.4 : setup.includes("standard") ? 0.2 : 0;   // Difficulty. Smaller harder to sink
+const POCKET_ROLL_IN_HELP = 0.2;   
+
+console.log("URL options: underscore seperated options.");
+console.log("Table size one of 'small, medium, standard, large, huge, super'");
+console.log("Options `guides_complex`");
+console.log("Render options `render[noshade_noreflect]`");
+
+
 const tables = {
     small: {w: 38, h: 19}, 		// 7ft
     medium: {w: 44, h: 22}, 		// 8ft
@@ -36,14 +57,17 @@ const INSET = CUSH_SIZE_X * 3.5;
 const TABLE_DIMOND_SIZE = CUSH_SIZE_X * 0.2;
 const TABLE_CANVAS_SIZE = {width: CUSH_SIZE_X * CUSH_W + INSET * 2, height: CUSH_SIZE_Y * CUSH_H + INSET * 2}
 const TABLE_SCALE = (innerWidth * (2/3)) / TABLE_CANVAS_SIZE.width;
-
+const BALL_BALL_COEF_RESTITUTION = 0.92; // 0.92 old dead balls 0.98 new springy balls
+const BALL_RAIL_COEF_RESTITUTION = 0.6; // 0.6 old dead table 0.9 new springy table
+const BALL_CLOTH_COEF_OF_ROLL = 0.0125; // between 0.005 and 0.015. This is an estimate full sim of ball roll not implemented
+const BALL_CLOTH_COEF_OF_ROLL_A = 1 - BALL_CLOTH_COEF_OF_ROLL;
 const BALL_SIZE = CUSH_SIZE_X ;
 const BALL_SIZE_SQR = BALL_SIZE * BALL_SIZE;
 const MASS_SCALE =  CUSH_REFERENCE_SIZE / CUSH_SIZE_X;
+const BALL_MASS_SCALE = 1;
 const BALL_MASS =  4 / 3 * Math.PI * (BALL_SIZE ** 3) * MASS_SCALE;
 const POCKET_SIZE = 1.76;   // in cush units
 const POCKET_ROLL_IN_SCALE = 1.3;  // scales size of pocket roll
-
 
 const POCKET_SIZE_PX = POCKET_SIZE * BALL_SIZE;
 const MARK_SIZE = BALL_SIZE * (200 / 256);  // radius of white part of ball
@@ -53,10 +77,15 @@ const MOUSE_TIP = BALL_SIZE / 6;
 const MOUSE_END = BALL_SIZE / 3;
 const TABLE_MARK_COLOR = "#ADB8";
 const TABLE_MARK_LINE_WIDTH = 3;
+const GUIDE_DISTANCE = 3000;  // When guides on approx length of guides
+const BAD_BOUNCE_SIZE = BALL_SIZE * 5;  // Size of bad bounce guide
+const BAD_BOUNCE_SPREAD = BALL_SIZE * 1;  // Angle width in pixels of bad bounce guide
 
-const TABLE_COLOR = "#080";
+const TABLE_COLOR = "#080";  // Must short CSS hash color.
 const TABLE_COLORS = ["#2A3","#293","#283","#273", "#263"];
+//const WHITE_BALL = "#D8D6D4";
 const WHITE_BALL = "#D8D6D4";
+const WHITE_BALL_SCUFF = "#D4D6D8";
 const SHADOW_COLOR = "#0004";
 const LIGHT_COLOR_LOW = "#FFF4";
 const LIGHT_COLOR = "#FFF6";
@@ -96,6 +125,7 @@ const colors = [ // by ball idx in rack order
    BALL_COLORS.yellow, BALL_COLORS.blue, BALL_COLORS.red, BALL_COLORS.purple,  BALL_COLORS.green, BALL_COLORS.brown,   BALL_COLORS.orange,
    BALL_COLORS.yellow, BALL_COLORS.blue, BALL_COLORS.red, BALL_COLORS.purple,  BALL_COLORS.green, BALL_COLORS.brown,   BALL_COLORS.orange,
 ];
+const BALL_COUNT = colors.length;
 const PW = POCKET_SIZE * 1.4, PW1 = POCKET_SIZE * 1.2, PW11 = POCKET_SIZE * 1.1, PW2 = POCKET_SIZE;
 const PC = CUSH_W / 2, PI = 0.1, PI1 = 0.3, PI11 = 0.45, PI3 = 0.6;
 const cush = [ // cushion pairs of coordinates forming top left corner (top left pocket and half top center pocket
@@ -136,7 +166,9 @@ const soundSettings = {
 	],
 	instancedSoundsHigh: [
 	  ["baLLCollide","BaLLCollideMono1.ogg"],
-	],};
+	],
+}
+soundSettings.COLLISION_FREQ_SPREAD = colors.map(()=> Math.random() * soundSettings.collideFreqSpread + 1 - soundSettings.collideFreqSpread * 0.5);
 var soundPlayCount = 0
 var soundsReady = false, channelReadyCount = 0;
 const synth = StartAudio();
@@ -155,15 +187,23 @@ const soundFX = synth.loadSounds("SoundFX",() => {
 	soundFX.init();
 }, ... soundSettings.sounds);
 
-
 var ctx;
 const canvas = $("canvas", {className: "mainCanvas", width: innerWidth, height: innerHeight});
 const gameCanvas = $("canvas", TABLE_CANVAS_SIZE);
 const overlay = $("canvas", TABLE_CANVAS_SIZE);
 const sprites = $("canvas", {width: BALL_SIZE * 8, height: BALL_SIZE * 3});
+const pocketed = $("canvas", {width: BALL_SIZE * 16 * 2, height: BALL_SIZE * 3});
 const ctxMain = canvas.getContext("2d");
 const ctxGame = ctx = gameCanvas.getContext("2d");
 const spriteCtx = sprites.getContext("2d");
+const pCtx = pocketed.getContext("2d");
+const badBounceFill = ctx.createRadialGradient(0,0, 0, 0,0, BAD_BOUNCE_SIZE);
+badBounceFill.addColorStop(0,  "#F00F");
+badBounceFill.addColorStop(0.7,"#8008");
+badBounceFill.addColorStop(1,  "#8000");
+
+var pocketPos = 0;
+var pocketedBalls = [];
 sprites.layout = {};
 if  (HAS_GAME_PLAY_API) {
     const gameInfo = $$(
@@ -203,8 +243,6 @@ const defaultPlayer = {
     CUE_LIGHT_COLOR: "#CB6",
     CUE_JOIN_COLOR: "#CA2",
 };
-
-
 
 /*var firstHit = 0;
 const game = {
@@ -452,9 +490,6 @@ const game = {
 const game = undefined; // This has be removed from code pen version
 const GAME_TOP = (canvas.height - TABLE_CANVAS_SIZE.height * TABLE_SCALE) / 2;
 const GAME_LEFT = (canvas.width - TABLE_CANVAS_SIZE.width * TABLE_SCALE) / 2;
-
-
-
 // mouse AKA que
 const mouse = Object.assign(startMouse(true, true), {
     pull: 0,
@@ -487,7 +522,8 @@ var fineAngleStart = 0;
 var fineAngle = 0;
 var runToStop = 1;
 var frameCount = 0;
-const balls = [], lines = [], pockets = [], contacts = [], positionSaves = [[],[],[],[]];
+const allBalls = new Array(BALL_COUNT).fill(), balls = new Array(BALL_COUNT).fill();
+const lines = [], pockets = [], contacts = [], positionSaves = [[],[],[],[]];
 setTimeout(() => {
     createSprites();
     tableEdge = createTable();  // returned is path2d so corners can be transparent
@@ -499,7 +535,7 @@ setTimeout(() => {
     }
 }, 0);
 
-function Line(x1,y1,x2,y2) {
+function Line(x1, y1, x2, y2, isPocket) {
     this.isBehindPocket =
         (x1 < TABLE_LEFT - CUSH_SIZE_X * 1 || y1 < TABLE_TOP - CUSH_SIZE_Y * 1 || y1 > TABLE_BOTTOM + CUSH_SIZE_Y * 1 || x1 > TABLE_RIGHT + CUSH_SIZE_X * 1) &&
         (x2 < TABLE_LEFT - CUSH_SIZE_X * 1|| y2 < TABLE_TOP - CUSH_SIZE_Y * 1|| y2 > TABLE_BOTTOM + CUSH_SIZE_Y * 1 || x2 > TABLE_RIGHT + CUSH_SIZE_X * 1);
@@ -516,6 +552,7 @@ function Line(x1,y1,x2,y2) {
     this.vy = this.y2 - this.y1;
     this.lenInv = 1 / (this.vx * this.vx + this.vy * this.vy) ** 0.5;
     this.u = 0;
+    this.isPocket = isPocket;
 }
 Line.prototype = {
     intercept(ball) { // only if ball approching from right side (as if standing on start looking to end). Undefined if no intercept
@@ -548,6 +585,21 @@ Line.prototype = {
         }
     }
 }
+/*class SubPos {
+    x = 0;
+    y = 0;
+    vx = 0;
+    vy = 0;
+    time = 0;
+    constructor(x, y, vx, vy, time) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.time = time;
+    }
+    
+};*/
 function Ball(x, y, id) {
     this.x = x;
     this.y = y;
@@ -563,6 +615,13 @@ function Ball(x, y, id) {
     this.dead = false;
     this.hold = false;
 	this.dark = 0;
+    this.alpha = 1;
+    /*this.movement = [];*/
+	if (RENDER_REFLEX) {
+		this.closeIdx = [];
+		this.closeCount = 0;
+		this.addClose = false;
+	}
     if (this.id === 0) {
         this.startX = this.x;
         this.startY = this.y;
@@ -584,20 +643,20 @@ Ball.prototype = {
         const sSqr = vx * vx + vy * vy, speed = sSqr ** 0.5;
         const tSqr = sSqr / TABLE_SCALE, tSpeed = speed / TABLE_SCALE;
         if (tSpeed > 0.1) {
-
             if (tSpeed < 4) {
-                da = (tSqr * (4.5 + 9 * 4 - tSqr)) / BALL_MASS;
+                da = (tSqr * (4.5 + 9 * 4 - tSqr)) / (BALL_MASS * BALL_MASS_SCALE);
             } else {
-                da = (tSqr * 4.5) / BALL_MASS;  // accel due to drag
+                da = (tSqr * 4.5) / (BALL_MASS * BALL_MASS_SCALE);  // accel due to drag
             }
             const nx = vx / speed;
             const ny = vy / speed;
             this.vx -= nx * da;
             this.vy -= ny * da;
-            //this.vx *= 0.993;
-            //this.vy *= 0.993;
-            this.vx *= 0.985;
-            this.vy *= 0.985;
+            //this.vx *= 0.985;
+            //this.vy *= 0.985;
+            
+            this.vx *= BALL_CLOTH_COEF_OF_ROLL_A;
+            this.vy *= BALL_CLOTH_COEF_OF_ROLL_A;
         } else {
             this.vx *= 0.9;
             this.vy *= 0.9;
@@ -655,23 +714,19 @@ Ball.prototype = {
     },
     downPocket() {
 		const soundPan =  ((this.x - TABLE_LEFT) / (TABLE_RIGHT - TABLE_LEFT)) * 2 - 1;
-		
         this.x = this.startX - 10000;
-        this.y = this.startY;
+        this.y = this.startY - 10000;
         game && (game.pocketed = this);
         this.vx = 0;
         this.vy = 0;
-		
         if (this.id === 0) {
-			
 			!this.hold && soundsReady && soundFX(
 				(Math.random() < 0.5 ? "pocket" : "pocket2"), 
 				0, 0, 
-				Math.max(soundSettings.pocketMinVol, Math.min(1, this.speed / soundSettings.pocketSpeedNorm)),  
+				Math.max(soundSettings.pocketMinVol, Math.min(0.5, this.speed / soundSettings.pocketSpeedNorm)),  
 				Math.random() * soundSettings.pocketFreqSpread + 1 - soundSettings.pocketFreqSpread / 2,
 				soundPan,
 			);
-
             this.hold = true;
             this.vx = 0;
             this.vy = 0;
@@ -679,14 +734,17 @@ Ball.prototype = {
             this.spin = 0;
         } else  {
             this.dead = true;
+			const pCtx = pocketed.getContext("2d");
+			this.addClose = false;
+			pocketedBalls.push(this);
+			drawPocketed();
 			soundsReady && soundFX(
 				(Math.random() < 0.5 ? "pocket" : "pocket2"), 
 				0, 0, 
-				Math.max(soundSettings.pocketMinVol,Math.min(1, this.speed / soundSettings.pocketSpeedNorm)), 
+				Math.max(soundSettings.pocketMinVol, Math.min(1, this.speed / soundSettings.pocketSpeedNorm)), 
 				Math.random() * soundSettings.pocketFreqSpread + 1 - soundSettings.pocketFreqSpread / 2,
 				soundPan,
 			);
-
         }
 		this.dark = 0;
     },
@@ -732,8 +790,72 @@ Ball.prototype = {
         ctx.setTransform(scale,0,0,scale, this.x + offX,  this.y + offY);
         ctx.drawImage(sprites, spr.x, spr.y, w, h, - w / 2,  - h / 2, w, h);
     },
+    /*drawSpriteBlur(spr, offX, offY, scale = 1) {
+        var x = this.x;
+        var y = this.y;
+
+        var vx = this.vx;
+        var vy = this.vy;       
+
+        this.alpha = 0.07;
+        var t = 0;
+        
+        this.x = x - vx;
+        this.y = y - vy;
+
+        
+        this.render()
+        while (t <= 1.05) {
+            t += 0.1;
+            this.x = x - vx + vx * t;
+            this.y = y - vy + vy * t;      
+            ctx.globalAlpha = this.alpha;            
+            this.drawSprite(spr, offX, offY, scale)
+            
+        }
+        
+        this.alpha = 1;
+        this.x = x;
+        this.y = y;
+        ctx.globalAlpha = this.alpha;
+
+    },    
+    renderBlur() {
+        var x = this.x;
+        var y = this.y;
+        var z = this.z;
+        var vx = this.vx;
+        var vy = this.vy;       
+
+        this.alpha = 0.2;
+        var t = 0;
+        
+        this.x = x - vx;
+        this.y = y - vy;
+        this.z = z;
+        this.vx = vx;
+        this.vy = vy;
+        
+        this.render()
+        while (t <= 1.05) {
+            t += 0.1;
+            this.x = x - vx + vx * t;
+            this.y = y - vy + vy * t;            
+            this.render()
+            
+        }
+        
+        this.alpha = 1;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.vx = vx;
+        this.vy = vy;
+        
+    },*/
     render(scale = 1) {
         var cx, cy, cz;
+        ctx.globalAlpha = this.alpha;
         if (this.id === 0) {
             ctx.fillStyle = this.col;
             ctx.beginPath();
@@ -755,27 +877,71 @@ Ball.prototype = {
                 this.drawSection(c.x,c.y,c.z, MARK_SIZE_S)
             }
         } else if (allowSpinControl){
-            this.drawSection(c.x,c.y,c.z, BALL_SIZE * 0.2, "#cdf")
-            this.drawSection(cS.x,cS.y,cS.z, BALL_SIZE * 0.2, "#CCf")
+            this.drawSection(c.x,c.y,c.z, BALL_SIZE * 0.2, WHITE_BALL_SCUFF);
+            this.drawSection(cS.x,cS.y,cS.z, BALL_SIZE * 0.2, WHITE_BALL_SCUFF);
         }
+		
 		const OVER_SCALE = 1.1;
-		ctx.globalCompositeOperation = "multiply";
-		this.drawSprite(sprites.layout.shade, 0, 0, scale * OVER_SCALE * 0.9);
-		ctx.globalCompositeOperation = "lighter";
-		ctx.globalAlpha = 1/1.5;
-		this.drawSprite(sprites.layout.light, 0, 0, scale * OVER_SCALE);
-		ctx.globalAlpha = 1;
-		this.drawSprite(sprites.layout.spec, 0, 0, scale * OVER_SCALE);
+		if (RENDER_COMPLEX_BALLS) {
+            ctx.globalAlpha = this.alpha;
+			ctx.globalCompositeOperation = "multiply";
+			this.drawSprite(sprites.layout.shade, 0, 0, scale * OVER_SCALE * 0.9);
+			ctx.globalCompositeOperation = "lighter";
+			ctx.globalAlpha = 1/3 * this.alpha;
+			this.drawSprite(sprites.layout.light, 0, 0, scale * OVER_SCALE);
+			ctx.globalAlpha = this.alpha;
+			this.drawSprite(sprites.layout.spec, 0, 0, scale * OVER_SCALE);
+		}
 		
 		ctx.globalCompositeOperation = "source-over";		
         if (this.z > 0) {
             ctx.fillStyle = "#000";
-            ctx.globalAlpha =  this.dark;//(this.z < 0 ? 0 : this.z> 1 ? 1 : this.z);
+            ctx.globalAlpha =  this.dark * this.alpha;//(this.z < 0 ? 0 : this.z> 1 ? 1 : this.z);
             ctx.beginPath();
             ctx.arc(0, 0, BALL_SIZE, 0, Math.PI * 2);
             ctx.fill();
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = this.alpha;
         }
+		if (RENDER_REFLEX) {
+			var i = this.closeCount;
+			ctx.setTransform(scale, 0, 0, scale, 0,0);
+			const near = 0.615, far = 0.250
+			//ctx.globalCompositeOperation = "lighter";
+			ctx.globalCompositeOperation = "screen";
+			while (i-- > 0) {
+				
+				const t = allBalls[this.closeIdx[i]];
+				const dx = t.x - this.x;
+				const dy = t.y - this.y;
+				const dist = (dy * dy + dx * dx) ** 0.5;
+				const dir = Math.atan2(dy, dx);
+				if (dist >= BALL_SIZE && dist < BALL_SIZE * 4) {
+					const zz = (dist - (BALL_SIZE)) / (BALL_SIZE * 3);
+					const a = (far - near) * zz + near;
+					const offDx = Math.cos(a);
+					const offDy = Math.sin(a);
+					const nx = dx / dist;
+					const ny = dy / dist;
+					ctx.globalAlpha = ((1 - ((dist-BALL_SIZE * 2) / (BALL_SIZE * 4))) ** 2 * 0.4)  * this.alpha;
+					ctx.fillStyle = t.col;
+					ctx.beginPath();				
+					ctx.ellipse(
+						this.x + nx * BALL_SIZE * offDx, 
+						this.y + ny * BALL_SIZE * offDx, 
+						BALL_SIZE * 0.5 * offDy, 
+						BALL_SIZE * offDy,
+						dir, 
+						Math.PI * 0.5,  
+						Math.PI * 1.5
+					);
+					ctx.arc(this.x, this.y, BALL_SIZE, dir - a, dir + a);
+					ctx.fill();
+				}
+			}
+			ctx.globalCompositeOperation = "source-over";	
+			ctx.globalAlpha = this.alpha;
+			this.closeCount = 0;
+		}
     },
     drawSection(cx, cy, cz, sr, col = WHITE_BALL) { // sr section radius
         const R = BALL_SIZE / sr;
@@ -793,6 +959,7 @@ Ball.prototype = {
         A *= sr;
         const x = cx * A, y = cy * A;
         ctx.fillStyle = col;
+        ctx.globalAlpha = this.alpha;
         ctx.beginPath();
         if (tx >= BALL_SIZE) {
             cz < 0 ?
@@ -819,31 +986,40 @@ Ball.prototype = {
             }
         }
         ctx.fill();
+		
     },
-    interceptBallTime(b, time) {
-        const x = this.x - b.x;
-        const y = this.y - b.y;
-        const d = (x * x + y * y) ** 0.5;
-        if (d > BALL_SIZE * 2) {
-            const times = Math.circlesInterceptUnitTime(
-                this.x, this.y, this.x + this.vx, this.y + this.vy,
-                b.x, b.y, b.x + b.vx, b.y + b.vy,
+	interceptBallTimeNorm(b, time) {
+        const x = b.x - this.x;
+        const y = b.y - this.y;
+        const dist = (x * x + y * y) ** 0.5;
+        if (dist > BALL_SIZE * 2) {
+            const t = Math.circlesInterceptUnitTime(
+                this.x, this.y, this.vx, this.vy,
+                b.x, b.y, b.vx, b.vy,
+				dist, x, y,
                 BALL_SIZE, BALL_SIZE
             );
-            if (times.length) {
-                const ta = times[0], tb = times[1];
-                if (times.length === 1) {
-                    if (ta >= time && ta <= 1) { return ta }
-                } else if (ta <= tb) {
-                    if (ta >= time && ta <= 1) { return ta }
-                    if (tb >= time && tb <= 1) { return tb }
-                } else {
-                    if (tb >= time && tb <= 1) { return tb }
-                    if (ta >= time && ta <= 1) { return ta }
-                }
-            }
+            if (t >= time && t <= 1) { return t }
         }
-    },
+    },   
+	interceptBallTimeRefl(b, time, idx, idx1) {
+        const x = b.x - this.x;
+        const y = b.y - this.y;
+        const dist = (x * x + y * y) ** 0.5;
+		if (this.addClose && dist < BALL_SIZE * 4 && !this.dead && !b.dead) {
+			this.closeIdx[this.closeCount++] = b.id;
+			b.closeIdx[b.closeCount++] = this.id;			
+		}
+        if (dist > BALL_SIZE * 2) {
+            const t = Math.circlesInterceptUnitTime(
+                this.x, this.y, this.vx, this.vy,
+                b.x, b.y, b.vx, b.vy,
+				dist, x, y,
+                BALL_SIZE, BALL_SIZE
+            );
+            if (t >= time && t <= 1) { return t }
+        }
+    },   
     collideLine(l, time, lineU, notInPlay = false) {  // lineU is unit position on line. If outside 0-1 then has hit end points of line
         var x1, y1;
         this.x += this.vx * time;
@@ -864,8 +1040,8 @@ Ball.prototype = {
         const nx = x1 / d;
         const ny = y1 / d;
         const u = (this.vx  * nx + this.vy  * ny) * 2;
-        this.vx = (nx * u - this.vx);
-        this.vy = (ny * u - this.vy);
+        this.vx = (nx * u - this.vx) * BALL_RAIL_COEF_RESTITUTION;
+        this.vy = (ny * u - this.vy) * BALL_RAIL_COEF_RESTITUTION;
         this.x -= this.vx * time;
         this.y -= this.vy * time;
 		this.speed = (this.vx * this.vx + this.vy * this.vy) ** 0.5;
@@ -884,10 +1060,10 @@ Ball.prototype = {
         const u2 = a.vy * x - a.vx * y;
         const u3 = b.vx * x + b.vy * y;
         const u4 = b.vy * x - b.vx * y;
-        b.vx = (x * u1 - y * u4) / d;
-        b.vy = (y * u1 + x * u4) / d;
-        a.vx = (x * u3 - y * u2) / d;
-        a.vy = (y * u3 + x * u2) / d;
+        b.vx = ((x * u1 - y * u4) / d) * BALL_BALL_COEF_RESTITUTION;
+        b.vy = ((y * u1 + x * u4) / d) * BALL_BALL_COEF_RESTITUTION;
+        a.vx = ((x * u3 - y * u2) / d) * BALL_BALL_COEF_RESTITUTION;
+        a.vy = ((y * u3 + x * u2) / d) * BALL_BALL_COEF_RESTITUTION;
         a.x = a.x - a.vx * time;
         a.y = a.y - a.vy * time;
         b.x = b.x - b.vx * time;
@@ -910,7 +1086,7 @@ Ball.prototype = {
     fromShadow(shadow) { Object.assign(this, {...shadow, vx: 0, vy: 0, z:0}) }
 
 }
-
+Ball.prototype.interceptBallTime = RENDER_REFLEX ? Ball.prototype.interceptBallTimeRefl : Ball.prototype.interceptBallTimeNorm; 
 function canAdd(ball) { // test if safe to add ball (no overlap)
     if (ball.x < TABLE_LEFT + INSET + BALL_SIZE || ball.y < TABLE_TOP + INSET + BALL_SIZE ||
         ball.y > TABLE_BOTTOM + INSET - BALL_SIZE || ball.x > TABLE_RIGHT+ INSET - BALL_SIZE) {
@@ -918,7 +1094,7 @@ function canAdd(ball) { // test if safe to add ball (no overlap)
     }
 
     for (const b of balls) {
-        if (ball !== b && ((b.x - ball.x) ** 2 + (b.y - ball.y) ** 2) < (BALL_SIZE_SQR * 4)) { return false }
+        if (b && ball !== b && ((b.x - ball.x) ** 2 + (b.y - ball.y) ** 2) < (BALL_SIZE_SQR * 4)) { return false }
     }
     return true;
 }
@@ -937,7 +1113,27 @@ function isOffTable(x, y) {
     }
     return false;
 }
-function renderBall(ctxDest, x, y, ball) {
+function drawPocketed() {
+	
+	const pb = pocketedBalls;
+	var i = 0;
+	for (; i < pb.length; i++) {
+		const b = pb[i];
+		b.closeCount =  0;
+		b.x = (i + 1) * BALL_SIZE * 2.001;
+		b.y = BALL_SIZE;
+        if (RENDER_REFLEX) {
+            if (i > 0) { b.closeIdx[b.closeCount++] = pb[i - 1].id } 
+            if (i + 1 < pb.length) { b.closeIdx[b.closeCount++] = pb[i + 1].id }
+        }
+		
+	}
+	pCtx.clearRect(0, 0, pocketed.width, pocketed.height);
+	for (const b of pb) {
+	    renderBall(pCtx, b.x, b.y, b, 1);
+	}
+}			
+function renderBall(ctxDest, x, y, ball, scale = TABLE_SCALE) {
     const c = ctx;
     ctx = ctxDest;
     const bx = ball.x;
@@ -945,13 +1141,7 @@ function renderBall(ctxDest, x, y, ball) {
     ball.x = x;
     ball.y = y;
     ball.z = 0;
-    ball.render(TABLE_SCALE);
-    //ball.drawSprite(sprites.layout.shade, 0, 0, TABLE_SCALE);
-    //ctx.globalCompositeOperation = "lighter";
-    //ctx.globalAlpha = 1/1.5;
-    //ball.drawSprite(sprites.layout.light, 0, 0, TABLE_SCALE);
-    //ctx.globalAlpha = 1;
-    //ball.drawSprite(sprites.layout.spec, 0, 0, TABLE_SCALE);
+    ball.render(scale);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
     ctx = c;
@@ -964,15 +1154,23 @@ function renderBalls() {
         if (b.hold && b.id !== 0) {
             b.drawSprite(sprites.layout.shadow, BALL_SIZE * 0.8, BALL_SIZE * 0.8);
         } else {
+          
             b.drawSprite(sprites.layout.shadow, BALL_SIZE * 0.4, BALL_SIZE * 0.4);
         }
     }
     ctx.setTransform(1,0,0,1,0,0);
     ctx.drawImage(overlay, 0, 0);
-    for (const b of balls) { b.render() }
+    for (const b of balls) { (!b.dead || b.id === 0) && b.render() }
     ctx.setTransform(1,0,0,1,0,0);
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
+	var h = 0, t = 0;
+	while (h < balls.length) {
+		if (balls[h].dead) { h ++ }
+		else { balls[t++] = balls[h++] }
+	}
+	balls.length = t;
+			
 }
 const sunk = HAS_GAME_PLAY_API ? {} : {}
 /*    balls: [],
@@ -1239,9 +1437,9 @@ function createSprites() {
     const ctx = spriteCtx;
     const ballShadowGrad = ctx.createRadialGradient(0,0, BALL_SIZE * 0.1, 0,0, BALL_SIZE * 1.2);
     ballShadowGrad.addColorStop(0,"#0008");
-    ballShadowGrad.addColorStop(0.1,"#0008");
-    ballShadowGrad.addColorStop(0.2,"#0006");
-    ballShadowGrad.addColorStop(0.6,"#0003");
+    ballShadowGrad.addColorStop(0.1,"#000A");
+    ballShadowGrad.addColorStop(0.4,"#0008");
+    ballShadowGrad.addColorStop(0.9,"#0002");
     ballShadowGrad.addColorStop(1,"#0000");
     ctx.fillStyle = ballShadowGrad;
     ctx.setTransform(1,0,0,1, BALL_SIZE * 1.5, BALL_SIZE * 1.5);
@@ -1250,9 +1448,10 @@ function createSprites() {
     ctx.fill();
     sprites.layout.shadow = {x:0, y:0, w: BALL_SIZE * 3, h: BALL_SIZE * 3};
 
-    const ballShadeGrad = ctx.createRadialGradient(-BALL_SIZE * 0.2, -BALL_SIZE * 0.2, BALL_SIZE * 0.8, -BALL_SIZE * 0.7, -BALL_SIZE * 0.7, BALL_SIZE * 2.4);
-    ballShadeGrad.addColorStop(0,"#0000");
-    //ballShadeGrad.addColorStop(0.1,"#0000");
+    const ballShadeGrad = ctx.createRadialGradient(-BALL_SIZE * 0.2, -BALL_SIZE * 0.2, BALL_SIZE * 0.1, -BALL_SIZE * 0.7, -BALL_SIZE * 0.7, BALL_SIZE * 2.4);
+    ballShadeGrad.addColorStop(0,"#FFF0");
+    ballShadeGrad.addColorStop(0.1,"#FFF1");
+    ballShadeGrad.addColorStop(0.4,"#0002");
     ballShadeGrad.addColorStop(0.8,"#000C");
     ballShadeGrad.addColorStop(0.95,"#0004");
     ctx.fillStyle = ballShadeGrad;
@@ -1263,14 +1462,24 @@ function createSprites() {
     sprites.layout.shade = {x: BALL_SIZE * 3, y:0, w: BALL_SIZE * 2, h: BALL_SIZE * 2};
 
 
-    const ballSkyGrad = ctx.createRadialGradient(BALL_SIZE * 0.7, BALL_SIZE * 0.7, 0, 0, 0, BALL_SIZE * 2.4);
+/*    const ballSkyGrad = ctx.createRadialGradient(BALL_SIZE * 0.7, BALL_SIZE * 0.7, 0, 0, 0, BALL_SIZE * 2.4);
     ballSkyGrad.addColorStop(0,"#FFF0");
     //ballSkyGrad.addColorStop(0.3,"#FFF0");
     ballSkyGrad.addColorStop(0.4,"#EEF3");
     ballSkyGrad.addColorStop(0.6,"#DEF6");
     ballSkyGrad.addColorStop(0.7,"#CDF8");
     ballSkyGrad.addColorStop(0.8,"#FFF0");
-    ballSkyGrad.addColorStop(1,"#FFF0");
+    ballSkyGrad.addColorStop(1,"#FFF0");*/
+	
+    const ballSkyGrad = ctx.createRadialGradient(BALL_SIZE * 0.0, BALL_SIZE * 0.0, 0, 0, 0, BALL_SIZE * 1);
+    ballSkyGrad.addColorStop(0,"#FFF0");
+    ballSkyGrad.addColorStop(0.20,"#FFF1");
+    ballSkyGrad.addColorStop(0.70, "#FFF4");
+    ballSkyGrad.addColorStop(0.8,TABLE_COLOR + "8");
+    ballSkyGrad.addColorStop(1,TABLE_COLOR + "1");
+   // ballSkyGrad.addColorStop(1, TABLE_COLOR + "0");
+	
+	
     ctx.fillStyle = ballSkyGrad;
     ctx.setTransform(1,0,0,1, BALL_SIZE * 6, BALL_SIZE);
     ctx.beginPath();
@@ -1422,7 +1631,7 @@ function createTable() {  // renders table overlay and creates edge lines and po
     while(i < cush.length) {
         const x1 = cush[i][0] * CUSH_SIZE_X, y1 = cush[i++][1] * CUSH_SIZE_Y;
         const x2 = cush[i % cush.length][0] * CUSH_SIZE_X, y2 = cush[i % cush.length][1] * CUSH_SIZE_Y;
-        lines.push( new Line(x1 , y1, x2 , y2));
+        lines.push( new Line(x1 , y1, x2 , y2, ![12,26,38,50,64,76].includes(i)));
    }
 
 
@@ -1519,11 +1728,15 @@ function createTable() {  // renders table overlay and creates edge lines and po
     return edge;
 }
 function rackBalls() {
+	pCtx.clearRect(0, 0, pocketed.width, pocketed.height);
     const w = ctx.canvas.width, w2 = w / 2;
     const h = ctx.canvas.height;
     const p = BALL_SIZE * 2;
     var i = 0, j = 0, ball, add, e;
-    balls.length = 0;
+    pocketedBalls.length = 0;
+	balls.length =  BALL_COUNT;
+	allBalls.length = BALL_COUNT;
+	balls.fill(undefined);
     while (i < rack.length) {
         add = false;
         e = 100;
@@ -1535,7 +1748,8 @@ function rackBalls() {
             );
             add = canAdd(ball);
         }
-        balls.push(ball);
+        balls[ball.id] = ball;
+		allBalls[ball.id] = ball;
         i += 3;
     }
     tempQueBall = new Ball(0,0,0);
@@ -1576,7 +1790,6 @@ function findPath(ball, balls, contacts, firstIntercept = false) {
                 }
             }
         }
-
         if (resolving) {
             if (minObj instanceof Ball) {
                 C.push(B.x + B.vx * minTime, B.y + B.vy * minTime, 2);
@@ -1595,9 +1808,14 @@ function findPath(ball, balls, contacts, firstIntercept = false) {
                 }
                 resolving = hits < 2;
             } else {
-                C.push(B.x + B.vx * minTime, B.y + B.vy * minTime, 1)
+                C.push(B.x + B.vx * minTime, B.y + B.vy * minTime);
                 B.collideLine(minObj, minTime, minU, true);
-                resolving = !isOffTable(B.x + B.vx * minTime, B.y + B.vy * minTime) && hits < 1;
+                resolving = !isOffTable(B.x + B.vx * minTime, B.y + B.vy * minTime) && hits < 1;               
+                if (minObj.isPocket && resolving && !firstIntercept) {
+                    C.push(3);
+                } else {
+                    C.push(1);
+                }
             }
             if (firstIntercept) { resolving = false }
             after = minTime;
@@ -1608,10 +1826,36 @@ function findPath(ball, balls, contacts, firstIntercept = false) {
     return C;
 
 }
+function fanLine(x1,y1,x2,y2) {
+
+    ctx.fill();
+    ctx.stroke();
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = badBounceFill;
+    ctx.globalCompositeOperation = "lighten";
+    var vx = x2 - x1;
+    var vy = y2 - y1;
+    var dist = (vx * vx + vy * vy) ** 0.5;
+    vx /= dist;
+    vy /= dist;
+    ctx.setTransform(vx * TABLE_SCALE, vy * TABLE_SCALE, -vy * TABLE_SCALE, vx * TABLE_SCALE, GAME_LEFT +x1 * TABLE_SCALE, GAME_TOP + y1 * TABLE_SCALE);
+
+    ctx.moveTo(0, 0);
+    ctx.lineTo(BAD_BOUNCE_SIZE, 0);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(BAD_BOUNCE_SIZE, - BAD_BOUNCE_SPREAD);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(BAD_BOUNCE_SIZE,  BAD_BOUNCE_SPREAD);    
+    ctx.stroke();   
+    ctx.beginPath();
+    ctx.restore();
+}
 function findFirstHit(ball, ang, balls, firstIntercept = false) {
     function drawPath(C, lineWidth, col) {
         var next = false, idx = 0,x1,x2,y1,y2;
         const bs = BALL_SIZE - lineWidth/2;
+        var badBounce = 0;
         ctx.strokeStyle = "#DDD8";
         ctx.fillStyle = col;
         ctx.beginPath();
@@ -1619,6 +1863,7 @@ function findFirstHit(ball, ang, balls, firstIntercept = false) {
         if (C.length > 0) {
             idx = 0;
             while(idx <  C.length) {
+                
                 x1 = C[idx];
                 y1 = C[idx + 1];
                 x2 = C[idx + 3];
@@ -1631,9 +1876,12 @@ function findFirstHit(ball, ang, balls, firstIntercept = false) {
                 if (idx === 0) {
                     x1 += nx * BALL_SIZE;
                     y1 += ny * BALL_SIZE;
-                } else if (C[idx+2] === 2 ) {
+                } else if (C[idx+2] === 2) {
                     x1 += nx * bs;
                     y1 += ny * bs;
+                }  else if(C[idx+2] === 3) {
+                    fanLine(x1,y1, x2,y2);    
+                    return next;
                 }
                 if(C[idx+5] === 2) {
                     ctx.moveTo(x2 + bs, y2);
@@ -1658,15 +1906,13 @@ function findFirstHit(ball, ang, balls, firstIntercept = false) {
     const Q = tempQueBall, T = tempBall;
     Q.x = ball.x;
     Q.y = ball.y;
-    Q.vx = -Math.cos(ang) * 2000;
-    Q.vy = -Math.sin(ang) * 2000;
+    Q.vx = -Math.cos(ang) * GUIDE_DISTANCE;
+    Q.vy = -Math.sin(ang) * GUIDE_DISTANCE;
     Q.id = ball.id;
     const lineWidth = (SHOW_FIRST_CONTACT_ONLY ? 3 : 6) / TABLE_SCALE;
-
     ctx.lineJoin = "round"
     ctx.lineCap = "round"
     if (drawPath(findPath(Q, balls, contacts, firstIntercept), lineWidth, "#DDD4")) {
-
 		if (!firstIntercept && !SHOW_FIRST_CONTACT_ONLY)  {
 			Q.x = T.x;
 			Q.y = T.y;
@@ -1674,17 +1920,19 @@ function findFirstHit(ball, ang, balls, firstIntercept = false) {
 			Q.vy = T.vy;
 			Q.id = T.id;
 			Q.col = T.col;
-
 			drawPath(findPath(Q, balls, contacts), lineWidth, Q.col + "6");
 		}
-
     }
-
-
-
 }
 function resolveCollisions(balls) {
     var minTime = 0, minObj, minBall, resolving = true, idx = 0, idx1, after = 0, e = 0, minU = 0;
+	if (RENDER_REFLEX) {
+		for (const b of balls) {
+			b.addClose = true;
+			b.closeCount = 0;
+		}
+	}
+		
     while (resolving && e++ < MAX_RESOLUTION_CYCLES) {
         resolving = false;
         minBall = minObj = undefined;
@@ -1694,7 +1942,7 @@ function resolveCollisions(balls) {
             idx1 = idx + 1;
             while (idx1 < balls.length) {
                 const b1 = balls[idx1++];
-                const time = b.interceptBallTime(b1, after);
+                const time = RENDER_REFLEX ? b.interceptBallTime(b1, after) : b.interceptBallTime(b1, after);
                 if (time !== undefined) {
                     if (time <= minTime) {
                         minTime = time;
@@ -1704,6 +1952,7 @@ function resolveCollisions(balls) {
                     }
                 }
             }
+			RENDER_REFLEX && (b.addClose = false);
             for (const line of lines) {
                 const u = line.intercept(b);
                 const time = u >= after && u <= 1 ? u : undefined;
@@ -1719,22 +1968,22 @@ function resolveCollisions(balls) {
             }
             idx ++;
         }
+		
         if (resolving) {
             if (minObj instanceof Ball) {
                 (game && !firstHit) && (game.firstHit = minObj);
                 minBall.collide(minObj, minTime);
 				if (soundPlayCount === 0 && soundsReady) {
-
 					const vol = ((minObj.speed + minBall.speed) / soundSettings.collideSpeedNorm) ** soundSettings.collideVolCurve;
 					const soundPan =  (((minObj.x + minBall.x) * 0.5 - TABLE_LEFT) / (TABLE_RIGHT - TABLE_LEFT)) * 2 - 1;
-					
 					soundIFX.stop(minObj.id);
 					soundIFX(
 					    minBall.id,
 						"baLLCollide", 
 						0, 0, 
 						Math.max(soundSettings.collideMinVol, Math.min(1, vol)), 
-						Math.random() * soundSettings.collideFreqSpread + 1 - soundSettings.collideFreqSpread * 0.5,
+						(soundSettings.COLLISION_FREQ_SPREAD[minBall.id] + soundSettings.COLLISION_FREQ_SPREAD[minObj.id]) * 0.5,
+						//Math.random() * soundSettings.collideFreqSpread + 1 - soundSettings.collideFreqSpread * 0.5,
 						soundPan,
 					);				
 					soundPlayCount += 4;
@@ -1757,11 +2006,9 @@ function runSim(steps) {
             while (i < balls.length) {
                 const b = balls[i];
                 b.update();
-                if (b.dead) { balls.splice(i, 1) }
-                else {
-                    if (b.speed > 0.1) { allStopped = false }
-                    i++
-                }
+
+				if (b.speed > 0.1) { allStopped = false }
+				i++;
             }
         }
         if (balls.length === 1 && allStopped) {
@@ -1845,9 +2092,32 @@ function doMouseInterface() {
             ballToPlace.hold = true;
             const oldx = ballToPlace.x;
             const oldy = ballToPlace.y;
-            ballToPlace.x = mouse.tx;
-            ballToPlace.y = mouse.ty;
-            let ok = canAdd(ballToPlace);
+			const offsetDist = BALL_SIZE * 2.00001;
+            let cx = ballToPlace.x = mouse.tx;
+            let cy = ballToPlace.y = mouse.ty;
+            let ok = canAdd(ballToPlace), maxIt = 10, count = 1;
+			/*while (!ok && maxIt--) {
+				ok = true;
+                const over = ballNearMouse();
+                if (over && over !== ballToPlace) {
+					cx += over.x;
+					cy += over.y;
+					count ++;
+                    //const x = ballToPlace.x - cx / count;
+                    //const y = ballToPlace.y - cy / count;
+                    const x = mouse.tx - cx / count;
+                    const y = mouse.ty - cy / count;
+                    const d = (x * x + y * y) ** 0.5;
+                    ballToPlace.x = over.x + (x / d) * offsetDist;
+                    ballToPlace.y = over.y + (x / d) * offsetDist;
+                    ok = canAdd(ballToPlace);
+				}
+			}
+			if (!ok) {
+			    ballToPlace.x = oldx;
+                ballToPlace.y = oldy;
+				
+			}*/
             if (!ok) {
                 ballToPlace.x = oldx;
                 ballToPlace.y = oldy;
@@ -1856,13 +2126,20 @@ function doMouseInterface() {
                     const x = mouse.tx - over.x;
                     const y = mouse.ty - over.y;
                     const d = (x * x + y * y) ** 0.5;
-                    ballToPlace.x = over.x + (x / d) * (BALL_SIZE * 2.001);
-                    ballToPlace.y = over.y + (y / d) * (BALL_SIZE * 2.001)
+					const nx = (x / d) * (BALL_SIZE * 2.001);
+					const ny = (y / d) * (BALL_SIZE * 2.001);
+                    ballToPlace.x = over.x + nx;
+                    ballToPlace.y = over.y + ny;
                     ok = canAdd(ballToPlace);
+					if (!ok) {
+						ballToPlace.x = over.x - nx;
+						ballToPlace.y = over.y - ny;
+						ok = canAdd(ballToPlace);
+					}
                 }
                 if (!ok){
-                    ballToPlace.x = oldx;
-                    ballToPlace.y = oldy;
+                   //ballToPlace.x = oldx;
+                    //ballToPlace.y = oldy;
                 }
             }
             if (mouse.button === 1) {
@@ -1969,7 +2246,7 @@ function doMouseInterface() {
 					mouse.spring += mouse.pull;
 					mouse.spring *= 0.95;
 					SHOW_GUIDES && !mouse.spinMode && findFirstHit(B, an, balls)	;
-					if(keys.KeyS) { 
+					if(allowSpinControl && keys.KeyS) { 
 						mouse.spinMode = true;
 						mouse.spin = -Math.PI;
 						mouse.spinPower = mouse.spring;
@@ -2061,15 +2338,16 @@ function doMouseInterface() {
 
             mouse.pull = 0;
             mouse.spring *= 0.5;
-            mouse.speed += mouse.spring
-            mouse.pos -= mouse.speed;
+            mouse.speed += mouse.spring * (keys.KeyW ? 1.5 : 1);
+            mouse.pos -= mouse.speed * (keys.KeyW ?0.75 : 1);
             if (mouse.pos < 0) {
+				
 				const hitPower = Math.min(1, (((mouse.speed * mouse.mass) / BALL_MASS) / 120) ** 1.6) * 120;
-                B.vx = Math.cos(mouse.angleToHit + Math.PI)* hitPower;
-                B.vy = Math.sin(mouse.angleToHit + Math.PI)* hitPower;
+                B.vx = Math.cos(mouse.angleToHit + Math.PI) * hitPower;
+                B.vy = Math.sin(mouse.angleToHit + Math.PI) * hitPower;
                 if (allowSpinControl && mouse.spin) {
                     B.spin = (mouse.spinPower * 0.2 / BALL_SIZE);
-                    B.spinDirection = /*mouse.angleToHit + */mouse.spin;
+                    B.spinDirection = mouse.spin;
                     mouse.spin = 0;
                 }
 				soundsReady && soundFX("cueHit", 0, 0, Math.max(0.1,Math.min(1, (mouse.speed / 170) ** 2)),  Math.random() * 0.2 + 0.9);
@@ -2086,6 +2364,9 @@ function doMouseInterface() {
     }
 }
 var paused = false;
+
+
+
 function mainLoop() {
     var allStopped;
 	if (keys.KeyP) {
@@ -2133,16 +2414,17 @@ function mainLoop() {
     ctx = ctxMain;
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
-    ctx.setTransform(TABLE_SCALE,0,0,TABLE_SCALE,GAME_LEFT, GAME_TOP);
+    ctx.setTransform(TABLE_SCALE,0,0,TABLE_SCALE, GAME_LEFT, GAME_TOP);
     ctxMain.drawImage(gameCanvas, 0,0);
-
+    ctxMain.setTransform(1,0,0,1,0,0);
+	ctxMain.drawImage(pocketed,   ctx.canvas.width / 2 - pocketed.width / 2, ctx.canvas.height - pocketed.height );
+	ctx.setTransform(TABLE_SCALE,0,0,TABLE_SCALE, GAME_LEFT, GAME_TOP);
     if (allStopped) {
         doMouseInterface();
 
     }
     if(HAS_GAME_PLAY_API && sunk.balls.length) { sunk.animate() }
 	(!SHOW_GUIDES || mouse.spinMode) && allStopped && !placeBalls && !balls[0].hold && simpleGuide(balls[0]);
-
     if (message) {
         ctx.setTransform(1,0,0,1,ctx.canvas.width / 2, GAME_TOP - 32);
         ctx.font = "32px Arial";
@@ -2192,7 +2474,22 @@ function mathExt() {
 		}
 		return ang;
     }
-    Math.circlesInterceptUnitTime = (a, e, b, f, c, g, d, h, r1, r2) => { // args (x1, y1, x2, y2, x3, y3, x4, y4, r1, r2)
+
+    Math.circlesInterceptUnitTime = (x1, y1, vx1, vy1, x2, y2, vx2, vy2, dist, px, py,  r1, r2) => {
+        const rr = r1 + r2;
+        const vx = vx1 - vx2;
+        const vy = vy1 - vy2;
+        var l = (vx * vx + vy * vy) ** 0.5;
+        if (l + rr < dist) { return 2 }
+        const u = (px * vx + py * vy) / (l * l);
+        var x = x1 + vx * u - x2;
+        var y = y1 + vy * u - y2;
+        const distSqr = x * x + y * y;
+        return (u * l - (rr * rr - distSqr) ** 0.5) / l;
+    }   	
+	
+	
+    /*Math.circlesInterceptUnitTime = (a, e, b, f, c, g, d, h, r1, r2) => { // args (x1, y1, x2, y2, x3, y3, x4, y4, r1, r2)
         const A = a * a, B = b * b, C = c * c, D = d * d;
         const E = e * e, F = f * f, G = g * g, H = h * h;
         var R = (r1 + r2) ** 2;
@@ -2200,7 +2497,7 @@ function mathExt() {
         const BB = 2 * (-A + a * b + 2 * a * c - a * d - c * b - C + c * d - E + e * f + 2 * e * g - e * h - g * f - G + g * h);
         const CC = A - 2 * a * c + C + E - 2 * e * g + G - R;
         return Math.quadRoots(AA, BB, CC);
-    }
+    }*/
     Math.quadRoots = (a, b, c) => { // find roots for quadratic
         if (Math.abs(a) < 1e-6) { return b != 0 ? [-c / b] : []  }
         b /= a;
