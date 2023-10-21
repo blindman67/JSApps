@@ -155,7 +155,7 @@ const data = {
 		minColorSize: 2000,
 		maxColorSize: 3652,
 		nebularColors: [0xFFFF8080, 0xFFFF8880, 0xFF101080, 0xFF8088FF, 0xFF1010FF], // neg 255 zero 0 positive 255 are 0,128,255
-		skyImage: "./media/Aoids_SkyB1.png",
+		skyImage: "./media/aoids_skyB1.png",
 		gravConstant: 0.00005,
 
 	},
@@ -1352,7 +1352,7 @@ const data = {
 
 	},
 	overlaySpriteSheet: {
-		image: "./media/Aoids_OverlayC14.png",
+		image: "./media/aoids_overlayC14.png",
         defaultZIndexBit: 0x40000000, // this is logic ORed with sprite index to force default z index
 		nameToIdx,
 		names: {
@@ -1610,7 +1610,7 @@ const data = {
 	spriteSheet: {
 		maxSpriteCount: 4096 * 2,  // this is sprite instance buffer count per shader.
         defaultZIndexBit: 0x40000000, // this is logic ORed with sprite index to force default z index
-		image: "./media/Aoids_spritesheetC14.png",
+		image: "./media/Aoids_SpriteSheetC14.png",
 		nameToIdx,
 		names: {
 			rocks: [[0], [1,2], [3,4,5,6], [7,8,9,10,11,12,13,14], [15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]],
