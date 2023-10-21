@@ -1,7 +1,7 @@
-import {} from "../../utils/MathExtensions.jsm";
-import {glUtils} from "../glUtils.jsm";
-import {Vec2} from "../../Vec2.jsm";
-import {Mat2} from "../../Mat2.jsm";
+import {} from "../../utils/MathExtensions.js";
+import {glUtils} from "../glUtils.js";
+import {Vec2} from "../../Vec2.js";
+import {Mat2} from "../../Mat2.js";
 
 
 export {lineShader};

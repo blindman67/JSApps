@@ -1,5 +1,5 @@
-import {$,$$,$R} from "../geeQry.jsm";
-import {getUID} from "../../utils/getUID.jsm";
+import {$,$$,$R} from "../geeQry.js";
+import {getUID} from "../../utils/getUID.js";
 
 
 export {Spacer};

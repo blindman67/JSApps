@@ -1,5 +1,5 @@
-import {Texture} from "../code/texture.jsm";
-import {glUtils} from "../code/glUtils.jsm";
+import {Texture} from "../code/texture.js";
+import {glUtils} from "../code/glUtils.js";
 
 function spriteShader(options = {}){
 	options = {

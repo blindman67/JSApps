@@ -1,5 +1,5 @@
-import {} from "../code/MathExtensions.jsm";
-import {glUtils} from "../code/glUtils.jsm";
+import {} from "../code/MathExtensions.js";
+import {glUtils} from "../code/glUtils.js";
 
 function gradientShader(options = {}){
 	options = {

@@ -1,6 +1,6 @@
 /* GL utils */
 
-import {} from "../utils/MathExtensions.jsm";
+import {} from "../utils/MathExtensions.js";
 
 const byteClamp4 = new Uint8ClampedArray(4);
 const byte4 = new Uint8Array(4);

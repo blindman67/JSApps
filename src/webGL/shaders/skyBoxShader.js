@@ -1,6 +1,6 @@
-import {} from "../../utils/MathExtensions.jsm";
-import {glUtils} from "../glUtils.jsm";
-import {TextureCube} from "../texture.jsm";
+import {} from "../../utils/MathExtensions.js";
+import {glUtils} from "../glUtils.js";
+import {TextureCube} from "../texture.js";
 
 export {skyBoxShader};
 

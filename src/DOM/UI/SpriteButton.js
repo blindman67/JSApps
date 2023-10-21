@@ -1,7 +1,7 @@
-import {$,$$,$R} from "../geeQry.jsm";
-import {getUID} from "../../utils/getUID.jsm";
-import {commands} from "../../utils/commands.jsm";
-import {Groups} from "./Groups.jsm";
+import {$,$$,$R} from "../geeQry.js";
+import {getUID} from "../../utils/getUID.js";
+import {commands} from "../../utils/commands.js";
+import {Groups} from "./Groups.js";
 
 
 export {SpriteButton};

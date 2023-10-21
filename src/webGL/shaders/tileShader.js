@@ -1,5 +1,5 @@
-import {Texture} from "../code/texture.jsm";
-import {glUtils} from "../code/glUtils.jsm";
+import {Texture} from "../code/texture.js";
+import {glUtils} from "../code/glUtils.js";
 
 const BIT_VALS = [
 	[[0xFF,0x00,0],[0xFFFF,0x0000,0], [0xFFFFFFFF,0x000000,0]],

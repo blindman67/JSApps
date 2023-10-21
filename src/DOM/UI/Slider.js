@@ -1,9 +1,9 @@
-import {$,$$,$R} from "../geeQry.jsm";
-import {customCursors} from "../customCursors.jsm";
-import {} from "../../utils/MathExtensions.jsm";
-import {getUID} from "../../utils/getUID.jsm";
-import {HSLA} from "../../utils/HSLA.jsm";
-import {commands} from "../../utils/commands.jsm";
+import {$,$$,$R} from "../geeQry.js";
+import {customCursors} from "../customCursors.js";
+import {} from "../../utils/MathExtensions.js";
+import {getUID} from "../../utils/getUID.js";
+import {HSLA} from "../../utils/HSLA.js";
+import {commands} from "../../utils/commands.js";
 
 
 export {Slider};
