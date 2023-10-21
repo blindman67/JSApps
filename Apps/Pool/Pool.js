@@ -33,11 +33,12 @@ const SHOW_GUIDES = sGuides;  // Show detailed guide
 const SHOW_FIRST_CONTACT_ONLY = !sGuideComplex; // if SHOW_GUIDS then only to first contact ball. Else traces first ball as well
 const POCKET_ROLL_IN_HELP = 0.2;   
 
+/*
 console.log("URL options: underscore seperated options.");
 console.log("Table size one of 'small, medium, standard, large, huge, super'");
 console.log("Options `guides_complex`");
 console.log("Render options `render[noshade_noreflect]`");
-
+*/
 
 const tables = {
     small: {w: 38, h: 19}, 		// 7ft
@@ -173,7 +174,7 @@ var soundPlayCount = 0
 var soundsReady = false, channelReadyCount = 0;
 var synth, soundIFX, soundFX;
 function DelayAudioStart() {
-    synth = StartAudio();
+    synth = StartAudio(soundSettings.masterVol);
     synth.volume = soundSettings.masterVol;
     soundIFX = synth.loadSounds("InstancedSoundFX",() => {
         console.log("InstancedSoundFX ready");
@@ -188,7 +189,6 @@ function DelayAudioStart() {
         soundsReady = channelReadyCount === 2;
         soundFX.init();
     }, ... soundSettings.sounds);
-    console.log("Sound started");
 }
 
 var ctx;

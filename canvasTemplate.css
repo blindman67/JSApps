@@ -2,8 +2,9 @@ body {
 	font-family: arial;
 }
 #root > ul > li {
+    font-family: monospace;
 	cursor: pointer;
-	width: 300px;
+	width: 800px;
 }
 #root > ul > li:hover {
 	color: #00A;
@@ -11,6 +12,8 @@ body {
 }
 
 #root > ul > li.ignore {
+    list-style-type: none;
+    font-family: monospace;    
 	cursor: default;
 }
 #root > ul > li.ignore:hover {
