@@ -7282,15 +7282,16 @@ var ExamplesMenu = {
         }
     },
     _loadBuilding: {help: "Click to load 111 story building simulation."},
-    loadCar() {
-        if (!running) {
-            systemMenu.useAutoView = false;
-            dropJson({name: "Car.json", onloaded: exampleOnLoad});
-        } else {
-            systemMessage("Stop sim befor loading scene.");
-        }
+    loadCar() {        
+        if (!running) { systemMenu.useAutoView = false; dropJson({name: "Car.json", onloaded: exampleOnLoad}); }
+        else { systemMessage("Stop sim befor loading scene."); }
     },
-    _loadCar: {help: "Click to load car with suspension and drive wheel."}    
+    _loadCar: {help: "Click to load car with suspension and drive wheel."},    
+    loadWorm() {        
+        if (!running) { systemMenu.useAutoView = false; dropJson({name: "Worm.json", onloaded: exampleOnLoad}); }
+        else { systemMessage("Stop sim befor loading scene."); }
+    },
+    _loadWorm: {help: "Click to load Worm that uses occilators to move."},    
 };
 
 GUI.start();
