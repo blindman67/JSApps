@@ -4,20 +4,28 @@ body {
 #root > ul > li {
     font-family: monospace;
 	cursor: pointer;
-	width: 680px;
+	width: 800px;
     color: #00A;
+    padding-left: 8px;
+}
+#root > ul > li.link {
+    padding-top: 4px;
+    border-bottom: 1px solid #AAF;
 }
 #root > ul > li:hover {
 	color: #00A;
 	background-color: #FDB;
 }
-
 #root > ul > li.ignore {
     list-style-type: none;
 	cursor: default;
     color: black;
     white-space: pre;
     min-height: 12px;
+}
+#root > ul > li.ignore.head {
+    font-size: larger;
+    border-top: 2px solid black;
 }
 #root > ul > li.ignore.help {
     font-size: smaller;
