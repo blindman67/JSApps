@@ -2,22 +2,22 @@
     
     const dataGUI = {
         reserved : ["name","onclose","onchanged","onbeforeclose","onafterupdate","oncancel","onok","onmoved","ondock","onundock","onfolded","onunfolded","dialogState"],
-        createDialog(data,extras){
+        createDialog(data, extras){
             var keys = Object.keys(data).filter(name=>name[0] !== "_" && dataGUI.reserved.indexOf(name) === -1);
             var name = data.name ? data.name : "dialog";
-            var ui = dialog.create(name,{
-                state : data.dialogState, 
-                onbeforeclose : data.onbeforeclose,
-                onchanged : data.onchanged,
-                onclosed : data.onclose,
-                onafterupdate : data.onafterupdate,
-                ondock : data.ondock,
-                onundock : data.onundock,
-                onfolded : data.onfolded,
-                onunfolded : data.onunfolded,
-                onmoved : data.onmoved,
-                container : "#GUI-container",   
-                data : data,
+            var ui = dialog.create(name, {
+                state:          data.dialogState, 
+                onbeforeclose:  data.onbeforeclose,
+                onchanged:      data.onchanged,
+                onclosed:       data.onclose,
+                onafterupdate:  data.onafterupdate,
+                ondock:         data.ondock,
+                onundock:       data.onundock,
+                onfolded:       data.onfolded,
+                onunfolded:     data.onunfolded,
+                onmoved:        data.onmoved,
+                container:      "#GUI-container",   
+                data:           data,
             });
             data._controls = ui.controls;
             data._dialog = ui;        
@@ -27,7 +27,7 @@
                 data.dialogState.commonState = undefined;
             }
             ui.building = true;
-            keys.forEach(key=>{
+            keys.forEach(key => {
                 const setUpKeyboardBinding = (data,info) => {
                     ["", "Left", "Mid", "Right"].forEach(but=>{
                         if( typeof data["key" + but] === "string"){
@@ -50,12 +50,12 @@
                 type = typeof data[key];
                 info = Object.assign({},commonState,{
                     type,
-                    dialog : ui,
-                    name : key,
-                    displayName : GUI.utilities.nameToReadable(key),
-                    help : data["_"+key] && data["_"+key].help ? data["_"+key].help : "",
-                    property : key,
-                    data : data,
+                    dialog:         ui,
+                    name:           key,
+                    displayName:    GUI.utilities.nameToReadable(key),
+                    help:           data["_"+key] && data["_"+key].help ? data["_"+key].help : "",
+                    property:       key,
+                    data:           data,
                 });
                 if (type === "string") {
                     if(data[key].indexOf("##") === 0){
@@ -92,23 +92,17 @@
                     } else if (data[key].indexOf("==") === 0) {
                         var dat = data[key].substr(2);
                         var setting = dat.split(",");
-                        //data[key] = setting[0];  // the value can be empty
                         info.displayName = data[key] = setting.shift();
                         info.height = setting.shift();
-                        if(setting[0][0] === "#"){
-                            info.background = setting.shift();
-                        }
+                        if (setting[0][0] === "#") { info.background = setting.shift(); }
                         info.help = setting.length ? setting.join(",") : "";
                         info.type = "separator";
                     } else if (data[key].indexOf("&&") === 0) {
                         var dat = data[key].substr(2);
                         var setting = dat.split(",");
-
                         info.displayName = data[key] = setting.shift();
                         info.height = setting.shift();
-                        if(setting[0][0] === "#"){
-                            info.background = setting.shift();
-                        }
+                        if (setting[0][0] === "#") { info.background = setting.shift(); }
                         info.help = setting.length ? setting.join(",") : "";
                         info.type = "color";
                     } else {

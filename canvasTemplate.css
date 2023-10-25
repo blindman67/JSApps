@@ -4,7 +4,8 @@ body {
 #root > ul > li {
     font-family: monospace;
 	cursor: pointer;
-	width: 800px;
+	width: 680px;
+    color: #00A;
 }
 #root > ul > li:hover {
 	color: #00A;
@@ -13,8 +14,16 @@ body {
 
 #root > ul > li.ignore {
     list-style-type: none;
-    font-family: monospace;    
 	cursor: default;
+    color: black;
+    white-space: pre;
+    min-height: 12px;
+}
+#root > ul > li.ignore.help {
+    font-size: smaller;
+}
+#root > ul > li.ignore.help.indent {
+    padding-left: 16px;
 }
 #root > ul > li.ignore:hover {
 	color: #000;

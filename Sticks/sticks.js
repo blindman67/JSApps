@@ -4077,7 +4077,8 @@ var mainMenu = {
             color : "hsl(170,50%,40%)",
             highlight : "hsl(170,50%,60%)",
             mouseDownHighlight : "hsl(170,60%,70%)",
-        }
+        },
+        help: "UI to set global states\n[LEFT] click to open close menu\n[LEFT] drag to move/tear/doc menu",
     },
     name : "Scene settings.",
     onchanged(control){
@@ -4287,7 +4288,8 @@ var buildMenu = {
             color : "hsl(210,50%,40%)",
             highlight : "hsl(210,50%,60%)",
             mouseDownHighlight : "hsl(200,80%,80%)",
-        }
+        },
+        help: "UI used to build structures\n[LEFT] click to open close menu\n[LEFT] drag to move/tear/doc menu",
     },
     name : "Build menu",
     capture(){
@@ -4913,6 +4915,7 @@ var groundMenu = {
             mouseDownHighlight : "hsl(250,60%,70%)",
         },
         showResizeIcon : false,
+        help: "UI used to add/edit ground lines[LEFT] click to open close menu\n[LEFT] drag to move/tear/doc menu",
     },
     name : "Ground Line",
     onbeforeclose,
@@ -5167,6 +5170,7 @@ var outlineMenu = {
             mouseDownHighlight : "hsl(290,60%,70%)",
         },
         showResizeIcon : false,
+        help: "UI used to add color and attach sprites\n[LEFT] click to open close menu\n[LEFT] drag to move/tear/doc menu",
     },
     onbeforeclose,
     onchanged(control){
@@ -5384,6 +5388,7 @@ var meshExtrasMenu = {
             mouseDownHighlight : "hsl(330,60%,70%)",
         },
         showResizeIcon : false,
+        help: "UI used to perform mesh like operations on selected structures\n[LEFT] click to open close menu\n[LEFT] drag to move/tear/doc menu",
     },
     onbeforeclose,
     onchanged(control){
@@ -6678,6 +6683,7 @@ var systemMenu = {
         },
         showResizeIcon : false,
         showCloseIcon : true,
+        help: "UI to control running/view state of simulation\n[LEFT] click to open close menu\n[LEFT] drag to move/tear/doc menu",
     },
     onbeforeclose,
     _exit(){
@@ -7236,9 +7242,14 @@ setTimeout(()=>{
     UIGround.open();
     UIOutline.open();
     UIMesh.open();
-    UIAoids.open();
+    //UIAoids.open();
     //UIRetro.open();
-    setTimeout(()=>{UIOutline.fold();UIMesh.fold();UIAoids.fold()},1500);
+    setTimeout(()=>{
+        UIOutline.fold();
+        UIMesh.fold();
+        UIAoids.fold();
+        UISystem.controls.stuff.click("points");
+    }, 1500);
 },100);
 /*setTimeout(()=>{UIBuild.open();UIBuild.dock(UIMain);},150);
 setTimeout(()=>{UIGround.open();UIGround.dock(UIBuild);},200);

@@ -12,9 +12,9 @@
 	</head>
 
 	<body>
- <canvas id="canvasId" class="canvasClass" width=381 height=360 ></canvas>
-  <div id="GUI-container"></div>
-	<script src="./geeQuery/geeQuery.js"></script>
+        <canvas id="canvasId" class="canvasClass" width=381 height=360 ></canvas>
+        <div id="GUI-container"></div>
+        <script src="./geeQuery/geeQuery.js"></script>
 	<script>
 	var canvas = document.getElementById("canvasId");
 	var ctx = canvas.getContext("2d");
@@ -345,34 +345,33 @@ var jsonReadWriter = (function(){
 
 
 	</script>
-	        <script src="DragDrop.js"></script>
-	<script src = "./GrooverGeom/GrooverGeom.js"></script>
-	<script src = "./GrooverGeom/GrooverGeom_ExtendRender.js"></script>
-	<script src = "./GrooverGeom/GrooverGeom_ExtendShapes.js"></script>
-	<script src = "./GrooverGeom/GrooverGeom_ExtendSVG.js"></script>
-	<script src = "./GrooverGeom/GrooverGeom_ExtendUI.js"></script>
-	<script src = "./GrooverGeom/GrooverGeom_ExtendConstructors.js"></script>
-	<script>
-		if (typeof groover.geom.addRender === "function") { groover.geom.addRender(); }             // add render extention if it exists
-		if (typeof groover.geom.addShapes === "function") { groover.geom.addShapes(); }             // add shape extention if it exists
-		if (typeof groover.geom.addUI === "function") { groover.geom.addUI(); }                     // add UI extention if it exists
-		if (typeof groover.geom.addConstructors === "function") { groover.geom.addConstructors(); } // add UI extention if it exists
-		else { console.log("Could not find groover.geom.addConstructors."); }
-		var GG = groover.geom; // shortcut to groover.geom
-	</script>
-
-    <script src="./GrooverGUI/src/CSSInject.js"></script>
-    <script src="./GrooverGUI/src/dialog.js"></script>
-    <script src="./GrooverGUI/src/slider.js"></script>
-    <script src="./GrooverGUI/src/checkBox.js"></script>
-    <script src="./GrooverGUI/src/toggleString.js"></script>
-    <script src="./GrooverGUI/src/select.js"></script>
-    <script src="./GrooverGUI/src/buttons.js"></script>
-    <script src="./GrooverGUI/src/string.js"></script>
-    <script src="./GrooverGUI/src/separator.js"></script>
-    <script src="./GrooverGUI/src/color.js"></script>
-    <script src="./GrooverGUI/src/GUI.js"></script>
-    <script src="./GrooverGUI/src/dataGUI.js"></script>
-	<script src = "sticks.js"></script>
+        <script src="DragDrop.js"></script>
+        <script src = "./GrooverGeom/GrooverGeom.js"></script>
+        <script src = "./GrooverGeom/GrooverGeom_ExtendRender.js"></script>
+        <script src = "./GrooverGeom/GrooverGeom_ExtendShapes.js"></script>
+        <script src = "./GrooverGeom/GrooverGeom_ExtendSVG.js"></script>
+        <script src = "./GrooverGeom/GrooverGeom_ExtendUI.js"></script>
+        <script src = "./GrooverGeom/GrooverGeom_ExtendConstructors.js"></script>
+        <script>
+            if (typeof groover.geom.addRender === "function") { groover.geom.addRender(); }             // add render extention if it exists
+            if (typeof groover.geom.addShapes === "function") { groover.geom.addShapes(); }             // add shape extention if it exists
+            if (typeof groover.geom.addUI === "function") { groover.geom.addUI(); }                     // add UI extention if it exists
+            if (typeof groover.geom.addConstructors === "function") { groover.geom.addConstructors(); } // add UI extention if it exists
+            else { console.log("Could not find groover.geom.addConstructors."); }
+            var GG = groover.geom; // shortcut to groover.geom
+        </script>
+        <script src="./GrooverGUI/src/CSSInject.js"></script>
+        <script src="./GrooverGUI/src/dialog.js"></script>
+        <script src="./GrooverGUI/src/slider.js"></script>
+        <script src="./GrooverGUI/src/checkBox.js"></script>
+        <script src="./GrooverGUI/src/toggleString.js"></script>
+        <script src="./GrooverGUI/src/select.js"></script>
+        <script src="./GrooverGUI/src/buttons.js"></script>
+        <script src="./GrooverGUI/src/string.js"></script>
+        <script src="./GrooverGUI/src/separator.js"></script>
+        <script src="./GrooverGUI/src/color.js"></script>
+        <script src="./GrooverGUI/src/GUI.js"></script>
+        <script src="./GrooverGUI/src/dataGUI.js"></script>
+        <script src = "sticks.js"></script>
 	</body>
 </html>
