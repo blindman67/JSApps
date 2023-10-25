@@ -12,8 +12,8 @@ var R = function(l,a){ return new GG.Rectangle(l,a);};
 var VA = function(){ return new GG.VecArray();};
 var PA = function(){ return new GG.PrimitiveArray();};
 /** GEOMShortcuts.js end **/
-const downloadPath = "../Downloads/";
-const downloadPaths = ["../Downloads/", "../Mark2D_Store/"];
+const downloadPath = "./Scenes/";
+const downloadPaths = ["./Scenes/"];
 downloadPaths.pathIdx = 0;
 var TextData;
 var modelName;
@@ -426,6 +426,7 @@ function dropJson(file){
                 sceneFromJson(shadowed);
             }
             id = findSafeId();
+            file.onloaded instanceof Function && file.onloaded(shadowed); 
         }, () => {
             downloadPaths.pathIdx += 1;
             if (downloadPaths.pathIdx < downloadPaths.length) {
@@ -2313,7 +2314,8 @@ var points = Object.assign({
         if(line.items.length === 0) { return }
         if(this.meanPos.minx > line.items[line.items.length - 1].x){ return }
         startLine = 0;
-        if(this.meanPos.lastStartLine < this.items.length && this.meanPos.minx > line.items[this.meanPos.lastStartLine].x){
+        //if(this.meanPos.lastStartLine < this.items.length && this.meanPos.minx > line.items[this.meanPos.lastStartLine].x){
+        if(this.meanPos.lastStartLine < line.items.length && this.meanPos.minx > line.items[this.meanPos.lastStartLine].x){
             startLine = this.meanPos.lastStartLine;
         }
         for(i = startLine; i < line.items.length; i += 1){
@@ -3656,9 +3658,7 @@ function sceneFromJson(dat){
     groundLines.empty();
     dat.ground.forEach(p=>{
         groundLines.add(groundLines.create(0,0))
-            .fromShadow(
-                restoreDefaults(p,groundLines.getDefaultItem())
-            );
+            .fromShadow(restoreDefaults(p,groundLines.getDefaultItem()));
     });
     groundLines.fix();
     UIMain.update();
@@ -4182,8 +4182,9 @@ var mainMenu = {
             downloadText(JSON.stringify(groundLineSave),fileName.split(".")[0] + "_Ground.json");
             systemMessage("Created and saved lines");
         },
-        _saveStatic : {help : "Saves selected lines as a static drawing for lander game"},
-        _gSave : {help : "Saves ground lines for Retro lander"},
+        _loadScene: {active: false},
+        _saveStatic: {help: "Saves selected lines as a static drawing for lander game", active: false},
+        _gSave: {help: "Saves ground lines for Retro lander", active: false},
     },
     stiffness: "##1,1,40,1,Number of iteration for constraints.",
     airFriction: "##0.99,0.7,1,0.001,Amount of resistance to air points have. 1 is no friction.",
@@ -4875,7 +4876,7 @@ var buildMenu = {
                 lines : lShadow,
             }, modelName);
         },
-        _save : {help : "Saves (downloads) the current structure as a JSON file." },
+        _save : {help : "Saves (downloads) the current structure as a JSON file.", active: false},
         load(){
             if(running){
                 UISystem.controls.run.click("build");
@@ -4902,7 +4903,7 @@ var buildMenu = {
             var event = new MouseEvent( "click");//, {view  : window} );
             el.dispatchEvent(event);
         },
-        _load : {help : "Loads a JSON file." },
+        _load : {help : "Loads a JSON file.", active: false },
     },
 }
 var groundMenu = {
@@ -6847,7 +6848,12 @@ var systemMenu = {
         },
         build(){
             running = !running;
-            if(running){
+            if (running) {
+                if (exampleOnLoad.autoView) {
+                    systemMenu.autoView = systemMenu.useAutoView = true;
+                    UISystem.controls.autoView.update();
+                    exampleOnLoad.autoView = false;
+                }
                 if(systemMenu.useAutoView || systemMenu.useAutoMeanView){
                     view.save("home");
                     textMessage("Home view saved")
@@ -7132,7 +7138,7 @@ var AoidsMenu = {
     },
     /*idPoint: {
     }*/
-}
+};
 var retroLanderMenu = {
     name : "Retro lander",
     dialogState : {
@@ -7218,6 +7224,75 @@ var retroLanderMenu = {
         _connect : { help : "Selected points/lines are flaged as connectors."},
     },
 }
+function exampleOnLoad(data) {
+    if (data.messages) {
+        for (const mess of data.messages) {
+            if (mess[0] === "sys") { systemMessage(mess[1], mess[2]) }
+            else { textMessage(mess[1], mess[2]) }
+        }
+    }
+    if (data.useGround) {        
+        groundMenu.useGround = true;
+        UIGround.controls.useGround.update();        
+        if (data.groundType) { 
+            UIGround.controls.create.click(data.groundType); 
+            if (data.groundSlope !== undefined) { 
+                groundMenu.slope = data.groundSlope;
+                UIGround.controls.slope.update();            
+            }
+        }
+    }
+    if (data.showPoints) {
+        UISystem.controls.stuff.click("points");        
+    }
+    exampleOnLoad.autoView = data.autoView === true ? true : false;
+    if (data.clicks) {
+        for (const click of data.clicks) {
+            if (click[0] === "system") {
+                if (click.length  === 3) {
+                    UISystem.controls[click[1]].click(click[2]);                
+                }
+            }
+        }
+        
+    }
+}
+var ExamplesMenu = {
+    name : "Example scenes",
+    dialogState : {
+        top : 0,
+        left : innerWidth - 210 - 204 - 204,
+        color : "hsl(360,60%,40%)",
+        highlight : "hsl(360,60%,60%)",
+        commonState : {
+            color : "hsl(320,50%,40%)",
+            highlight : "hsl(320,50%,60%)",
+            mouseDownHighlight : "hsl(320,60%,70%)",
+        },
+        showResizeIcon : false,
+    },
+    onbeforeclose,
+    onchanged(control){ },
+    loadBuilding() {
+        if (!running) {
+            systemMenu.useAutoView = false;
+            dropJson({name: "Building111Stories.json", onloaded: exampleOnLoad});
+        } else {
+            systemMessage("Stop sim befor loading scene.");
+        }
+    },
+    _loadBuilding: {help: "Click to load 111 story building simulation."},
+    loadCar() {
+        if (!running) {
+            systemMenu.useAutoView = false;
+            dropJson({name: "Car.json", onloaded: exampleOnLoad});
+        } else {
+            systemMessage("Stop sim befor loading scene.");
+        }
+    },
+    _loadCar: {help: "Click to load car with suspension and drive wheel."}    
+};
+
 GUI.start();
 GUI.image.spriteSheet("meshModIcons","icons/MeshModifyIcons.png",{width : 16, height : 16})
 GUI.image.spriteSheet("meshModWideIcons","icons/MeshModifyIcons.png",{width : 32, height : 16})
@@ -7227,6 +7302,7 @@ var UIGround = dataGUI.createDialog(groundMenu);
 var UIOutline = dataGUI.createDialog(outlineMenu);
 var UIMesh = dataGUI.createDialog(meshExtrasMenu);
 var UIBuild = dataGUI.createDialog(buildMenu);
+const UIScenes = dataGUI.createDialog(ExamplesMenu);
 var UIAoids = dataGUI.createDialog(AoidsMenu);
 var UIRetro = dataGUI.createDialog(retroLanderMenu);
 setTimeout(()=>{
@@ -7234,7 +7310,8 @@ setTimeout(()=>{
     UIBuild.dock(UIMain);
     UIMain.dock(UISystem);
     UIMesh.dock(UIOutline);
-    UIAoids.dock(UIMesh);
+    UIScenes.dock(UIMesh);
+    //UIAoids.dock(UIMesh);
     //UIRetro.dock(UIMesh);
     UISystem.open();
     UIMain.open();
@@ -7242,6 +7319,7 @@ setTimeout(()=>{
     UIGround.open();
     UIOutline.open();
     UIMesh.open();
+    UIScenes.open();
     //UIAoids.open();
     //UIRetro.open();
     setTimeout(()=>{
