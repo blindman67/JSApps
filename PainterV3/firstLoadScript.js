@@ -84,13 +84,15 @@ const busy = (() => {
     return Object.assign(API.start,API);;
 })();
 var AID = 1; // app id, this can have duplicates and be reused
-var UID = 1; // Unique Id to session, must not be duplicated, must not be reused
-var maxUID = 1;
+var UID = 1000000; // Unique Id to session, must not be duplicated, must not be reused
+var maxUID = 1000000;
 const APP_PROTOCOL = document.location.protocol;
+const LOCAL = document.location.href.includes("localhost");
+const HOST = "//blindman67.github.io/JSApps/PainterV3";
 const APPNAME = "PainterV3";
-const APP_ROOT_DIR_SHORT = APP_PROTOCOL + "//localhost";
-const APP_ROOT_DIR = APP_PROTOCOL + "//localhost/";
-const APP_ROOT_DIR_REG = APP_PROTOCOL === "https:" ? /https:\/\/localhost\//gi : /http:\/\/localhost\//gi;
+const APP_ROOT_DIR_SHORT = APP_PROTOCOL + (LOCAL ? "//localhost/JSApps/PainterV3" : HOST);
+const APP_ROOT_DIR = APP_PROTOCOL + (LOCAL ? "//localhost/JSApps/PainterV3/" : HOST + "/");
+const APP_ROOT_DIR_REG = APP_PROTOCOL === "https:" ? (LOCAL ? /https:\/\/localhost\/JSApps\/PainterV3\//gi : /https:\/\/blindman67\.github\.io\/JSApps\/PainterV3\//gi ) : (LOCAL ? /http:\/\/localhost\/JSApps\/PainterV3\//gi : /http:\/\/blindman67\.github\.io\/JSApps\/PainterV3\//gi);
 localStorage[APPNAME + "_GUID"] = localStorage[APPNAME + "_GUID"] ? localStorage[APPNAME + "_GUID"] : 1;
 function getGUID(){  // Global unique to Painter  must not be duplicated, must not be reused
     var GUID = Number(localStorage[APPNAME + "_GUID"] ) + 1;
@@ -111,15 +113,17 @@ const directortySearch = {
 		}
 	}
 }
-localStorage.MS_localDownloads = APP_ROOT_DIR + "Downloads/";  // for other WEB apps on this domain to access the download directory.
+localStorage.MS_localDownloads = APP_ROOT_DIR + (LOCAL ? "Examples/" : "Examples/");  // for other WEB apps on this domain to access the download directory.
 const directories = [  // list of search URl when locating files
-    localStorage[APPNAME + "_searchDirectory"] !== undefined ? localStorage[APPNAME + "_searchDirectory"] : APP_ROOT_DIR + "PainterV3/icons/",
-    APP_ROOT_DIR + "PainterV3/icons/",
-    APP_ROOT_DIR + "PainterV3/templates/",
-    APP_ROOT_DIR + "Aoids3Store/",
-    APP_ROOT_DIR + "MarkArmy_Store/",
-    APP_ROOT_DIR + "Mark2D_Store/",
-    APP_ROOT_DIR + "Downloads/",
+    localStorage[APPNAME + "_searchDirectory"] !== undefined ? localStorage[APPNAME + "_searchDirectory"] : APP_ROOT_DIR + "icons/",
+    APP_ROOT_DIR + "icons/",
+    APP_ROOT_DIR + "templates/",
+    ...(LOCAL ? [
+        APP_ROOT_DIR + "Aoids3Store/",
+        APP_ROOT_DIR + "MarkArmy_Store/",
+        APP_ROOT_DIR + "Mark2D_Store/",
+    ] : [] ),
+    APP_ROOT_DIR + (LOCAL ? "Examples/" : "Examples/"),
 ];
 const ICON_FROM = uni => String.fromCharCode(55357) + String.fromCharCode(uni);
 const STYLE_WRAP_ICON_FROM = (uni, className) => `<span class="${className}">${ICON_FROM(uni)}</span>`;
@@ -422,7 +426,7 @@ const CanDo = {
 CanDo.check();
 const unsafeMessage = "Some functions will taint the canvas and are thus turned off.\nYou can turn off browser security and activate unsafe functions\nusing the command safe.";
 const settings = {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#2f465a",
     widgetColor: "#0F0",
     highlightColor: "cyan",        // When highlighting a sprite
     highlightSelFit: "#FF4",
@@ -490,7 +494,7 @@ const settings = {
     recentCount: 40,               // number of media files to keep in recent media list
     allowUnsafe: false,            // if true then allows draw functions that taint the canvas.
     JPEG_Save_Quality: 0.9,          // Used when saving images as jpg. Valid range 0 to 1 with 1 being best quality.
-    downloadDir: APP_ROOT_DIR + "Downloads/",
+    downloadDir: APP_ROOT_DIR + "Examples/",
     recent: [],
     saveGridState: true,
 	dynamicCompressor: true,
@@ -518,8 +522,8 @@ const settings = {
     autoSizeTimeline: true,
     includeUnsavedImagesWhenSaving: true,
     appendIdOnSave: false,
-    author: "Blindman67",
-    copyright: "All content copyright Blindman67. All rights reserved. 2022",
+    author: "Mark Spronck",
+    copyright: "All content copyright Mark Spronck. All rights reserved. 2015-2023",
     project: "Painter V3 Development",
     selectLoaded: true,
     viewLoaded: true,

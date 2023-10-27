@@ -1,0 +1,458 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2023-10-16T02:30:16.540Z",
+        "id": 485966,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018",
+        "scene": "painterV3Scene_485912",
+        "type": "scene"
+    },
+    "scene": {
+        "workspace": {
+            "showGrid": false,
+            "snapMode": 0,
+            "pixelSnap": "1",
+            "backgroundColor": "rgb(69, 89, 106)"
+        },
+        "sprites": [
+            {
+                "name": "Vanish Guide",
+                "id": 485941,
+                "x": -1467.67,
+                "y": 198.53,
+                "h": 23.55,
+                "rx": -0.142948,
+                "ry": 1.427848,
+                "a": 0.5,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "color": "red",
+                "rgb": "#ff0000",
+                "gridY": 8,
+                "type": "vanish"
+            },
+            {
+                "name": "Center Line",
+                "id": 485942,
+                "x": -123.05,
+                "y": 5,
+                "w": 64,
+                "h": 64,
+                "rx": -1.713744,
+                "ry": -0.142948,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#ff0000",
+                "gridSpecial": 5,
+                "hidden": true,
+                "lookat": [
+                    485941,
+                    1.5707963267948966,
+                    0
+                ],
+                "type": "cutter"
+            },
+            {
+                "name": "Outer Near",
+                "id": 485943,
+                "x": -127.1,
+                "y": -122,
+                "w": 64,
+                "h": 64,
+                "rx": 4.477693,
+                "ry": 6.04849,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#ff0000",
+                "gridSpecial": 5,
+                "hidden": true,
+                "lookat": [
+                    485941,
+                    1.5707963267948966,
+                    0
+                ],
+                "type": "cutter"
+            },
+            {
+                "name": "Outer Far",
+                "id": 485944,
+                "x": 126.48,
+                "y": -182.63,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "rgb": "#ff0000",
+                "gridSpecial": 6,
+                "hidden": true,
+                "type": "cutter"
+            },
+            {
+                "name": "Vanish Guide function link",
+                "id": 485945,
+                "x": 602.7,
+                "y": -500.93,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "linked": [
+                        485941,
+                        485942,
+                        485943,
+                        485944
+                    ],
+                    "srcIds": [
+                        26220,
+                        26221,
+                        26222,
+                        26223
+                    ],
+                    "source": "templates/VanishControls.js",
+                    "values": {
+                        "showLines": "Hide",
+                        "showControls": "Hide",
+                        "colorGrid": "On",
+                        "lineCount": 4
+                    },
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            },
+            {
+                "name": "Cutter",
+                "id": 485947,
+                "x": 6,
+                "y": 3,
+                "hideOutline": false,
+                "type": "image",
+                "imgName": "canvas485949",
+                "imgGuid": 485965
+            },
+            {
+                "name": "Vanish Guide",
+                "id": 485950,
+                "x": 717.24,
+                "y": 29.77,
+                "h": 55.15,
+                "rx": -3.102411,
+                "ry": -1.531614,
+                "a": 0.5,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "color": "#0C0",
+                "rgb": "#00ff00",
+                "gridY": 8,
+                "type": "vanish"
+            },
+            {
+                "name": "Center Line",
+                "id": 485951,
+                "x": 134.89,
+                "y": 6.94,
+                "w": 64,
+                "h": 64,
+                "rx": 1.609978,
+                "ry": 3.180775,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#00ff00",
+                "gridSpecial": 5,
+                "hidden": true,
+                "lookat": [
+                    485950,
+                    1.5707963267948966,
+                    0
+                ],
+                "type": "cutter"
+            },
+            {
+                "name": "Outer Near",
+                "id": 485952,
+                "x": 122.42,
+                "y": -122.98,
+                "w": 64,
+                "h": 64,
+                "rx": 1.822161,
+                "ry": 3.392957,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#00ff00",
+                "gridSpecial": 5,
+                "hidden": true,
+                "lookat": [
+                    485950,
+                    1.5707963267948966,
+                    0
+                ],
+                "type": "cutter"
+            },
+            {
+                "name": "Outer Far",
+                "id": 485953,
+                "x": -122.94,
+                "y": -185.99,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "rgb": "#00ff00",
+                "gridSpecial": 6,
+                "hidden": true,
+                "type": "cutter"
+            },
+            {
+                "name": "Vanish Guide function link",
+                "id": 485954,
+                "x": 607.75,
+                "y": -462.45,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "linked": [
+                        485950,
+                        485951,
+                        485952,
+                        485953
+                    ],
+                    "srcIds": [
+                        26220,
+                        26221,
+                        26222,
+                        26223
+                    ],
+                    "source": "templates/VanishControls.js",
+                    "values": {
+                        "showLines": "Hide",
+                        "showControls": "Hide",
+                        "colorGrid": "On",
+                        "lineCount": 4
+                    },
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            },
+            {
+                "name": "Vanish Guide",
+                "id": 485956,
+                "x": 80,
+                "y": -5916.07,
+                "h": 5.71,
+                "rx": 1.584101,
+                "ry": 3.154897,
+                "a": 0.5,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "color": "#88f",
+                "rgb": "#0088ff",
+                "gridY": 8,
+                "type": "vanish"
+            },
+            {
+                "name": "Center Line",
+                "id": 485957,
+                "x": -1.27,
+                "y": 192,
+                "w": 64,
+                "h": 64,
+                "rx": 0.013304,
+                "ry": 1.584101,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#0088ff",
+                "gridSpecial": 5,
+                "hidden": true,
+                "lookat": [
+                    485956,
+                    1.5707963267948966,
+                    0
+                ],
+                "type": "cutter"
+            },
+            {
+                "name": "Outer Near",
+                "id": 485958,
+                "x": -126.44,
+                "y": -118.2,
+                "w": 64,
+                "h": 64,
+                "rx": 6.318775,
+                "ry": 7.889572,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#0088ff",
+                "gridSpecial": 5,
+                "hidden": true,
+                "lookat": [
+                    485956,
+                    1.5707963267948966,
+                    0
+                ],
+                "type": "cutter"
+            },
+            {
+                "name": "Outer Far",
+                "id": 485959,
+                "x": -137.66,
+                "y": 196.96,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "rgb": "#0088ff",
+                "gridSpecial": 6,
+                "hidden": true,
+                "type": "cutter"
+            },
+            {
+                "name": "Vanish Guide function link",
+                "id": 485960,
+                "x": 599.18,
+                "y": -430.07,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": false,
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "linked": [
+                        485956,
+                        485957,
+                        485958,
+                        485959
+                    ],
+                    "srcIds": [
+                        26220,
+                        26221,
+                        26222,
+                        26223
+                    ],
+                    "source": "templates/VanishControls.js",
+                    "values": {
+                        "showLines": "Hide",
+                        "showControls": "Hide",
+                        "colorGrid": "On",
+                        "lineCount": 4
+                    },
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "vectors": [],
+        "groups": [],
+        "collections": [
+            {
+                "name": "VanishHelpers",
+                "guid": 485946,
+                "children": [
+                    485941,
+                    485942,
+                    485943,
+                    485944,
+                    485945
+                ]
+            },
+            {
+                "name": "VanishHelpers",
+                "guid": 485955,
+                "children": [
+                    485950,
+                    485951,
+                    485952,
+                    485953,
+                    485954
+                ]
+            },
+            {
+                "name": "VanishHelpers",
+                "guid": 485961,
+                "children": [
+                    485956,
+                    485957,
+                    485958,
+                    485959,
+                    485960
+                ]
+            }
+        ],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            },
+            "timeMarks": []
+        },
+        "animation": {
+            "time": 0,
+            "start": 0,
+            "end": 120,
+            "length": 120,
+            "speed": 1
+        },
+        "kinematics": [],
+        "text": [],
+        "media": [],
+        "images": [
+            {
+                "name": "canvas485949",
+                "id": 485965,
+                "dataURL": "data:image/png;base64,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"
+            }
+        ]
+    }
+}
