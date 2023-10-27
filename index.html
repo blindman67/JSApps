@@ -6,14 +6,15 @@
 		 <link rel="stylesheet" type="text/css" href="canvasTemplate.css">
     </head>
     <body>
-	<div id="root">
-		<h3>JavaScript experiments by Blindman67</h3>
+	<div id="root">        
+		<h2>JavaScript experiments by Blindman67</h3>
         <h4>All content Copyright Blindman67 2023</h4>
         All apps are intended to be use on a desktop PC with a 3 button mouse with wheel.<br>
 		Select app to start it.
         <ul>
             <li class="ignore"></li>
-            <li class="ignore head">Painter V3. For game creation</li>       
+            <li class="ignore head">Painter V3. For all thing game creation</li>       
+            <li class="ignore"></li>
             <li class="link" data-named="./PainterV3/PainterV3.html" 
             title=
 "Painter is a large and complex app
@@ -38,6 +39,7 @@ Git hosted pages do not use IIS and thus there is a lot of work
 needed to make the app compatable
 Some feature may not work."
             >[Sticks editor] Warning install in progress</li>
+            <li class="ignore"></li>
             <li class="ignore help">Quick start guide</li>
             <li class="ignore help indent">Right click in empty space creates a point</li>
             <li class="ignore help indent">Right click over point attaches a line</li>
@@ -52,22 +54,71 @@ Some feature may not work."
             <li class="ignore"></li>
             
             <li class="ignore head">Pool table simulation using 2D HTMLCanvasElement and CanvasRenderingContext2D API </li>
+            <li class="links">
+                <span class="link" data-url="./Apps/Pool/index.html?small">Small 7ft table</span>
+                <span class="link" data-url="./Apps/Pool/index.html?small_guides">With guides</span>
+                <span class="link" data-url="./Apps/Pool/index.html?small_guides_complex">With full shot guides</span>
+            </li>
+            <li class="links">
+                <span class="link" data-url="./Apps/Pool/index.html?medium">Medium 8ft table</span>
+                <span class="link" data-url="./Apps/Pool/index.html?medium_guides">With guides</span>
+                <span class="link" data-url="./Apps/Pool/index.html?medium_guides_complex">With full shot guides</span>
+            </li>
+            <li class="links">
+                <span class="link" data-url="./Apps/Pool/index.html?standard">Standard 8.5ft table</span>
+                <span class="link" data-url="./Apps/Pool/index.html?standard_guides">With guides</span>
+                <span class="link" data-url="./Apps/Pool/index.html?standard_guides_complex">With full shot guides</span>
+            </li>
+            <li class="links">
+                <span class="link" data-url="./Apps/Pool/index.html?large">Large 9ft table</span>
+                <span class="link" data-url="./Apps/Pool/index.html?large_guides">With guides</span>
+                <span class="link" data-url="./Apps/Pool/index.html?large_guides_complex">With full shot guides</span>
+            </li>
+            <li class="links">
+                <span class="link" data-url="./Apps/Pool/index.html?huge">Huge 11ft table</span>
+                <span class="link" data-url="./Apps/Pool/index.html?huge_guides">With guides</span>
+                <span class="link" data-url="./Apps/Pool/index.html?huge_guides_complex">With full shot guides</span>
+            </li>            
+            <li class="ignore"></li>
             <li class="ignore help">Note this game has sound FX that will start with your first shot.</li>
-            <li class="link" data-url="./Apps/Pool/index.html?small">Pool on Small table</li>
-            <li class="link" data-url="./Apps/Pool/index.html?medium">Pool on Medium table</li>
-            <li class="link" data-url="./Apps/Pool/index.html?standard">Pool on Standard table</li>
-            <li class="link" data-url="./Apps/Pool/index.html?standard_guides">Pool on Standard table with simple shot guide</li>
-            <li class="link" data-url="./Apps/Pool/index.html?standard_guides_complex">Pool on Standard table with full shot guides</li>
-            <li class="link" data-url="./Apps/Pool/index.html?large">Pool on Large table</li>
-            <li class="link" data-url="./Apps/Pool/index.html?huge">Pool on Huge table</li>
+            <li class="ignore help">How to play</li>
+            <li class="ignore help indent">Hold left mouse to aim.</li>
+            <li class="ignore help indent">Left drag sets direction and power.</li>
+            <li class="ignore help indent">The further you drag the cue from cue ball the more power in the strike.</li>
+            <li class="ignore help indent">Release left button to take shot.</li>
+            <li class="ignore help">Fine anim and lock anim.</li>
+            <li class="ignore help indent">With left button down, hold down right button for fine amining.</li>
+            <li class="ignore help indent">With left and right button down drag around cue ball to adjust aim clockwise or counterclockwise.</li>
+            <li class="ignore help indent">Releasing right button while left button down locks strike direction.</li>
+            <li class="ignore help indent">You can still change strike power with left button down by changing cue distance to que ball.</li>
+            <li class="ignore help indent">To make a shot release the left button.</li>
+            <li class="ignore help indent">To cancel a shot. Lock direction [right button while left down]. Drag cue over cue ball and release left button.</li>
+            <li class="ignore help">Taking the shot</li>
+            <li class="ignore help indent">When you have hit the cue ball the sim will run until all balls have stopped.</li>
+            <li class="ignore help indent">You can speed up the sim while waiting for balls to stop by holding right button.</li>
+            <li class="ignore help indent">When all the colored balls have been sunk the table will reset.</li>
+            <li class="ignore help indent">If you sink the cue ball you will need to place it in the D to resume play.</li>
+            <li class="ignore help indent">Sunk balls are shown at the bottom of the screen in the order they are sunk.</li>
+            <li class="ignore help">Placement mode.</li>
+            <li class="ignore help indent">Before taking a shot, right click to enter placement mode.</li>
+            <li class="ignore help indent">Left click the ball to move.</li>
+            <li class="ignore help indent">Move the ball to where you want it and left click to put it down.</li>
+            <li class="ignore help indent">When you want to play select the cue ball and place it where you want to take a shot from.</li>
+            <li class="ignore help">Extras.</li>
+            <li class="ignore help indent">Hold [W] while taking a shot to add extra power to your shot.</li>
+            <li class="ignore help indent">Hold [S] while taking a shot to hit the cue ball above center. This will give the ball legs.</li>
+            <li class="ignore help indent">Hold [X] while taking a shot to hit the cue ball below center. This will add back spin.</li>
+
             <li class="ignore"></li>
             
             <li class="ignore head">More Games</li>
             <li class="link" data-url="./standalone/PowerSlider/index.html">Powers of Two. Modified 1024 game</li>
             <li class="ignore help">Mouse selects game size. Direction keys to slide tiles. Aim is to get tile with 1024</li>
+            <li class="ignore"></li>
             
             <li class="link" data-url="./standalone/SpaceInvaders/index.html">Space Invaders.</li>
             <li class="ignore help">Keyboard [1] insert coin. [S] Play [Left][Right] to move [Up] to fire.</li>
+            <li class="ignore"></li>
             
             <li class="link" data-url="./standalone/GhostsRevenge/index.html">Ghosts Revenge. Pac-Man clone.</li>
             <li class="ignore help">Keyboard only. Any key to start. Arrow keys to move.</li>

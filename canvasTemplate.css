@@ -1,21 +1,46 @@
 body {
 	font-family: arial;
+    background: #EEE;
+}
+#root {
+    background: #FFF;
+    padding: 8px;
+}
+#root > h1, #root > h2, #root > h3, #root > h4 {
+     text-align: center;
+}
+#root > ul {
+     display: table;
 }
 #root > ul > li {
     font-family: monospace;
 	cursor: pointer;
-	width: 800px;
     color: #00A;
     padding-left: 8px;
+    display: table-caption
+}
+#root > ul > .links {
+    padding-top: 4px;
+    border-bottom: 1px solid #AAF;
 }
 #root > ul > li.link {
     padding-top: 4px;
     border-bottom: 1px solid #AAF;
 }
-#root > ul > li:hover {
+#root > ul > li.link:hover {
 	color: #00A;
 	background-color: #FDB;
 }
+#root > ul > li > span.link {
+    padding-top: 4px;
+    border-bottom: 1px solid #AAF;
+}
+#root > ul > li > span.link:hover {
+	color: #00A;
+	background-color: #FDB;
+}
+
+
 #root > ul > li.ignore {
     list-style-type: none;
 	cursor: default;
@@ -26,14 +51,13 @@ body {
 #root > ul > li.ignore.head {
     font-size: larger;
     border-top: 2px solid black;
+    margin-top: 10px;
 }
 #root > ul > li.ignore.help {
-    font-size: smaller;
+    font-size: small;
 }
 #root > ul > li.ignore.help.indent {
     padding-left: 16px;
+    font-size: smaller;
 }
-#root > ul > li.ignore:hover {
-	color: #000;
-	background-color: transparent;
-}
+

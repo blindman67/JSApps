@@ -7241,6 +7241,15 @@ function exampleOnLoad(data) {
                 UIGround.controls.slope.update();            
             }
         }
+        if (data.groundStructure) { 
+            surfaceLines.empty();
+            groundMenu.groundType = "";
+            points.eachItem(p=>{p.surface && surfaceLines.add(surfaceLines.create(p))});
+            surfaceLines.sort();
+            surfaceLines.fix();
+            groundMenu.useGround = true;
+            UIGround.controls.useGround.update();     
+        }            
     }
     if (data.showPoints) {
         UISystem.controls.stuff.click("points");        
@@ -7277,26 +7286,29 @@ var ExamplesMenu = {
         if (!running) {
             systemMenu.useAutoView = false;
             dropJson({name: "Building111Stories.json", onloaded: exampleOnLoad});
-        } else {
-            systemMessage("Stop sim befor loading scene.");
-        }
+        } else { systemMessage("Stop current sim befor loading another scene."); }
     },
     _loadBuilding: {help: "Click to load 111 story building simulation."},
     loadCar() {        
         if (!running) { systemMenu.useAutoView = false; dropJson({name: "Car.json", onloaded: exampleOnLoad}); }
-        else { systemMessage("Stop sim befor loading scene."); }
+        else { systemMessage("Stop current sim befor loading another scene."); }
     },
     _loadCar: {help: "Click to load car with suspension and drive wheel."},    
     loadWorm() {        
         if (!running) { systemMenu.useAutoView = false; dropJson({name: "Worm.json", onloaded: exampleOnLoad}); }
-        else { systemMessage("Stop sim befor loading scene."); }
+        else { systemMessage("Stop current sim befor loading another scene."); }
     },
     _loadWorm: {help: "Click to load Worm that uses occilators to move."},    
+    loadBridge() {        
+        if (!running) { systemMenu.useAutoView = false; dropJson({name: "SuspensionBridge.json", onloaded: exampleOnLoad}); }
+        else { systemMessage("Stop current sim befor loading another scene."); }
+    },
+    _loadBridge: {help: "Click to load Suspension bridge, some cars to roll over it and anoscillator tuned to bridges resonance."},    
 };
 
 GUI.start();
-GUI.image.spriteSheet("meshModIcons","icons/MeshModifyIcons.png",{width : 16, height : 16})
-GUI.image.spriteSheet("meshModWideIcons","icons/MeshModifyIcons.png",{width : 32, height : 16})
+GUI.image.spriteSheet("meshModIcons", "icons/MeshModifyIcons.png",{width : 16, height : 16})
+GUI.image.spriteSheet("meshModWideIcons", "icons/MeshModifyIcons.png",{width : 32, height : 16})
 var UISystem = dataGUI.createDialog(systemMenu);
 var UIMain = dataGUI.createDialog(mainMenu);
 var UIGround = dataGUI.createDialog(groundMenu);

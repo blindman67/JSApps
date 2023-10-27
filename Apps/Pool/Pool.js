@@ -17,11 +17,11 @@ import {StartAudio} from "./Synth.js";
 const playerAName = "Mark";
 const playerBName = "Gaye";
 const keyboard = simpleKeyboard();
-keyboard.addKey("KeyA", "KeyS", "KeyD", "KeyW", "KeyN", "KeyP", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit0");
+keyboard.addKey("KeyA", "KeyS", "KeyX", "KeyD", "KeyW", "KeyN", "KeyP", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit0");
 const keys = keyboard.keys;
 mathExt(); // creates some additional math functions
 const setup = location.href.split("?")[1]?.toLowerCase() ?? "";
-var allowSpinControl = true;//setup.includes("spin");//true;//false;
+var allowSpinControl = true;
 var slowDevice = false;
 const renderSetup = setup.split("render[")[1]?.split("]")[0].split("_") ?? [];
 const RENDER_COMPLEX_BALLS = !renderSetup.includes("noshade");
@@ -508,6 +508,7 @@ const mouse = Object.assign(startMouse(true, true), {
     spin: 0,
     spinPower: 0,
 	spinMode: false,
+    spinOn: false,
     mass: (MOUSE_TIP + MOUSE_END) * 0.5  * Math.PI * MOUSE_LENGTH * MASS_SCALE
 });
 var maxPull = BALL_SIZE * BALL_MASS / mouse.mass;
@@ -516,7 +517,11 @@ var message = "Welcome to POOL SIM.";
 const messages = [
     "Left click & drag que for power, release to shoot.",
     //"While dragging press and hold W,A,S,or D to add spin.",
-    "While lining shot hold [S] to setup cue ball spin.",
+    "While taking the shoot hold [W] to add power to the cue.",
+    "While taking the shoot hold [S] to hit cue ball above center. Adds travel to cue ball.",
+    "While taking the shoot hold [X] to hit cue ball below center. Holds cue ball.",
+    
+    "Cue ball spin is not enabled. Sorry",
     "Before taking a shot, right click to enter placement mode",
 
 ]
@@ -1346,25 +1351,47 @@ function renderQue(ball) {  // ball is the que target
     ctx.stroke();
 
     ctx.globalCompositeOperation = "source-over"
-    if(allowSpinControl && mouse.spinMode) {
-        const spin = Math.max(15, mouse.spinPower);
-        const sax = Math.cos(mouse.spin);
-        const say = Math.sin(mouse.spin);
-        ctx.setTransform(sax, say, -say, sax, B.x * TABLE_SCALE + GAME_LEFT, B.y * TABLE_SCALE + GAME_TOP);
-        ctx.fillStyle = "#F777";
-        ctx.strokeStyle = "#A44A";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.lineTo(0, -5);
-        ctx.lineTo(spin, -5);
-        ctx.lineTo(spin, -15);
-        ctx.lineTo(spin + 15,0);
-        ctx.lineTo(spin, 15);
-        ctx.lineTo(spin, 5);
-        ctx.lineTo(0, 5);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
+    if(allowSpinControl) {
+        if (mouse.spinOn) {
+            const spin = 5;
+            const sax = Math.cos(mouse.spin);
+            const say = Math.sin(mouse.spin);
+            ctx.setTransform(sax, say, -say, sax, B.x * TABLE_SCALE + GAME_LEFT, B.y * TABLE_SCALE + GAME_TOP);
+            ctx.fillStyle = "#F777";
+            ctx.strokeStyle = "#A44A";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.lineTo(0, -5);
+            ctx.lineTo(spin, -5);
+            ctx.lineTo(spin, -15);
+            ctx.lineTo(spin + 15,0);
+            ctx.lineTo(spin, 15);
+            ctx.lineTo(spin, 5);
+            ctx.lineTo(0, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+        } else if (mouse.spinMode) {
+            const spin = Math.max(15, mouse.spinPower);
+            const sax = Math.cos(mouse.spin);
+            const say = Math.sin(mouse.spin);
+            ctx.setTransform(sax, say, -say, sax, B.x * TABLE_SCALE + GAME_LEFT, B.y * TABLE_SCALE + GAME_TOP);
+            ctx.fillStyle = "#F777";
+            ctx.strokeStyle = "#A44A";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.lineTo(0, -5);
+            ctx.lineTo(spin, -5);
+            ctx.lineTo(spin, -15);
+            ctx.lineTo(spin + 15,0);
+            ctx.lineTo(spin, 15);
+            ctx.lineTo(spin, 5);
+            ctx.lineTo(0, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
     }
     if (lockAngle && !lockAngleLocked) {
         const A = mouse.angle;
@@ -2103,28 +2130,6 @@ function doMouseInterface() {
             let cx = ballToPlace.x = mouse.tx;
             let cy = ballToPlace.y = mouse.ty;
             let ok = canAdd(ballToPlace), maxIt = 10, count = 1;
-			/*while (!ok && maxIt--) {
-				ok = true;
-                const over = ballNearMouse();
-                if (over && over !== ballToPlace) {
-					cx += over.x;
-					cy += over.y;
-					count ++;
-                    //const x = ballToPlace.x - cx / count;
-                    //const y = ballToPlace.y - cy / count;
-                    const x = mouse.tx - cx / count;
-                    const y = mouse.ty - cy / count;
-                    const d = (x * x + y * y) ** 0.5;
-                    ballToPlace.x = over.x + (x / d) * offsetDist;
-                    ballToPlace.y = over.y + (x / d) * offsetDist;
-                    ok = canAdd(ballToPlace);
-				}
-			}
-			if (!ok) {
-			    ballToPlace.x = oldx;
-                ballToPlace.y = oldy;
-				
-			}*/
             if (!ok) {
                 ballToPlace.x = oldx;
                 ballToPlace.y = oldy;
@@ -2143,10 +2148,6 @@ function doMouseInterface() {
 						ballToPlace.y = over.y - ny;
 						ok = canAdd(ballToPlace);
 					}
-                }
-                if (!ok){
-                   //ballToPlace.x = oldx;
-                    //ballToPlace.y = oldy;
                 }
             }
             if (mouse.button === 1) {
@@ -2253,53 +2254,31 @@ function doMouseInterface() {
 					mouse.spring += mouse.pull;
 					mouse.spring *= 0.95;
 					SHOW_GUIDES && !mouse.spinMode && findFirstHit(B, an, balls)	;
-					if(allowSpinControl && keys.KeyS) { 
-						mouse.spinMode = true;
+					/*if(allowSpinControl && keys.KeyS) { 
+						mouse.spinMode = true;						
 						mouse.spin = -Math.PI;
 						mouse.spinPower = mouse.spring;
 						lockAngleAt = mouse.angleSet = mouse.angleToHit;
 						mouse.pullSet = mouse.pull;
 						mouse.springSet = mouse.spring;
 						mouse.posSet = mouse.pos;
-					}
-					
+					}*/
+
+					if(allowSpinControl && keys.KeyX) { 
+						mouse.spin =  mouse.angleToHit;
+						mouse.spinPower = mouse.spring;
+                        mouse.spinOn = true;
+					} else if(allowSpinControl && keys.KeyS) { 
+						mouse.spin =  mouse.angleToHit - Math.PI;
+						mouse.spinPower = mouse.spring;
+                        mouse.spinOn = true;
+					} else {
+                        mouse.spinOn = false;
+                        mouse.spinPower = 0;
+                    }
 				}
             }
-			
-				/*
-                if (mouse.spin === 0) {
-                    if(keys.KeyD) {
-                        mouse.spin = -Math.PI / 2;
-                        mouse.spinPower = mouse.spring;
-                    }
-                    if(keys.KeyA) {
-                        mouse.spin = Math.PI / 2;
-                        mouse.spinPower = mouse.spring;
-                    }
-                    if(keys.KeyS) {
-                        mouse.spin = Math.TAU;
-                        mouse.spinPower = mouse.spring;
-                    }
-                    if(keys.KeyW) {
-                        mouse.spin = -Math.PI;
-                        mouse.spinPower = mouse.spring;
-                    }
-                } else {
-                    mouse.spin = 0;
-                    if(keys.KeyD) {
-                        mouse.spin = -Math.PI / 2;
-                    }
-                    if(keys.KeyA) {
-                        mouse.spin = Math.PI / 2;
-                    }
-                    if(keys.KeyS) {
-                        mouse.spin = Math.TAU;
-                    }
-                    if(keys.KeyW) {
-                        mouse.spin = -Math.PI;
-                    }
-                }
-				*/
+
 
         } else {
 
@@ -2318,10 +2297,10 @@ function doMouseInterface() {
                 mouse.angle = lockAngleAt
             }
             if (mouse.pull) {
-                if (allowSpinControl && mouse.spin) {
-                    const sp = Math.max(15,mouse.spring - mouse.spinPower);
+                if (allowSpinControl && mouse.spinOn) {
+                    //const sp = Math.max(15,mouse.spring - mouse.spinPower);
                    // mouse.spring = mouse.spinPower;
-                    mouse.spinPower = mouse.spinPower;
+                   // mouse.spinPower = mouse.spinPower;
                 }
 				mouse.button = 0;
                 mouse.pos = mouse.spring;
@@ -2352,7 +2331,7 @@ function doMouseInterface() {
 				const hitPower = Math.min(1, (((mouse.speed * mouse.mass) / BALL_MASS) / 120) ** 1.6) * 120;
                 B.vx = Math.cos(mouse.angleToHit + Math.PI) * hitPower;
                 B.vy = Math.sin(mouse.angleToHit + Math.PI) * hitPower;
-                if (allowSpinControl && mouse.spin) {
+                if (allowSpinControl && (mouse.spin || mouse.spinOn)) {
                     B.spin = (mouse.spinPower * 0.2 / BALL_SIZE);
                     B.spinDirection = mouse.spin;
                     mouse.spin = 0;
@@ -2363,6 +2342,7 @@ function doMouseInterface() {
                 mouse.speed = 0;
                 mouse.pos = 0;
                 mouse.spin = 0;
+                mouse.spinOn = false;
                 lockAngleLocked = lockAngle = false;
                 game && game.shoots();
             }
