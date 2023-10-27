@@ -221,6 +221,10 @@ const keyboard = (() => {
         ArrowDown : false,
         ArrowLeft : false,
         ArrowRight : false,
+        KeyW: false,
+        KeyS: false,
+        KeyA: false,
+        KeyD: false,
         anyKey : false,
     };
     const callbacks = {};
@@ -1227,10 +1231,10 @@ function createMap(){
             const nextMoveOpt = [0,1,2,3,4]; // move options for next cell in direction of movement
             var moveDist = 0; // distance moved from current pos;
             const controls = {
-                up : {name : "ArrowUp", dir : 3, on : false},
-                down : {name : "ArrowDown", dir : 1, on : false },
-                right : {name : "ArrowRight", dir : 0, on : false },
-                left : {name : "ArrowLeft", dir : 2, on : false },
+                up:    {names: ["ArrowUp",    "KeyW"], dir: 3, on: false},
+                down:  {names: ["ArrowDown",  "KeyS"], dir: 1, on: false},
+                right: {names: ["ArrowRight", "KeyD"], dir: 0, on: false},
+                left:  {names: ["ArrowLeft",  "KeyA"], dir: 2, on: false},
                 mostResent : [-1,-1,-1,-1],
             }
             // p is player and used to reference the player in this code section
@@ -1313,7 +1317,9 @@ function createMap(){
                 move(keys){
                     var mDir = -1;
                     const checkKey = (key) => {
-                        if(keys[key.name]){
+                        var idx = key.names.length, isOn = false;
+                        while (--idx) { if (keys[key.names[idx]]) { isOn = true; break; } }
+                        if(isOn){
                             if(!key.on){
                                 doFor(3,i=>controls.mostResent[3-i] = controls.mostResent[2-i]);
                                 controls.mostResent[0] = key.dir;
@@ -1850,7 +1856,7 @@ const game = {
 }
 
 var cheats = 0;
-keyboard.addCallback("KeyD",()=>{
+keyboard.addCallback("KeyM",()=>{
     cheats += 1;
     if(cheats === 4){
         log("Cheats on.");
