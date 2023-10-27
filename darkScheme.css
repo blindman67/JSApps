@@ -1,0 +1,33 @@
+body {
+    background: #111;
+    color: white;
+}
+#root {
+    background: #000;
+}
+#root > ul > li {
+    color: #DDF;
+}
+#root > ul > .links {
+    border-bottom-color: #006;
+}
+#root > ul > li.link {
+    border-bottom-color: #006;
+}
+#root > ul > li > span.link {
+    border-bottom-color: #006;
+}
+#root > ul > li.link:hover {
+	background-color: #00A;
+	color: #FDB;
+}
+#root > ul > li > span.link:hover {
+	background-color: #00A;
+	color: #FDB;
+}
+#root > ul > li.ignore {
+    color: white;
+}
+#root > ul > li.ignore.head {
+    border-top-color: white;
+} 

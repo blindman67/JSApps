@@ -1,9 +1,7 @@
 body {
 	font-family: arial;
-    background: #EEE;
 }
 #root {
-    background: #FFF;
     padding: 8px;
 }
 #root > h1, #root > h2, #root > h3, #root > h4 {
@@ -15,42 +13,30 @@ body {
 #root > ul > li {
     font-family: monospace;
 	cursor: pointer;
-    color: #00A;
     padding-left: 8px;
     display: table-caption
 }
 #root > ul > .links {
     padding-top: 4px;
-    border-bottom: 1px solid #AAF;
+    border-bottom: 1px solid;
 }
 #root > ul > li.link {
     padding-top: 4px;
-    border-bottom: 1px solid #AAF;
-}
-#root > ul > li.link:hover {
-	color: #00A;
-	background-color: #FDB;
+    border-bottom: 1px solid;
 }
 #root > ul > li > span.link {
     padding-top: 4px;
-    border-bottom: 1px solid #AAF;
+    border-bottom: 1px solid;
 }
-#root > ul > li > span.link:hover {
-	color: #00A;
-	background-color: #FDB;
-}
-
-
 #root > ul > li.ignore {
     list-style-type: none;
 	cursor: default;
-    color: black;
     white-space: pre;
     min-height: 12px;
 }
 #root > ul > li.ignore.head {
     font-size: larger;
-    border-top: 2px solid black;
+    border-top: 2px solid;
     margin-top: 10px;
 }
 #root > ul > li.ignore.help {
