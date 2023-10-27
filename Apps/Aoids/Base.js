@@ -221,7 +221,7 @@ Base.prototype = {
         return this;
     },
     remove(rock) {
-        if (rock.attached) {
+        if (rock.attached && this.habitats) {
             const habsOfType = this.habitats.get(rock.attached.type);
             const idx = habsOfType.indexOf(rock);
             const aIdx = this.all.indexOf(rock);

@@ -47,8 +47,17 @@ function showInstructionsLevel1(e, data) {
 
     if (gamePlayState.middleButtonClicked) {
         gamePlayState.middleButtonClicked = false;
-        gamePlayState.instructions.pos = gamePlayState.instructions.length;
         Aoids.info("GAME STARTED", undefined, undefined, "flash" );
+        if (gamePlayState.instructions === undefined) {
+            if (gamePlayState.levelInstructions) {
+                gamePlayState.levelInstructions.stop();
+                gamePlayState.levelInstructions = undefined;                
+            }
+            VIEW_MODES.viewLocked = false;
+            createRocks();            
+            return;
+        }
+        gamePlayState.instructions.pos = gamePlayState.instructions.length;
     }
     if (gamePlayState.instructions.pos === gamePlayState.instructions.length) {
         gamePlayState.levelInstructions.stop();
