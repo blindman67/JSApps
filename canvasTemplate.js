@@ -1,7 +1,7 @@
 import {$,$$} from "./src/DOM/geeQry.js";
-root.style.position = "absolute";
-const bounds = root.getBoundingClientRect();
-root.style.left = ((innerWidth - bounds.width) * 0.5 | 0) + "px";
+const centreElement = el => (el.style.position = "absolute", el.style.left = ((innerWidth - el.getBoundingClientRect().width) * 0.5 | 0) + "px");
+centreElement(root);
+
 
 function startApp(e) { location.href = e.target.dataset.url?.includes("index.html") ? e.target.dataset.url : e.target.dataset.named !== undefined ? e.target.dataset.named : (e.target.dataset.url + "/index.html"); }
 for (const link of $("?#root li")) { (link.dataset.url || link.dataset.named) && link.addEventListener("click", startApp) }
