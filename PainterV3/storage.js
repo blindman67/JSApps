@@ -566,24 +566,47 @@ const storage = (()=>{
             }
             if(loaded) {loaded({status : "Loaded sprites OK"})}
             settings.animateGifOnLoad = gifLoadOption;
+            var skipViewSetup = false;
+            var isSetup = false;
             function loadedCommands() {
                 if(data.info && data.info.loadedCommands && data.info.loadedCommands.length) {
-                    const commandId = commands[data.info.loadedCommands.shift()];
-                    setTimeout(()=> {
-                        issueCommand(commandId);
-                        loadedCommands();
-                    } ,18);
-                } else {
+                    const commandName = data.info.loadedCommands.shift();
+                    const commandId = commands[commandName];
+                    if (commandId !== undefined) {
+                        setTimeout(()=> {
+                            console.log("Issue command: " + commandName);
+                            issueCommand(commandId);
+                            loadedCommands();
+                        }, 20);
+                    } else {
+                        setTimeout(()=> {
+                            console.log("Unknown command: " + commandName);
+                            loadedCommands();
+                        }, 20);
+                    }
+                } else if (!isSetup) {
                     setTimeout(()=> {
                         if (turnOnFunctionLinks && !sprites.functionLinksOn) {
                             issueCommand(commands.edSpriteActivateFunctionLinks);
                         }
                         data.addSceneAsCollection && (collections.create(selection.asArray(), undefined, data.collectionSceneName));
-                        (data.viewLoadedSprites && data.zoomLoadedSprites) && issueCommand(commands.edSprResetViewFit);
-                        (data.viewLoadedSprites && !data.zoomLoadedSprites) && issueCommand(commands.edSprResetView);
-                        !data.selectLoadedSprites && selection.restore();
+                        if (!skipViewSetup) {
+                            (data.viewLoadedSprites && data.zoomLoadedSprites) && issueCommand(commands.edSprResetViewFit);
+                            (data.viewLoadedSprites && !data.zoomLoadedSprites) && issueCommand(commands.edSprResetView);
+                            !data.selectLoadedSprites && selection.restore();
+                        }
                         settings.saveGridState && editSprites.deserialWorkspace(data.workspace);
-                    },18);
+                        isSetup = true;
+                        loadedCommands();
+                    },20);
+                } else if(data.info && data.info.cmds && data.info.cmds.length) {
+                    const cmd = data.info.cmds.shift();
+                    setTimeout(()=> {
+                        console.log("Run: " + cmd);
+                        if (cmd === "skipViewSetup") { skipViewSetup = true; }
+                        else { commandLine(cmd, true); }
+                        loadedCommands();
+                    }, 20);
                 }
             }
             timeline.deserialize(data.timeline, UIDOffset);
