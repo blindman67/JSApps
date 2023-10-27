@@ -1,0 +1,147 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2023-09-20T20:03:30.355Z",
+        "id": 442067,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018",
+        "scene": "ArrowLine",
+        "type": "scene"
+    },
+    "scene": {
+        "workspace": {},
+        "sprites": [
+            {   "name": "Arrow", "id": 442058,
+                "x": 0.28,
+                "y": 0.32,
+                "w": 255.86,
+                "h": 8,
+                "rx": 6.283537,
+                "ry": 7.854537,
+                "locks": {
+                    "UI": true
+                },
+                "hideOutline": true,
+                "attachedTo": 442060,
+                "attachment": {
+                    "x": 131.93,
+                    "y": 4,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "shape",
+                "shape": {
+                    "name": "arrow",
+                    "id": 442059
+                }
+            },
+            {   "name": "Start", "id": 442060,
+                "x": -127.65,
+                "y": 0.27,
+                "w": 8,
+                "h": 8,
+                "rx": 6.283537,
+                "ry": 7.854333,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "lookat": [
+                    442062,
+                    0,
+                    0
+                ],
+                "type": "shape",
+                "shape": {
+                    "name": "circle",
+                    "id": 442061
+                }
+            },
+            {   "name": "End", "id": 442062,
+                "x": 128.21,
+                "y": 0.36,
+                "w": 8,
+                "h": 8,
+                "gridX": 1,
+                "gridY": 1,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "type": "cutter"
+            }, 
+            {   "name": "Text", "id": 442391,
+                "x": 85.28,
+                "y": -27.08,
+                "w": 225.88,
+                "h": 38.4,
+                "sx": 0.5,
+                "sy": 0.5,
+                "attachedTo": 442058,
+                "attachment": {
+                    "x": 112,
+                    "y": -11,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "sx": 0.5,
+                    "sy": 0.5,
+                    "ir": true
+                },
+                "type": "text",
+                "textId": 442392
+            },
+            {
+                "name": "Line",
+                "id": 442065,
+                "x": 239.94,
+                "y": 6.68,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [442060, 442058],
+                    "outputs": [442062, 442391],
+                    "linked": [442058, 442060, 442062, 442391],
+                    "source": "var arrowOUT, startIN, endIN, textOUT, linkCount = 0, linksCount = 0;\nconst spriteIDS = [442058, 442060, 442062, 442391], spriteList = sprites.createIdMapOf(spriteIDS);\nconst vals = [];\nfunction update() {\n    if (!API.active) { return }\n    const dx = (endIN.x - startIN.x);\n    const dy = (endIN.y - startIN.y);\n    const len = Math.hypot(dx, dy);\n    arrowOUT.setScale(len / arrowOUT.w, arrowOUT.sy);\n    arrowOUT.attachment.x = len * 0.5 + arrowOUT.attachedTo.w * arrowOUT.attachedTo.sx * 0.5;\n    arrowOUT.attachment.position();\n    textOUT.attachment.x = len * 0.0 + textOUT.attachedTo.w * textOUT.attachedTo.sx * 0.5;\n        arrowOUT.attachment.position();\n    arrowOUT.key.update();\n    textOUT.key.update();\n    API.updateWidget = arrowOUT.selected || textOUT.selected ;\n}\nfunction getSprite(id) { const spr = spriteList.get(id); linksCount ++; if(spr) { linkCount ++ } return spr; }\nfunction setSprites() {\n    linksCount = linkCount = 0\n    arrowOUT = getSprite(442058);\n    startIN = getSprite(442060);\n    endIN = getSprite(442062);\n    textOUT = getSprite(442391);\n    API.active = linksCount === linkCount;\n    reset();\n}\nfunction reset() {}\nconst API = { updateWidget:false, active: false, reset, spriteIDS, spriteList,\n    inputs: [['startIN',442060], ['endIN',442062]],\n    outputs: [['arrowOUT',442058], ['textOUT',442391]],\n    bind(spr, id) { if(spriteList.has(id)) { spriteList.set(id,spr); setSprites(); } }, getById(id) { return spriteList.get(id) }, update,\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "vectors": [],
+        "groups": [],
+        "collections": [ ],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            },
+            "timeMarks": []
+        },
+        "animation": {
+            "time": 0,
+            "start": 0,
+            "end": 120,
+            "length": 120,
+            "speed": 1
+        },
+        "kinematics": [],
+        "text": [
+            {
+                "text": "Test center text.",
+                "id": 442392,
+                "local": true
+            }
+        ],
+        "media": [],
+        "images": []
+    }
+}

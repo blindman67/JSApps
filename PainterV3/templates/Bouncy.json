@@ -1,0 +1,108 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2019-07-28T04:31:02.380Z",
+        "id": 339307,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018 - 2020",
+        "details": "==============================================\nHelp for Bouncy.json\nProcedural bouncing circles.\nAll sprites with names starting with \"Ball\" will bounce\nAll sprites with the same starting name as the linked Ground will be ground restraints\nGravity input is distance object will move from zero in one second\n----------------------------------------------\n",
+        "type": "scene",
+        "loadedCommands": ["edSprResetView","edSpriteActivateFunctionLinks"]
+    },
+    "scene": {
+        "sprites": [{
+                "name": "Gravity",
+                "id": 339303,
+                "x": 0,
+                "y": -512,
+                "w": 32,
+                "h": 360,
+                "namedInLink": true,
+                "type": "cutter"
+            },{
+                "name": "Ball",
+                "id": 339301,
+                "x": -128,
+                "y": -264,
+                "ry": 1.570796,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Ground",
+                "id": 339304,
+                "x": -512,
+                "y": 256,
+                "w": 32,
+                "h": 32,
+                "ry": 1.570796,
+                "gridY": 0,
+                "locks": {
+                    "scale": true
+                },
+                "namedInLink": true,
+                "type": "marker",
+                "marker": "G0"
+            },{
+                "name": "Ground",
+                "id": 339304339302,
+                "x": -700,
+                "y": 0,
+                "rx": 1.0,
+                "ry": 2.570796,
+                "w": 32,
+                "h": 32,
+                "gridY": 0,
+                "locks": {
+                    "scale": true
+                },
+                "type": "marker",
+                "marker": "G1"
+            },{
+                "name": "Ground",
+                "id": 339304339301,
+                "x": 556,
+                "y": 0,
+                "rx": -1.0,
+                "ry": 0.570796,
+                "w": 32,
+                "h": 32,
+                "gridY": 0,
+                "locks": {
+                    "scale": true
+                },
+                "type": "marker",
+                "marker": "G2"
+            }, {
+                "name": "Bouncy",
+                "id": 339306,
+                "x": 1,
+                "y": 1,
+                "w": 96,
+                "h": 16,
+                "ry": 1.570796,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [339304, 339301, 339303],
+                    "outputs": [],
+                    "linked": [339304, 339301, 339303],
+                    "source": "templates/Bouncy.js",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "groups": [],
+        "collections": [],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            }
+        }
+    }
+}

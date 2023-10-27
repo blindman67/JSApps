@@ -1,0 +1,66 @@
+
+$w = $arg0
+$l = $arg1 === undefined ? $w : $arg1
+$h = $arg2 === undefined ? $w : $arg2
+
+
+$w2 = $w / 2
+$l2 = $l / 2
+$h2 = $h / 2
+
+// get unique names for the images
+$imA = "Right" + $uID
+$imB = "Left" + $uID
+$imC = "Top" + $uID
+
+
+// calculate issometric angles for 2 across 1 up 
+$ang = Math.asin(1 / (5 ** 0.5))
+$ang1 = -(Math.PI/2 - $ang)
+
+// calculate scaling so that rotated sprite are streached to back to there
+// pixel size
+$scale =  $w / (Math.cos($ang) * $w) 
+
+
+// show feedback
+log creating iso box w : $w l : $l h : $h
+
+// create the images
+create image $imA  $w $h
+create image $imB $l $h
+create image $imC $w $l
+
+
+// Create right
+create sprite $imA  0 0
+select                // select it
+rotater -$ang 0       // rotate x axis up
+scale $scale 1        // scale so the x length matches pixel width
+move -$w2 $h2 0 0     // move the local (bottom left) to world 0
+
+
+// Create left
+create sprite $imB 0 0
+select
+rotater $ang 0
+scale $scale 1
+move $l2 $h2 0 0 
+
+
+// Create top
+create sprite $imC 0 0
+select
+rotater -$ang $ang1
+scale $scale $scale
+move -$w2 $l2 0 -$h 
+
+
+// select the last 3 sprites
+select -1 -2 -3
+
+// set the view to center on the selection
+com edSprResetView
+log Done
+
+

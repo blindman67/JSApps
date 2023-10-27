@@ -1,0 +1,14 @@
+$size = $arg0 === undefined ? 32 : $arg0
+call createTileImages $size "abcdefghijkl"
+
+
+
+$map = ""
+$map = $map + "a b c d l a b e k h h h j f*"
+$map = $map + "e c b k a i f e g b d a e e*"
+$map = $map + "f l k j g d f e a c i k e j*"
+$map = $map + "g h c i l g i e g h h e e e*"
+$map = $map + "h h h h h h h c h h h c c c*"
+
+
+call createTileMap $size $map

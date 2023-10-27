@@ -1,0 +1,1483 @@
+body {
+    user-select: none;
+    -moz-user-select: none;
+    overflow: hidden;
+}
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+	background: #11560d;
+}
+::-webkit-scrollbar-thumb {
+	background: #45c114;
+}
+.hide {
+    display : none;
+}
+#mainCanvas {
+    position: absolute;
+    top: 0px;
+    right: 4px;
+    bottom: 0px;
+    left: 0px;
+}
+#uiContainer {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    overflow: hidden;
+    background-color:#585858;
+}
+#timeContainer {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    overflow: hidden;
+    background-color:#585858;
+}
+#canvas {
+}
+#logContainer {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    overflow: hidden;
+}
+#editContainer {
+    position: absolute;
+    top: 0px;
+    right: 100px;
+    bottom: 0px;
+    left: 0px;
+}
+#commandBar {
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 6px;
+    height : 18px;
+    background: #000;
+}
+#floatingContainer {
+}
+#floatingInfoContainer {
+    position : absolute;
+    background : #999;
+    margin : 0px;
+    display: none;
+    border: 4px solid white;
+    box-shadow: 0px 0px 0px 2px rgba(0,0,0,1);
+    padding: 3px;
+    z-index: 1000;
+    overflow: hidden;
+}
+#noUIInfoContainer {
+    position : absolute;
+    background : #000;
+    top: 15px;
+    width: 20%;
+    left: 40%;
+    margin : 0px;
+    display: none;
+    border: 1px solid white;
+    padding: 1px;
+    z-index: 1000;
+    text-align: center;
+    color: #fff;
+
+
+}
+/* Floating Sprite pannel */
+.imageContainer {
+     overflow: hidden;
+    position: absolute;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    top: 23px;
+    image-rendering: pixelated;
+    cursor: crosshair;
+}
+.imageContainer .imageCan {  /* canvas displaying pannel image */
+    width: 100%;
+    height: 100%;
+}
+.imageCan {
+    pointer-events: none;
+}
+.floatingTitle.imagePannel {
+    color: white;
+
+}
+.floatingTitle.imagePannel.dirty {
+    background: #942;
+}
+.floatingTitle.imagePannel.drawable {
+    background: #492;
+}
+.floatingTitle.imagePannel.dirty.drawable {
+    color: black;
+    background: #DD2;
+}
+
+/* Command bar */
+.commandInput {
+    background-color: black;
+    color: lime;
+    border-width: 0px;
+    padding: 0px 0px 0px 3px;
+    font-family: monospace;
+    font-size: 12px;
+}
+.commandInput:focus {
+    outline : none;
+}
+
+/* Info pannel rules */
+#floatingInfoContainer.show {
+    pointer-events: none;
+    display: block;
+}
+#floatingInfoContainer.showActive {
+    max-height: 200px;
+    overflow-y: scroll;
+    display: block;
+}
+.info.hide { display: none }
+.info {
+}
+.info.autoCompleteLine {
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 12px;
+    text-indent: 6px;
+    background: white;
+    cursor: pointer;
+}
+.info.autoCompleteLine:hover {
+    background: #7CF;
+}
+.info.autoCompleteLine.selected {
+    background: #BF8;
+}
+.infoCanvas.englarged {
+    image-rendering: pixelated;
+}
+#noUIInfoContainer.show {
+    pointer-events: none;
+    display: block;
+}
+
+
+/* UI pannel*/
+.pannel {
+    position : relative;
+    left: 0px;
+    top : 0px;
+    background : #999;
+    border: 1px solid #555;
+    margin: 2px
+}
+.pannelTabContainer {
+    position : relative;
+    left: 0px;
+    top : 0px;
+    right : 0px;
+    bottom : 0px;
+}
+.title {
+    background : #999;
+    border: 1px solid #555;
+    margin: 2px;
+    font-size: small;
+    text-align: center;
+    cursor : pointer;
+}
+.title:hover  {
+    background : #9AC;
+}
+.pannelTriangle {
+    position: absolute;
+    left: 6px;
+    display: initial;
+    pointer-events: none;
+}
+.floatingPannel {
+    position : absolute;
+    background : #999;
+    display :grid;
+    border : 2px solid black;
+
+}
+.floatingPannel.minimised {
+    height: 20px;
+    overflow: hidden;
+}
+.floatingTitle {
+    background : #999;
+    border: 1px solid #555;
+    margin: 2px;
+    font-size: small;
+    text-align: center;
+    cursor : move;
+    display: block;
+    height: 16px;
+}
+.floatingTitle:hover {
+    background : #9AC;
+}
+.floatPannelName {
+    display: flex;
+    position: absolute;
+    right: 34px;
+    left: 6px;
+    pointer-events: none;
+    overflow: hidden;
+    height: 16px;
+}
+.closeButton {
+    right: 6px;
+    top: 4px;
+    position: absolute;
+    display: initial;
+    cursor : pointer;
+}
+.closeButton:hover {
+    color : red;
+}
+.minMaxButton {
+    right: 22px;
+    top: 3px;
+    position: absolute;
+    display: initial;
+    cursor : pointer;
+}
+.minMaxButton:hover {
+    color : red;
+}
+
+/* Pannel customisations */
+.colorPanelOpen {
+    background-color : #3c5b98;;
+    color : white;
+}
+.paintPanelOpen {
+    background-color : #773980;
+    color : white;
+}
+.colorPanelFlash { 
+   background : #FFF;
+   color : #000;
+}
+.spritesPanelOpen {
+    background-color : #598a44;
+    color : white;
+}
+
+#timeline {
+    position: absolute;
+    top : 4px;
+    left: 0px;
+    right: 0px;
+    background : #aaa;
+}
+.animPanelOpen {
+    background-color : #598a44;
+    color : white;
+}
+
+/* Quick select pannel */
+.quickSelectPannel {
+    position : absolute;
+    border : 2px solid black;
+    box-shadow: 0px 0px 3px 4px rgba(0,0,0,0.5);
+    background : #999;
+    margin : 0px;
+}
+
+/* Sizer bars */
+.sizerBar {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    width : 4px;
+    background : #a7a7a7;
+    border-left : 1px solid black;
+    border-right : 1px solid black;
+    cursor : col-resize;
+}
+.sizerBar.hoverOnly {
+    opacity: 0;
+    /*width : 2px;*/
+}
+.sizerBar.hoverOnly:hover {
+    opacity: 1
+}
+
+.sizerBarHor {
+    position: absolute;
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
+    height : 4px;
+    background : #a7a7a7;
+    border-top : 1px solid black;
+    border-bottom : 1px solid black;
+    cursor : row-resize;
+}
+.sizerBarHorTime {
+    position: absolute;
+    right: 0px;
+    left: 0px;
+    height : 4px;
+    background : #a7a7a7;
+    border-top : 1px solid black;
+    border-bottom : 1px solid black;
+    cursor : row-resize;
+}
+.hideTimeline {
+    display : none;
+}
+.highlightSizer {
+    background : #AFD;
+}
+
+/* UI buttons sliders list containers*/
+#buttons {
+    position: absolute;
+    top : 0px;
+    left: 0px;
+    right: 0px;
+    background : #aaa;
+}
+.buttons {
+    position: absolute;
+    left: 0px;
+    bottom: 1px;
+    top: 0px;
+    border : 1px solid black;
+    background : #aaa;
+    cursor : pointer;
+    /*vertical-align: middle;*/
+    /*text-align: center;  */
+    font-size : 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.buttons:hover {
+    /*background : #DDD;     */
+    border: 2px solid white;
+    margin-top: -1px;
+    margin-left: -1px;
+}
+.buttonDisplayOnly {
+    background: url(icons/iconsGreen.png);
+    cursor : default;
+}
+.buttonDisplayOnly:hover {
+    border : 1px solid black;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+.buttonDisplayTextOnly {
+    cursor : default;
+    background: none;
+    border: none;
+    border-bottom: 1px dashed #0007;
+    display: block;
+    text-transform: capitalize;
+    pointer-events: none;
+}
+.buttonDisplayTextOnly:hover {
+    /*border : 1px solid black;
+    margin-top: 0px;
+    margin-left: 0px;    */
+}
+.buttonSprite{
+    background: url(icons/iconsGreen.png);
+}
+.buttonFontBig {
+    font-size : large;
+}
+.buttonDisabled {
+    background-color : rgba(0,0,0,0.5);
+    opacity: 0.2;
+    cursor :  default;
+}
+.buttonDisabled:hover {
+    border: 1px solid black;
+    margin-top: 0px;
+    margin-left: 0px;
+    cursor :  default;
+}
+.dialogExit {
+    font-size: 18px;
+}
+.textLeft {
+    text-align : left;
+    font-size : 11px;
+    text-indent: 3px;
+}
+.dialogText {
+    text-align: left;
+    font-size: 14px;
+    position: absolute;
+    top: 23px;
+    padding: 4px;
+}
+.rightButton {
+    right : 1px;
+   left: unset;
+   color : red;
+}
+.textButtonSubText { /* used in floating menus/dialogs */
+    color : white;
+    pointer-events: none;
+    position : absolute;
+    right : 4px;
+	font-size: 11px;
+}
+.textButtonLeftText { /* used in floating menus/dialogs */
+    text-align: left;
+    text-indent: 4px;
+    display: block;
+}
+.textButtonSubGroupText { /* used in floating menus/dialogs */
+    text-align: left;
+    text-indent: 4px;
+    display: block;
+    pointer-events: none;
+    cursor : default;
+    background: none;
+    border: none;
+    border-bottom: 1px dashed #0007;
+}
+.textButtonSubGroupSelection { /* used in floating menus/dialogs */
+    text-align: right;
+    display: block;
+}
+.textButtonLabelCenter { /* used in floating menus/dialogs */
+    text-align: center;
+    pointer-events: none;
+    font-size: 18px;
+    overflow: hidden;
+}
+.textButtonTextLabelLeft { /* used in floating menus/dialogs */
+    text-align: left;
+    pointer-events: none;
+    overflow: hidden;
+    top: 0px;
+    font-weight: 600;
+}
+.textButtonTextContentRight { /* used in floating menus/dialogs */
+    text-align: right;
+    pointer-events: none;
+    overflow: hidden;
+    right: 4px;
+    top: 0px;
+}
+.textButtonTextSplit:hover { /* used in floating menus/dialogs */
+    background: #8BF6;
+}
+.textButtonBigButton { /* used in floating menus/dialogs */
+    font-size: 16px;
+}
+.textButtonRowItem {
+    text-align: center;
+    display: block;
+}
+.textButtonArgRowItem {
+    text-align: left;
+    text-indent: 4px;
+    display: block;
+
+}
+.textButtonHighlightSelectedRowItem {
+    text-align: center;
+    display: block;
+    background: #ddd;
+    color:#000;
+
+}
+.buttons.dialogImage {
+    cursor : default;
+    pointer-events: none;
+}
+.buttons.dialogImage:hover {
+    border: none;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+.dialogTextInput {
+    position : absolute;
+    background-color: black;
+    color: lime;
+    border-width: 0px;
+    padding: 0px 0px 0px 3px;
+    font-family: monospace;
+    font-size: 12px;
+    right : 4px;
+}
+/* For timeline elements Tracks are sprite named animation tracks containg animation keys*/
+.animTrack {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background : #aaa;
+    right: 1px;
+    border: none;
+    height: 15px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 10px;
+    word-spacing: -3px;
+    font-size: 12px;
+}
+.animTrackTableContain {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background : #aaa;
+    right: 1px;
+    bottom: 1px;
+    border: none;
+    font-size: 12px;
+}
+.tracksTable {
+     position: absolute;
+    left: 0px;
+    top: 0px;
+    background : #aaa;
+    right: 1px;
+    bottom: 1px;
+    border: none;
+    font-size: 12px;
+    border-collapse: collapse;
+}
+td {
+    /*padding :1px;*/
+    min-width : 7px;
+    /*border: 1px solid;*/
+}
+.trackRow0 {
+    padding-top:2px;
+    padding-bottom : 2px;
+    margin-bottom : 2px;
+    background-color: #88bfb3;
+}
+.trackRow1 {
+    padding-top:2px;
+    padding-bottom : 2px;
+    margin-bottom : 2px;
+    background-color: #7eb580;
+}
+.trackRow0:hover {
+    background-color: #9de2d3;
+}
+.trackRow1:hover  {
+    background-color: #8ee5a0;
+}
+.trackRowEmpty {
+    display : none;
+}
+.trackName {
+    width: 140px;
+    padding: 0px;
+    background: #aaaa;
+    padding: 0px;
+    cursor: pointer;
+    border: 1px solid;
+}
+.trackName.X { background: #a2f7a1aa; border-color: #000 }
+.trackName.Y { background: #e4c966aa; border-color: #000 }
+.trackName.SX { background: #dcffdaaa; border-color: #000 }
+.trackName.SY { background: #fbe6c6aa; border-color: #000 }
+.trackName.RX { background: #a9ddfbaa; border-color: #000 }
+.trackName.RY { background: #f2aef7aa; border-color: #000 }
+.trackName.A  { background: #ffeaeaaa; border-color: #000 }
+.trackName.IMG { background: #545454aa; color: #fff; border-color: #000 }
+.trackName.RGB {background: #882449aa; color: #FFF; border-color: #000 }
+.trackName.compact {background: #882449aa; color: #FFF; border-color: #000 }
+.trackKey {
+    cursor : pointer;
+    background-image: url('/PainterV3/icons/keyIconsA.png');
+    background-repeat: no-repeat;
+}
+.trackKey.Selected {
+    cursor : ew-resize;
+}
+.trackKey.Selecting {
+    background : #68B8;
+}
+.trackNoKey {}
+.trackEmptyKey { /* For keys past animation end time */
+    background : #99C;
+}
+.trackEmptyKeyOutside { /* For keys past animation end time */
+    background : #B9C;
+}
+.trackNoKey000 { background : #ACA8 }
+.trackNoKey001 { background : #8A88 }
+.trackNoKey010 { background : #9b98 }
+.trackNoKey011 { background : #7978 }
+.trackNoKey100 { background : #AAC8 }
+.trackNoKey101 { background : #88A8 }
+.trackNoKey110 { background : #99b8 }
+.trackNoKey111 { background : #7798 }
+
+.trackRow0.highlight {
+    background-color: #FFFF80;
+}
+.trackRow1.highlight {
+    background-color: #CCCC80;
+}
+.draggingKeyShowTime {
+    color : white;
+}
+.trackKey.AtTime.PlaceMode {
+    cursor: pointer;
+    background-color: #2F2;
+}
+.trackKey.Selected.AtTime.PlaceMode {
+    cursor : ew-resize;
+    background-color: #2F2;
+}
+.trackKey.Selecting.AtTime.PlaceMode {
+    background-color: #2F2;
+}
+.trackNoKey.AtTime.PlaceMode {
+    background-color: #2F2;
+}
+.trackKey.AtTime.ModifyMode {
+    cursor: pointer;
+    background-color: #FF2;
+}
+.trackKey.Selected.AtTime.ModifyMode {
+    cursor : ew-resize;
+    background-color: #FF2;
+}
+.trackKey.Selecting.AtTime.ModifyMode {
+    background-color: #FF2;
+}
+.trackNoKey.AtTime.ModifyMode {
+    background-color: #FF2;
+}
+.trackKey.AtTime.RecordMode {
+    cursor: pointer;
+}
+.trackKey.Selected.AtTime.RecordMode {
+    cursor : ew-resize;
+}
+.trackKey.Selecting.AtTime.RecordMode {}
+.trackNoKey.AtTime.RecordMode {
+    background-color: #800;
+}
+.trackKey { background-position-x: -81px; }
+.cvLi { background-position-x: 0px }
+.cvSt { background-position-x: -9px }
+.cvIn { background-position-x: -18px }
+.cvOt { background-position-x: -27px }
+.cvIO { background-position-x: -36px }
+.trackKey.Selected  { background-position-y: -45px; }
+
+
+.animSlider { /* Main timeline slider bar */
+    position: absolute;
+    left: 0px;
+    cursor : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAATCAYAAACORR0GAAABPElEQVRIS61ViQ2DMBBLhmgHgBk6Redlis4AA9AhKI7iyLnmQyJSlXJc7PM9wbux9YhuX3Ev2apovsEDIABj36Pfs2PTQDLoGhHBAbwfx+G2bXPzPONwsK3r6qZpct4HiGCLe5GsRBRIAA4Q7jG8d9w/VFnwo+quokQEzxgxCRY5DcDX+VtAZnwRSKasqYigkSyoG7AhqHEi2ySsCe1SM+s6TISDSB/SwrWAKDZDsMkz06qElxWhDlhsbwVlvajAjkCzGbKOOz0JgkNUiGi51JY69Xz513naDImkkX9bj+zZdF9GRqKspZtogy9lkEObg+h2EgCbm+RbVQTHqwtXkiFJN8ntNRIlel0lRQw+pLEzIzWhOmsZCWtkD+pnQdu7l0k7a9nQtj4TOiPV74yw620ydDNoGvF/hKR75gc/gagpSBM4aQAAAABJRU5ErkJggg==') 12 13, pointer;
+    top: 0px;
+    background : #676767;
+    right: 18px;
+    border: none;
+    height: 17px;
+}
+.animTotalSlider {  /* The small canvas slider above the main time slide that shows total time*/
+   position: absolute;
+   left: 0px;
+   top: 0px;
+   background : #447;
+   right: 18px;
+   border: none;
+   height: 3px;
+}
+.keyFrameAdded { /* is new item added */
+   background : #999;
+   color : #000;
+}
+.animSliderPos { /* Main timeline time slider position bar */
+    position: absolute;
+    left: 0px;
+    border: 1px solid;
+    width: 38px;
+    font-size: 10px;
+    background: #0f0;
+    text-align: center;
+    height: 13px;
+    padding-top: 1px;
+}
+.animSliderPos:hover {
+    border: 1px solid white;
+}
+.animSelectTrack {
+    text-align: left;
+    font-size: 11px;
+}
+.animTrackSelected{
+    background-color: #00F;
+}
+.animTrackSelected:hover{
+    background-color: #35F;
+}
+.animTrackSomeSelected{
+    background-color: #F0F8;
+}
+.animTrackSomeSelected:hover{
+    background-color: #F5F8;
+}
+.animPlaceMode {
+    font-size: 12px;
+    background: #0f0;
+    height: 13px;
+    padding-top: 1px;
+    text-align: center;
+}
+.animModifyMode {
+    font-size: 12px;
+    background: #ff0;
+    height: 13px;
+    padding-top: 1px;
+    text-align: center;
+}
+.animRecordMode {
+    font-size: 12px;
+    background: #f00;
+    height: 13px;
+    padding-top: 1px;
+    color : white;
+    text-align: center;
+}
+.animSecondTimePlaceMode {
+    background: #0f0;
+}
+.animSecondTimeModifyMode {
+    background: #ff0;
+}
+.animSecondTimeRecordMode {
+    background: #f00;
+}
+.animWaitFlash {
+    background : #fff;
+    color : black;
+
+}
+/* Radio also highlight check box items */
+.radioOnDark {
+    background-color : #000;
+    border : 1px solid white;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+.radioOn {
+    background-color : #DDD;
+    border : 2px solid white;
+    margin-top: -1px;
+    margin-left: -1px;
+}
+.radioOnLeft {
+    background-color : #FDD;
+    border-top-color: #F00;
+    border-top-width: 4px;
+    margin-top: -3px;
+}
+.radioOnRight {
+    background-color : #55F;
+    border-top-color: #00F;
+    border-top-width: 4px;
+    margin-top: -3px;
+}
+.radioOnLeftRight {
+    background-color : #DDF;
+    border-top-color: #F0F;
+    border-top-width: 2px;
+    margin-top: -1px;
+}
+.radioOnStrict {
+    cursor : not-allowed;
+}
+.radioOnWheelSelect {
+    cursor : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAZCAYAAADNAiUZAAABgElEQVRIS+2WOw7CMAyG2x0JZhakduIGcABOzQEYOAASUjswMIPEDrYVR47lJm4pG5Gi0kf8OfZvk7oaHu/wqs58M+nVkME3DDJY1/TJCuZzEsFY5IXuYe1lLrAXegDg+Q8dm+tfhZeVz/4kHC9ULvaUUlS/VQEuKJZP3/dV27aV/C3Cqu3okkMhvrgCvoIqB2QtExRrnK8A3MC80c4HRJB4OrRTBcVaPil7uMOjAJNjc0IJ0HUdcTEVMOKzcE9NZm4oNpCH0UIfwQF05MxQrcgp4eWupaG4uzvMdbjeEGo197iwVPis6rATa6cUYphRaATFPDRNQ/bDvwqpzjMUtJTTREgJ2APjbzS0oN5ESEsUgNyxF2yEdwtrT0adYpgTIeHNaLACksFgWIuJgVd4T0KSYxRYQclgMGb13mxHcoON0PKRRqvQ1XsjOJdb0XU4tPIctYOHC7E+RiJ30iNwQVBJroxUyUfRodLxEsGoRumx9kPm0iX6EpRVnTM2+mj6AWsyVmUNOZG5AAAAAElFTkSuQmCC') 7 2, pointer;
+}
+.radioOnSelected {
+    background-color : #DAA;
+    border : 3px solid Red;
+    margin-top: -2px;
+    margin-left: -2px;
+}
+.lightBoxRadioOnFrame {
+    margin-top: -1px;
+    margin-left: -1px;
+}
+.lightBoxRadioOnFrame.alphaVLow {
+    background-color : #444;
+    border : 1px solid white;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+.lightBoxRadioOnFrame.alphaLow {
+    background-color : #888;
+    border : 1px solid white;
+    margin-top: 0px;
+    margin-left: 0px;
+
+}
+.lightBoxRadioOnFrame.alphaMedium {
+    background-color : #AAA;
+    border : 2px solid white;
+}
+.lightBoxRadioOnFrame.alphaHigh {
+    background-color : #DDD;
+    border : 3px solid white;
+    margin-top: -2px;
+    margin-left: -2px;
+}
+
+.buttonOn {
+    background : #F88;
+}
+.buttonOn:hover {
+    background : #FAA;
+    border: 2px solid white;
+    margin-top: -1px;
+    margin-left: -1px;
+}
+.sliders {
+    position: absolute;
+    left: 0px;
+    bottom: 1px;
+    top: 0px;
+    border : 1px solid black;
+    background : #aaa;
+    cursor : url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAATCAYAAACORR0GAAABPElEQVRIS61ViQ2DMBBLhmgHgBk6Redlis4AA9AhKI7iyLnmQyJSlXJc7PM9wbux9YhuX3Ev2apovsEDIABj36Pfs2PTQDLoGhHBAbwfx+G2bXPzPONwsK3r6qZpct4HiGCLe5GsRBRIAA4Q7jG8d9w/VFnwo+quokQEzxgxCRY5DcDX+VtAZnwRSKasqYigkSyoG7AhqHEi2ySsCe1SM+s6TISDSB/SwrWAKDZDsMkz06qElxWhDlhsbwVlvajAjkCzGbKOOz0JgkNUiGi51JY69Xz513naDImkkX9bj+zZdF9GRqKspZtogy9lkEObg+h2EgCbm+RbVQTHqwtXkiFJN8ntNRIlel0lRQw+pLEzIzWhOmsZCWtkD+pnQdu7l0k7a9nQtj4TOiPV74yw620ydDNoGvF/hKR75gc/gagpSBM4aQAAAABJRU5ErkJggg==') 12 13, pointer;
+    vertical-align: middle;
+    text-align: center;
+    font-size : 12px;
+}
+.slide {
+    position: absolute;
+    height: 10px;
+    top: 1px;
+    left: 1px;
+    pointer-events: none;
+}
+.slideSmall {
+    position : absolute;
+    width: 6px;
+    height : 12px;
+    background: #ffffff;
+    border: 2px solid black;
+    margin: -2px;
+    pointer-events: none;
+}
+.value {
+    position: absolute;
+    pointer-events: none;
+    text-align : right;
+    border-left : 1px solid black;
+    font-size: 12px;
+    top: 0px;
+    background: #060;
+    color: white;
+}
+.sliderFlash {
+    background : #FFF;
+}
+.colorSwatchSel {
+    border: 2px solid white;
+    margin-top: -1px;
+    margin-left: -1px;
+}
+.keyFilterKeyHighlight {  /* This needs to be ontop of radioOn */
+    background-color: #72c2e6;
+}
+
+/*Selection button*/
+.selection {
+    position: absolute;
+    bottom: 1px;
+    top: 0px;
+    border : 1px solid black;
+    background : #aaa;
+    /*z-index: 10;*/
+    vertical-align: middle;
+    cursor : pointer;
+}
+.selectionItem {
+    position: absolute;
+    left: 6px;
+    bottom: 1px;
+    top: 0px;
+    font-size : 12px;
+    border : none;
+    pointer-events: none;
+}
+.selectionItem.small {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 17px !important;
+}
+.selectionDropDown {
+    /*z-index: 12; */
+    position: absolute;
+    bottom: 1px;
+    top: -1px;
+    font-size : 12px;
+    border : none;
+    right: 4px;
+    text-align: right;
+    pointer-events: none;
+}
+.selectionList {
+    display : none;
+    /*z-index : 10;*/
+     background: #888;
+    list-style-type: none;
+    border: 1px solid black;
+    font-size: 12px;
+    text-align: left;
+    padding-left: 0px;
+}
+.selectionListItem {
+    margin-left: 5px;
+    /*z-index : 13;*/
+    cursor : pointer;
+}
+.selectionListItem:hover {
+     background: #ccc;
+}
+.selectionListItemHighlight {
+    background: #ccF;
+}
+.selectionListItemHighlight:hover  {
+    background: #cFF;
+}
+.selectionListShow {
+    display : block;
+    position: relative;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+}
+
+/* UI tabs */
+.tabPannel {
+    position: absolute;
+    top: 21px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+/*    position : relative;*/
+    /*left: 0px;
+    top : 0px;
+    background : #999;
+    border: 1px solid #555;
+    margin: 2px;*/
+    /*height : inherit;*/
+}
+.tabTitle {
+    background : #677;
+    border: 1px solid #555;
+    margin: 2px;
+    font-size: small;
+    text-align: center;
+    cursor : pointer;
+    width: 25%;
+    display: inline-block;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.tabTitle:hover  {
+    background : #9AC;
+}
+.tabOn {
+    background : #999;
+    padding-bottom: 2px;
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-style: none;
+}
+.tabOn:hover {
+    background : #CDF;
+}
+
+.tabTitle.media {
+    background : #CA7;
+}
+.tabTitle.media.tabOn {
+    background : #632;
+    color: #FFF;
+}
+.tabTitle.sprites {
+    background : #AC7;
+}
+.tabTitle.sprites.tabOn {
+    background : #362;
+    color: #FFF;
+
+}
+.tabTitle.extras {
+    background : #7AC;
+}
+.tabTitle.extras.tabOn {
+    background : #236;
+    color: #FFF;
+
+}
+.tabTitle.media.tabFlashNew { /* New is new item added */
+   background : #FFF;
+   color : #000;
+}
+.tabTitle.sprites.tabFlashNew { /* New is new item added */
+   background : #FFF;
+   color : #000;
+}
+.tabTitle.extras.tabFlashNew { /* New is new item added */
+   background : #FFF;
+   color : #000;
+}
+.tabFlashNew { /* New is new item added */
+   background : #FFF;
+   color : #000;
+}
+.subtab {
+    padding-bottom: 1px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-style: none;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    background-color: #0004;
+    height: 19px !important;
+}
+.subtab.radioOn {
+
+    border-color: black;
+    background-color: #aaa;
+    border-bottom: none;
+    margin-top: 0px;
+    margin-left: 0px;
+}
+/* Item lists */
+.list {
+     position: absolute;
+    left: 2px;
+    bottom: 2px;
+    top: 2px;
+    right: 2px;
+    border : 1px solid black;
+    background : #aaa;
+    vertical-align: middle;
+    text-align: center;
+    font-size : 12px;
+    /*overflow-y: scroll;*/
+    overflow-x: hidden;
+}
+.fold {
+}
+.foldClosed {
+    height: 18px;
+    overflow-y: hidden;
+}
+.hideItem {
+    display : none;
+}
+.listItem {
+    text-align : left;
+    cursor : pointer;
+    background : #445e99;
+    color : #CCC;
+    border-bottom: 1px solid black;
+    height: 14px;
+    overflow: hidden;
+}
+.listItem.draggable {
+    cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAWCAYAAAA1vze2AAAB+0lEQVRIS6VWuU4DMRDdDYdASFwNR0PFF6SgQUgIunxvShpoaNKCxKGkI0KQhIhDuXnPzKwmjr1swNLTesc7fn4zY3vTZLalMI3FvInnJzAEJoFvrUn9NmD8sj4c8NsEzdnS1A3vAi1gkEPiCOgnPjt474jPxCcpYWDkkRzBdgd0jcIZBerjLa5NIp9kgTI9kmPYboVkJLOrHyU7BX4zitpFSNR/C50PoC8G5ouxXwHeaDPh4uspQCX1X0k8VW4iLyQkYLKbhuRMFtTAs/VfEs0XV+y3AxiegZ6SMOHsEwO72ljfzshvKpVKUq1Ws6etTE5qs8a4t4uQ+N/UarWkXC4n+hQSp9SRxOIeCEGWD41/qLJMzliZN1MkOhhzDJFyxTklnJGwMjrzTGzJJCxTRGJjhb1ruJbQ2dYSjIUoL3QcC+z4E5jvgVetKBL1/qLGrPqiVGKR4ggYjzMVeO3aEl63lVVEkSHgSXBtNiNVPAAvwNBuRqrpz6NGSDjhpYZMc4T3fYYKmDogqXUuNaGkawTyDsjCamSSc+YSuAokPnpAFlZjQvXIXANPgQOyzjyHbkanpkji8Y3eNUw8j/4mQAW8Ahok8HOi86qaQxiWgdBCXJ5lMbw1uel44ZFoj6qA6PWrRIvorAE/hR9vDBNV8EeDi6HfqijJfj6+AXKZCqmdaFGHAAAAAElFTkSuQmCC') 5 1, pointer;
+}
+.listItem:hover {
+     background : #0c1e52;
+}
+.listItemDragging {
+    color : white;
+    background : red;
+}
+.foldItem {
+    text-align : left;
+    cursor : pointer;
+    background : #5a8292;
+    color : #CCC;
+    border-bottom: 1px solid black;
+}
+.foldItem:hover {
+     background : #58A;
+}
+.foldItem.top {
+    border-bottom: none;
+}
+.foldItemHighlight {
+    background: #2c8a4e;
+    color: #d9f9e0;
+}
+.foldItemHighlight:hover {
+    background : #145d0c;;
+}
+.foldPaintingFoldActive {
+    background : #67bbb8;;
+}
+.foldPaintingFoldActive:hover {
+        background : #54bf67;;
+}
+.foldPaintingItemSelected {
+    background: #a37ea7;
+    color: #fcdcff;
+}
+.foldPaintingItemSelected:hover {
+    background : green;
+}
+.itemDirty {
+    background : #851;
+}
+.itemDirty:hover {
+    background : #c83;
+}
+.itemSelectedUsed {
+    background : #18B;
+}
+.itemSelectedUsed:hover {
+     background : #169;
+}
+.itemSelected {
+    background : #11F;
+}
+.itemSelected:hover {
+     background : #45F;
+}
+.foldItem.itemSelected {
+    color: #333;
+    background : #8BC;
+}
+.foldItem.itemSelected:hover {
+     background : #9DF;
+     color: #000;
+}
+.foldItem.protected {
+    background : #597;
+    color : #DDD;
+}
+.foldItem.protected:hover {
+    background : #5A8;
+
+}
+.itemAttachedSelected {
+    background : #95A;
+}
+.itemLocatesSelected {
+    background : #49A;
+}
+.itemMouseOver{
+    background : #191;
+}
+.itemMouseOver:hover {
+    background : #5Aa;
+}
+.itemSettingsBoolean {
+    background : #579;
+}
+.itemSettingsBoolean:hover {
+    background : #79A;
+}
+.foldItemSpriteGroupOpen {
+    background : #84A;
+}
+.foldItemSpriteGroupOpen:hover {
+    background : #D9F;
+    color: #000;
+}
+.foldItem.itemSelected.foldItemSpriteGroupOpen {
+    background : #B6F;
+    color: #FFF;
+}
+.foldItem.itemSelected.foldItemSpriteGroupOpen:hover {
+    background : #C9F;
+    color: #000;
+}
+.foldSpriteInGroupOpen {
+    background : #949;
+}
+.foldSpriteInGroupOpen:hover {
+    background : #C8C;
+}
+.foldItem.itemSelected.foldSpriteInGroupOpen {
+    background : #C6F;
+    color: #FFF;
+}
+.foldItem.itemSelected.foldSpriteInGroupOpen:hover {
+    background : #F9F;
+    color: #000;
+}
+.itemSpriteInGroupOpen {
+    background : #5e4499;
+}
+.itemSpriteInGroupOpen:hover {
+    background : #86D;
+}
+.itemSelected.itemSpriteInGroupOpen {
+    background : #86C;
+    color: #FFF;
+}
+.itemSelected.itemSpriteInGroupOpen:hover {
+    background : #A8F;
+    color: #000;
+}
+.itemHighlight {
+    background : #3AC;
+    color : black;
+}
+.itemFlagged {
+    background : #F00;
+    color : white;
+}
+.itemEditingText {
+    background : #5A5;
+    color : white;
+}
+.itemEditingText:hover {
+    background : #6F6;
+    color : white;
+}
+.itemHidden {
+    display: none;
+}
+.foldItemColorSwatch {
+    display: inline-block;
+    border: 1px solid black;
+    height: 10px;
+    float: left;
+    padding-left: 20px;
+    margin-left: 15px;
+    margin-top: 1px;
+    margin-right: -8px;
+    pointer-events: none;
+}
+.foldItem.showColor {
+    border-right-width: 131px;
+    border-right-style: solid;
+}
+.itemSelected.dragSpriteEntry {
+    background : #BB77;
+    color: #000C;
+    //height: 4px;
+   // overflow-y: hide;
+}
+
+.itemTainted {
+    background: #C00;
+    color: #FFF;
+}
+/* fold styles for extras pannel. Do not add rules that change layout and functionality. */
+
+
+
+.extrasHelpers .foldItem { background: hsl(50, 22%, 49%); }
+.extrasHelpers .listItem { background: hsl(50, 24%, 42%); }
+.extrasHelpers .foldItem:hover { background: hsl(50, 18%, 55%); }
+.extrasHelpers .listItem:hover { background: hsl(50, 60%, 30%); }
+
+.extrasHelpersTesting .foldItem { background: hsl(0, 22%, 49%); }
+.extrasHelpersTesting .listItem { background: hsl(0, 25%, 42%); }
+.extrasHelpersTesting .foldItem:hover { background: hsl(0, 18%, 55%); }
+.extrasHelpersTesting .listItem:hover { background: hsl(0, 60%, 30%); }
+
+.extrasImageProcessing .foldItem { background: hsl(150, 22%, 49%); }
+.extrasImageProcessing .listItem { background: hsl(150, 24%, 42%); }
+.extrasImageProcessing .foldItem:hover { background: hsl(150, 18%, 55%); }
+.extrasImageProcessing .listItem:hover { background: hsl(150, 60%, 30%); }
+
+.extrasImageProcessingWebGL .foldItem { background: hsl(200, 22%, 39%); }
+.extrasImageProcessingWebGL .listItem { background: hsl(200, 24%, 32%); }
+.extrasImageProcessingWebGL .foldItem:hover { background: hsl(200, 18%, 45%); }
+.extrasImageProcessingWebGL .listItem:hover { background: hsl(200, 60%, 20%); }
+
+
+
+.extrasAnimation .foldItem { background: hsl(90, 22%, 49%); }
+.extrasAnimation .listItem { background: hsl(90, 24%, 42%); }
+.extrasAnimation .foldItem:hover { background: hsl(90, 18%, 55%); }
+.extrasAnimation .listItem:hover { background: hsl(90, 60%, 30%); }
+
+.extrasPainting .foldItem { background: hsl(180, 22%, 49%); }
+.extrasPainting .listItem { background: hsl(180, 24%, 42%); }
+.extrasPainting .foldItem:hover { background: hsl(180, 18%, 55%); }
+.extrasPainting .listItem:hover { background: hsl(180, 60%, 30%); }
+
+.extrasSprites .foldItem { background: hsl(100, 22%, 49%); }
+.extrasSprites .listItem { background: hsl(100, 24%, 42%); }
+.extrasSprites .foldItem:hover { background: hsl(100, 18%, 55%); }
+.extrasSprites .listItem:hover { background: hsl(100, 60%, 30%); }
+
+/* Floating pannels */
+/* LightBox */
+
+#floatingContainer .lightBoxPannel  {
+   background: #54693f;
+}
+.lightBoxPannel .floatingTitle {
+    background: #6a8450;
+}
+.lightBoxPannel .floatPannelName {
+    color: white;
+    background: #6a8450;
+}
+.lightBoxPannel .minMaxButton {
+    color: white;
+}
+.lightBoxPannel .closeButton {
+    color: white;
+
+}
+.lightBoxPannel .radioOn {
+    background-color: #bbb;
+    border: 1px solid #f5f5f5;
+    margin-top: -1px;
+    margin-left: -1px;
+}
+.lightBoxPannel .radioOnSelected {
+    background-color: #DAA;
+    border: 1px solid Red;
+    margin-top: -1px;
+    margin-left: -1px;
+}
+/* Logger */
+.logger {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 24px;
+    left: 0px;
+    background : #454;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size : 12px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+.loggerNorm {
+    color : white;
+    cursor : pointer;
+}
+.loggerNorm:hover {
+    background : #575;
+}
+.loggerClickable {
+    cursor : pointer;
+    color : #CCF;
+}
+.loggerClickable:hover {
+    background : #6A6;
+}
+
+.loggerSys {
+    color : #7F8;
+}
+.loggerSys .R { color: #F00; font-weight: bolder; }
+.loggerSys .RG { color: #FF0; font-weight: bolder; }
+.loggerSys .G { color: #0F0; font-weight: bolder; }
+.loggerSys .GB { color: #0FF; font-weight: bolder; }
+.loggerSys .B { color: #00F; font-weight: bolder; }
+.loggerSys .RB { color: #F0F; font-weight: bolder; }
+.loggerSys .RGB { color: #FFF; font-weight: bolder; }
+.loggerSys .W { color: #FFF; font-weight: bolder; }
+.loggerError {
+    color : #F87;
+}
+.loggerWarn {
+    color : #FB4;
+}
+.loggerInfo {
+    color : #5F4;
+}
+.loggerObj {
+    color : #bab9c5;
+}
+.loggerFold {
+    color: #fffda9;
+   cursor : pointer;
+}
+.loggerFolded {
+    height : 16px;
+    overflow : hidden;
+}
+.loggerFold:hover {
+    background : #575;
+}
+.loggerObjKey {
+}
+.loggerObjValue {
+   color: #e5fdf5;
+}
+.loggerObjString {
+    color: #77f1ff;
+}
+.loggerObjNumber {
+    color: #ff9e77;
+}
+.loggerObjFunction {
+    color: #c3ff77;
+}
+.loggerObjBoolean {
+    color: #e577ff;
+}
+.loggerObjArray {
+    color: #77ffa2;
+}
+.loggerObjObject {
+    color: #fffb44;
+}
+.loggerFlashError {
+    background : #A65;
+}
+.loggerFlashWarn {
+    background : #994;
+}
+.loggerFlashNote {
+    background : #4A4;
+}
+.loggerFlashInfo {
+    background : #4A4;
+}
+.loggerFixed {
+    color : #fF4;
+}
+.loggerClicker {
+    cursor : pointer;
+}
+.loggerClicker:hover {
+    background-color: #fF9;
+    color : #000;
+}
+/*Misc*/
+.textRed {
+    color : red;
+    pointer-events: none;
+}

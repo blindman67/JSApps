@@ -1,0 +1,476 @@
+$startup = true
+
+menu title "16 Image tracker"
+
+if tracker.isReady === false {
+    tracker.startup()
+}
+$imgCount = 0
+$animSpr = undefined
+$status = "Starting"
+$lastStatus = ""
+
+$res = storage.file("trackerDialog")
+$scanMethod = storage.read("scanMethod",1)
+$detail = storage.read("detail",2)
+$detailStart = storage.read("detailStart",6)
+$compareRes = storage.read("compareRes",2)
+$difAmp = storage.read("difAmp",1)
+$subScan = storage.read("subScan",0)
+$maxRepeat = storage.read("maxRepeat",0)
+$resetOnTrackStart = storage.read("resetOnTrackStart",0)
+
+$selHasRefAnim = false
+
+$scanMethods = ["Simple","Refine to zero","Frame Advance","PR to zero","PRS to zero"]
+$scanMethodUI = $scanMethods[$scanMethod]
+
+
+$detailVal = [0.0625,0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32]
+$detailName = ["16th Pixel","8th Pixel","Quater Pixel","Half pixel","1 Pixel","2 Pixel","4 Pixel","8 Pixel","16 Pixel","32 Pixel"]
+$detailUI = $detailName[$detail]
+$detailStartUI = $detailName[$detailStart]
+
+$compareResVal = [4,8,16,32,64,128,256]
+$compareResNames = ["XLow 4px", "Low 8px", "Med 16px", "Def 32px", "High 64px", "XHigh 128px", "XXHigh 256px"]
+$compareResUI = $compareResNames[$compareRes]
+
+$scaleUni = true   // uniform scale on
+$scaleUniUI = "ON"
+
+$useFirst = false   // use first image
+$useFirstUI = "OFF"
+
+$debugging = false   // use first image
+$debuggingUI = "OFF"
+
+$resetOnTrackStartUIopts = ["Keep","Restore Anim","Clear Anim"]
+$resetOnTrackStartUI = $resetOnTrackStartUIopts[$resetOnTrackStart]
+
+$maxRepeatOpts = ["Auto","Repeat 1","Repeat 2","Repeat 3","Repeat 4","Repeat 5"]
+$maxRepeatUI = $maxRepeatOpts[$maxRepeat]
+
+
+$gain = "Gain " + $difAmp;
+
+menu exit "Exit"
+$options = ""
+
+$options = $options + "$gain,Gain%Gain linear%Gain 1%Gain 2%Gain 3%Gain 4%Gain 5%Gain 6%Gain 7%Gain 8,"
+$options = $options + "$compareResUI,CompRes%" + $compareResNames.join("%") + ""
+$options = $options + ",{,Anim sprite?Use selected sprite as prite containing animation Use capture sprite for videos,"
+$options = $options + "Add visible?Adds selected sprite to list of sprites visible to tracker,"
+$options = $options + "Drag Track?Toggle dragging and tracking,},"
+$options = $options + "{,Set as follower?Sets selected sprite as follower,Use Follower Anim?Uses animation on follower to update relative dragger,},"
+$options = $options + "{,Select 2nd Anim,~track2nd,Tracker on 2nd,},"
+$options = $options + "$scaleUniUI,Uniform scale ,"
+$options = $options + "$useFirstUI,Use first ,"
+$options = $options + "{,$resetOnTrackStartUI,Starts ?How to setup animation at start of new follower,Capture?Capture current tracking as start animation,~CapAnim,Use Cap,},"
+$options = $options + "$maxRepeatUI,Max repeat ?Max scans per follower Auto will use variance of scan to to stop,"
+$options = $options + "{,Clear Anim?Removes animation tracks from selected or relevant sprite,Clear 2 End?Removes animation from current frame to end,},"
+$options = $options + "{,Ranges,R Pos,R Rot,R Scale,},,"
+$options = $options + "$detailUI,Detail%" + $detailName.join("%") + ","
+$options = $options + "$detailStartUI,DetailStart%" + $detailName.join("%") + ","
+$options = $options + "$scanMethodUI,Scan method%" + $scanMethods.join("%") + ","
+$options = $options + "{,Pos,Rot,Sca,},"
+$options = $options + "{,Pos Rot,Pos Sca,Sca Rot,},"
+$options = $options + "Pos Rotate Scale,,"
+$options = $options + "~StopId,!Tracker stop,"
+menu options $options
+menu keep
+timeout 100
+label doAgain
+$busy = false
+$opt = call menu
+$busy = true
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    $res = storage.close()
+    tracker.shutDown()
+    exit
+}
+jumpSub menuInput
+
+jump doAgain
+
+
+
+//============================================================================================================================
+// Subrotines
+label menuInput
+	$t = $opt === "Ranges" || $opt === "R Pos" || $opt === "R Rot" || $opt === "R Scale"
+    if $t === true {
+		if $opt === "Ranges" {
+			$res = tracker.showRanges();
+		}
+		if $opt === "R Pos" {
+			$res = tracker.showRanges(true, false, false);
+		}
+		if $opt === "R Rot" {
+			$res = tracker.showRanges(false, true, false);
+		}
+		if $opt === "R Scale" {
+			$res = tracker.showRanges(false, false, true);
+		}
+        exitSub
+    }
+
+    $cap = $opt === "Capture" || $opt === "Use Cap"
+    if $cap === true {
+        if $resetOnTrackStart === 0 {
+			if $opt === "Use Cap" {
+				$ref = tracker.captureStartAnim(true)
+			}
+			if $opt !== "Use Cap" {
+				$ref = tracker.captureStartAnim()
+			}
+            info Anim captured for start action
+            $resetOnTrackStart = 1
+            $resetOnTrackStartUI = $resetOnTrackStartUIopts[$resetOnTrackStart]
+            $res = tracker.setTrackStartAction($resetOnTrackStartUI)
+            info Start action  $resetOnTrackStartUI
+            jumpSub updateUI
+            exitSub
+        }
+        $resetOnTrackStart = 0
+        $resetOnTrackStartUI = $resetOnTrackStartUIopts[$resetOnTrackStart]
+        $res = tracker.setTrackStartAction($resetOnTrackStartUI)
+        info Start action  $resetOnTrackStartUI
+        jumpSub updateUI
+        exitSub
+
+    }
+    if $opt === "resetOnTrackStartUI" {
+        $resetOnTrackStart = ($resetOnTrackStart + 1) % $resetOnTrackStartUIopts.length
+        $resetOnTrackStartUI = $resetOnTrackStartUIopts[$resetOnTrackStart]
+        $res = tracker.setTrackStartAction($resetOnTrackStartUI)
+        info Set track start action  $resetOnTrackStartUI
+        jumpSub updateUI
+        exitSub
+    }
+
+    if $opt === "maxRepeatUI" {
+        $maxRepeat = ($maxRepeat + 1) % $maxRepeatOpts.length
+        $maxRepeatUI = $maxRepeatOpts[$maxRepeat]
+        $res = tracker.setMaxRepeat($maxRepeat)
+        info Set max repeat to  $maxRepeatUI
+        jumpSub updateUI
+        exitSub
+    }
+
+    if $opt === "Select 2nd Anim" {
+        if selection.length > 0 {
+            $animTrackSpr = selection[0]
+            $res = $animTrackSpr.uiFlashSprite("attention","#FF0")
+            $res = tracker.set2ndAnim($animTrackSpr)
+            jumpSub updateUI
+            info Tracking anim sprite set
+            exitSub
+
+        }
+        warn No sprite selected
+        exitSub
+    }
+    if $opt === "Add visible" {
+        if selection.length > 0 {
+            $res = tracker.addSelectedToCapture()
+            jumpSub updateUI
+            info Added render sprites
+            exitSub
+        }
+        if selection.length === 0 {
+            $res = tracker.clearCaptureSprites()
+            jumpSub updateUI
+            info Extra render sprites cleared
+            exitSub
+        }
+
+    }
+    if $opt === "Tracker on 2nd" {
+        if $animTrackSpr !== undefined {
+            if selection.length > 0 {
+                $i = 0
+                label loop2nd
+                $res = tracker.setTrackRelative($animTrackSpr, selection[$i]);
+                if $res !== undefined {
+                    $res = $res.uiFlashSprite("attention","#F00")
+                }
+                $i = $i + 1
+                if $i < selection.length {
+                    jump loop2nd
+                }
+                jumpSub updateUI
+                info Track relative applied
+                exitSub
+            }
+            warn Ref sprite not selected
+            exitSub
+
+        }
+        warn 2nd Anim sprite not set
+        exitSub
+    }
+    $isPos = $opt.includes("Pos")
+    $isRot = $opt.includes("Rot")
+    $isSca = $opt.includes("Sca")
+    $isFollow = $isPos || $isRot || $isSca
+    if $isFollow === true {
+	    $res = log.clear()
+        jumpSub setupTracker
+        $res = tracker.followUsing($isPos, $isRot, $isSca, $scaleUni, $useFirst)
+        jump updateUI
+    }
+
+    if $opt === "Tracker stop" {
+        $res = tracker.stop();
+        exitSub
+    }
+    if $opt === "Clear Anim" {
+        $res = tracker.clearSelectedTrackers(0);
+        if $res !== undefined {
+            $res = $res.uiFlashSprite("attention","#F00")
+        }
+        exitSub
+    }
+    if $opt === "Clear 2 End" {
+        $res = tracker.clearSelectedTrackers(animation.time);
+        if $res !== undefined {
+            $res = $res.uiFlashSprite("attention","#F00")
+        }
+        exitSub
+    }
+    if $opt === "gain" {
+        $difAmp = Number($gain.replace("Gain Gain ",""))
+        if isNaN($difAmp) === true {
+            $difAmp = "linear"
+        }
+        $res = tracker.gain($difAmp)
+        jumpSub updateUI
+        exitSub
+    }
+    if $opt === "scanMethodUI" {
+        $scanMethod = $scanMethods.indexOf($scanMethodUI.replace("Scan method ",""))
+        $scanMethodUI = $scanMethods[$scanMethod];
+        $res = tracker.setScanMethod($scanMethodUI)
+        jumpSub updateUI
+        exitSub
+    }
+    if $opt === "scaleUniUI" {
+        $scaleUni = ! $scaleUni
+        jump updateUI
+    }
+	if $opt === "useFirstUI" {
+        $useFirst = ! $useFirst
+        jump updateUI
+    }
+	if $opt === "debuggingUI" {
+        $debugging = ! $debugging
+		$res = tracker.debugCanvas($debugging)
+        jump updateUI
+    }
+    if $opt === "detailUI" {
+        $detail = $detailName.indexOf($detailUI.replace("Detail ",""))
+        $detailUI = $detailName[$detail]
+        $res = tracker.distMin($detailVal[$detail]);
+        jump updateUI
+    }
+    if $opt === "detailStartUI" {
+        $detailStart = $detailName.indexOf($detailStartUI.replace("DetailStart ",""))
+        $detailStartUI = $detailName[$detailStart]
+        $res = tracker.distMax($detailVal[$detailStart]);
+        jump updateUI
+    }
+    if $opt === "compareResUI" {
+        $compareRes = $compareResNames.indexOf($compareResUI.replace("CompRes ",""))
+        $compareResUI = $compareResNames[$compareRes]
+        jump updateUI
+    }
+    if $opt === "Select debug sprite" {
+        if selection.length > 0 {
+            $res = tracker.displaySprite(selection[0])
+            $res = selection[0].uiFlashSprite("attention","#F0F")
+            jumpSub updateUI
+            exitSub
+        }
+        $res = tracker.displaySprite(selection[0])
+        jumpSub updateUI
+        exitSub
+    }
+    if $opt === "Drag Track" {
+        $res = tracker.convertToDragger()
+        jump updateUI
+    }
+    if $opt === "Use Follower Anim" {
+        $res = tracker.useFollower()
+        jump updateUI
+    }
+    if $opt === "Set as follower" {
+        $res = tracker.asReference()
+        if $res !== undefined {
+            $res = $res.uiFlashSprite("attention","#F80")
+        }
+        jump updateUI
+    }
+    if $opt === "As relative" {
+        $res = tracker.asRelative()
+        jump updateUI
+    }
+    if $opt === "Anim sprite" {
+        jumpSub selectAnimSpr
+        jumpSub updateUI
+        exitSub
+    }
+exitSub
+
+label updateUI
+    $gain = "Gain " + $difAmp;
+    $detailUI = $detailName[$detail]
+    $detailStartUI = $detailName[$detailStart]
+    $scanMethodUI = $scanMethods[$scanMethod]
+    $compareResUI = $compareResNames[$compareRes]
+    $scaleUniUI = $scaleUni ? "On" : "Off"
+    $useFirstUI = $useFirst ? "On" : "Off"
+    $debuggingUI = $debugging ? "On" : "Off"
+    storage.write("difAmp",$difAmp)
+    storage.write("detail",$detail)
+    storage.write("detailStart",$detailStart)
+    storage.write("scanMethod",$scanMethod)
+    storage.write("compareRes", $compareRes)
+    storage.write("subScan", $subScan)
+    storage.write("resetOnTrackStart", $resetOnTrackStart)
+    storage.write("maxRepeat", $maxRepeat)
+    menuUpdate $gain $compareResUI $scaleUniUI $useFirstUI $debuggingUI $detailUI $detailStartUI $scanMethodUI $resetOnTrackStartUI $maxRepeatUI
+exitSub
+
+label updateStatus
+    $t = tracker.isTracking()
+    if $t === true {
+        menuButton "StopId" enable ""
+    }
+    if $t === false {
+        menuButton "StopId" disable ""
+    }
+	if $selHasRefAnim === true {
+        menuButton "CapAnim" enable ""
+	}
+	if $selHasRefAnim === false {
+        menuButton "CapAnim" disable ""
+	}
+
+	$t = tracker.has2ndAnim()
+	if $t === true {
+        menuButton "track2nd" enable ""
+	}
+	if $t === false {
+        menuButton "track2nd" disable ""
+	}
+
+    $t = tracker.updateStatus
+    if $t !== "" {
+        if $t !== $lastStatus {
+            info  Tracker Status:  $t
+            $lastStatus = $t
+        }
+    }
+
+exitSub
+
+label setupTracker
+
+    $res = tracker.gain($difAmp)
+    $res = tracker.distMin($detailVal[$detail])
+    $res = tracker.distMax($detailVal[$detailStart])
+    $res = tracker.setScanMethod($scanMethodUI)
+    $res = tracker.setMaxRepeat($maxRepeat)
+    $res = tracker.setTrackStartAction($resetOnTrackStartUIopts[$resetOnTrackStart])
+exitSub
+
+label checkSelected
+
+
+    $selHasRefAnim = false
+	if selection.length === 1 {
+		if selection[0].animRefFrames !== undefined {
+			$selHasRefAnim = true
+			$update = true
+		}
+	}
+exitSub
+
+label selectAnimSpr
+    $count = 0
+    $animSpr = undefined
+    $imgCount = 0
+    if selection.length === 0 {
+        exitSub
+    }
+    label nextSelA
+        $s = selection[$count]
+        if $s.type.image === false {
+            jump nextSelStepA
+        }
+        if $s.type.animated === false {
+            jump nextSelStepA
+        }
+        if $s.animation.tracks.image === undefined {
+            jump nextSelStepA
+        }
+
+        $animSpr = $s
+        $imgCount = $animSpr.animation.tracks.image.keys.length
+        $name = $animSpr.name
+        $res = tracker.animSprite($animSpr)
+        $res = $animSpr.uiFlashSprite("attention","#5F5")
+
+        if $animSpr.type.attached {
+            $res = tracker.asReference()
+            if $res !== undefined {
+                $res = $res.uiFlashSprite("attention","#F80")
+            }
+            info  "Follower sprite set"
+        }
+
+        exitSub
+
+        label nextSelStepA
+            $count = $count + 1
+            if $count < selection.length {
+                jump nextSelA
+            }
+
+    if selection.length === 1 {
+        $animSpr = selection[0]
+        $res = tracker.animSprite($animSpr)
+        $res = $animSpr.uiFlashSprite("attention","#5F5")
+        exitSub
+
+    }
+exitSub
+
+//============================================================================================================================
+// Events
+
+event ontrackerupdated {
+    jumpSub updateStatus
+}
+event onspriteupdate {
+    com paint    
+}
+event onselectionchanged {
+	$t = tracker.isTracking()
+	if $t === false {
+        if $busy === false {
+			jumpSub checkSelected
+			jumpSub updateStatus
+		}
+	}
+}
+event ontimeout {
+    if $startup === true {
+        $startup = false
+        jumpSub selectAnimSpr
+		jumpSub checkSelected
+        jumpSub updateUI
+        jumpSub updateStatus
+    }
+}

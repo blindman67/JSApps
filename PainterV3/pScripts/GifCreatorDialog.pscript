@@ -1,0 +1,496 @@
+// This is a long and complex script that provides a dialog to create and save GIFs
+// It lets you capture frames manualy or from a section of animation.
+// You should have GIFEncoder set to true in Painter options
+// This dialog will include your Authoring and Copyright details set in Painter options as a comment in the GIF.
+// See ./Help/Personalization.html for details on changing Authoring and Copyright details
+// For more infor see ./Help/GIFEncoder.html and ./Help/Scripting/Index.html
+
+$id = UID++
+$encoderReady = false
+$canSaveGif = false
+$capturingFrames = false
+$animationTime = 0
+$pallet = undefined
+$captureImage  = undefined
+$selectedPallet = "Not selected"
+$selectedCaptureSprite = "Not selected"
+$encoderStatus = "Not Started"
+$transparent = false
+$transparentGIF = "OFF"
+$transparentT = "128"
+$ditherType = "No Dither"
+$ditherTypeDisplay = "No Dither"
+$palletLookupType = "Linear"
+$palletLookupTypeDisplay = "Linear"
+
+$captureMethod = "Animation"
+
+$BGColor = "Not set"
+$backgroundColor = undefined
+jumpSub findContext
+menu title "20 GIF creator"
+menu exit "Exit"
+menu exit "Save"
+menu exit "Capture"
+$capturingFrames = false
+$res = storage.file("gifCreator")
+$frameDelay = storage.read("frameDelay",10)
+$animationInterval = storage.read("animationInterval",1)
+$randomDither = storage.read("randomDither",false)
+$transThreshold = storage.read("transThreshold",false)
+$animationFrom = storage.read("animationFrom",animation.startTime)
+$animationTo = storage.read("animationTo",animation.endTime)
+$nextFrameIn = $frameDelay
+$frameTotalTime = 0
+
+
+$animationTo = $animationTo > animation.endTime ? animation.endTime : $animationTo
+$animationFrom = $animationFrom < animation.startTime ? animation.startTime : $animationFrom
+$animationFrom = $animationFrom > $animationTo ? $animationTo - 1 : $animationFrom
+$animationTimes = animation.startTime + " " + animation.endTime
+
+$animationFromStr = timeToStr($animationFrom)
+$animationToStr = timeToStr($animationTo)
+
+$animationLen = $animationTo - $animationFrom + 1
+$animationTime = $animationFrom
+$captureMethodDisplay = "Auto " + ($animationLen / $animationInterval|0)+ " frames " + (($animationLen / $animationInterval|0) * $frameDelay / 1000).toFixed(2) + "sec."
+
+
+$options = ""
+$options = $options + "$frameDelay,slider Delay 10 1000 10 10 #000,"
+$options = $options + "$animationInterval,slider Interval 1 30 1 1 #000,"
+
+$options = $options + ",,$animationFromStr,From time ,"
+$options = $options + "$animationFrom,slider From "+$animationTimes+" 1 1 #000,"
+$options = $options + ",$animationTo,slider To "+$animationTimes+" 1 1 #000,"
+$options = $options + "$animationToStr,To time ,"
+
+$options = $options + ",,$ditherTypeDisplay,Random Dither?Click to cycle dither options,"
+$options = $options + "$palletLookupTypeDisplay,Pallet lookup methor ?Click to pallet lookup options,"
+$options = $options + "$selectedPallet,Use selected pallet ,"
+$options = $options + "$selectedCaptureSprite,Use capture sprite ,"
+$options = $options + "$transparentGIF,Transparent ,"
+$options = $options + "$transparentT,Transparent cutoff ,"
+$options = $options + "$BGColor,Use background color,"
+$options = $options + "$captureMethodDisplay,Capture method,"
+$options = $options + "$encoderStatus,Start,"
+menu options $options
+menu keep
+
+
+//=======================================================================================================================
+// Start of main menu loop
+//=======================================================================================================================
+label doAgain
+$opt = call menu
+
+if $opt === "exit" {
+    if $encoderReady === true {
+        $res = GIFEncoder.close();
+    }
+    jumpSub saveSettings
+    $res = storage.close()
+    exit
+}
+if $opt === "save" {
+    if $canSaveGif === false {
+        $frameCount = GIFEncoder.frames
+        if $frameCount > 0 {
+            $res = GIFEncoder.stop();
+            $canSaveGif = true
+        }
+    }
+    if $canSaveGif === true {
+        $gifFileName = $captureSprite.name + ".gif"
+        $res = GIFEncoder.saveStream($gifFileName)
+        $encoderStatus = "Saving as " + $gifFileName
+        menuUpdate $encoderStatus
+        jump doAgain
+    }
+    log "No gif ready to save"
+    jump doAgain
+}
+if $opt === "capture" {
+    if $encoderReady === false {
+        log "You need to start the encoder"
+        jump doAgain
+    }
+    $palletLookup = $pallet.getLookup()
+
+    if $captureMethod === "Animation" {
+        log "Sarting animation capture"
+        $res = heartBeat.registerBusyProcess($id,true)
+
+        $capturingFrames = true
+        $encoderStatus = "Capturing animation"
+        $animationTime = $animationFrom
+        animation.time = $animationTime
+        log "frameRendered"
+        frameRendered
+         log "post frameRendered"
+        menuUpdate $encoderStatus
+        jump doAgain
+    }
+
+
+    if $captureImage.processedData !== undefined {
+        $res = localProcessImage.createJob("createIndexedLookup", $captureImage, $captureImage.processedData.idxPix, $palletLookupType + " " + $ditherType,  $palletLookup, "color fixed",  $transparent, $transThreshold, $transIndex);
+        jump waitForJob
+    }
+
+    $res = localProcessImage.createJob("createIndexedLookup", $captureImage, undefined, $palletLookupType + " " + $ditherType, $palletLookup, "color fixed",  $transparent, $transThreshold, $transIndex);
+
+    label waitForJob
+
+    $encoderStatus = "Adding frame"
+
+    jump doAgain
+}
+if $opt === "animationFrom" {
+    jumpSub showUpdateAnimationLength
+    jump doAgain
+}
+if $opt === "animationTo" {
+    jumpSub showUpdateAnimationLength
+    jump doAgain
+}
+if $opt === "animationFromStr" {
+    $res = mouse.oldButton & 4
+    if $res === 4 {
+        animation.time = $animationFrom
+        jump doAgain
+    }
+    $animationFrom = animation.time
+    $animationFromStr = timeToStr($animationFrom)
+    jumpSub showUpdateAnimationLength
+    jump doAgain
+}
+if $opt === "animationToStr" {
+    $res = mouse.oldButton & 4
+    if $res === 4 {
+        animation.time = $animationTo
+        jump doAgain
+    }
+    $animationTo = animation.time
+    jumpSub showUpdateAnimationLength
+    jump doAgain
+}
+if $opt === "frameDelay" {
+    $res = Math.round($frameDelay / (1000 / 60))
+    $animationInterval = $res < 1 ? 1 : $res
+    menuUpdate $animationInterval
+    jumpSub showAnimationLength
+    jump doAgain
+}
+if $opt === "ditherTypeDisplay" {
+    if $ditherType === "No Dither" {
+        $ditherType = "Random Dither"
+        jump ditherSet
+    }
+    if $ditherType === "Random Dither" {
+        $ditherType = "Ordered Dither 2by2"
+        jump ditherSet
+    }
+    if $ditherType === "Ordered Dither 2by2" {
+        $ditherType = "Ordered Dither 3by3"
+        jump ditherSet
+    }
+    if $ditherType === "Ordered Dither 3by3" {
+        $ditherType = "Ordered Dither 4by4"
+        jump ditherSet
+    }
+    if $ditherType === "Ordered Dither 4by4" {
+        $ditherType = "No Dither"
+        jump ditherSet
+    }
+    label ditherSet
+    $ditherTypeDisplay = $ditherType
+    menuUpdate $ditherTypeDisplay
+    jump doAgain
+}
+if $opt === "palletLookupTypeDisplay" {
+    if $palletLookupType === "Linear" {
+        $palletLookupType = "Logarithmic";
+        $palletLookupTypeDisplay = $palletLookupType
+        menuUpdate $palletLookupTypeDisplay
+        jump doAgain
+    }
+    $palletLookupType = "Linear";
+    $palletLookupTypeDisplay = $palletLookupType
+    menuUpdate $palletLookupTypeDisplay
+    jump doAgain
+}
+if $opt === "captureMethodDisplay" {
+    if $captureMethod === "Manual" {
+        $captureMethod = "Animation"
+        $res = animation.startFrame()
+        animation.time = $animationFrom
+        jumpSub showAnimationLength
+        jump doAgain
+    }
+    $captureMethod = "Manual"
+    $captureMethodDisplay = "Manual"
+    menuUpdate $captureMethodDisplay
+    jump doAgain
+}
+if $opt === "BGColor" {
+    if $backgroundColor !== undefined {
+        $backgroundColor = undefined
+        $BGColor = " OFF"
+        jump updateBG
+    }
+    $backgroundColor = colours.secondColorAlpha
+    $BGColor = " ON " + colours.secondColor.css
+    label updateBG
+        menuUpdate $BGColor
+        jump doAgain
+}
+if $opt === "transparentGIF" {
+    $transparent = !$transparent
+    if $transparent === true {
+        if $pallet !== undefined {
+            $transparentGIF = "Trans index " + $pallet.length + " ON"
+        }
+        if $pallet === undefined {
+            $transparentGIF = "ON"
+        }
+    }
+    if $transparent === false {
+        $transparentGIF = "OFF"
+    }
+
+    $transparentT = " Cutoff " + $transThreshold
+    menuUpdate $transparentGIF $transparentT
+    jump doAgain
+}
+if $opt === "transparentT" {
+    $transThreshold = (colours.alpha * 255) | 0
+    $transparentT = " Cutoff " + $transThreshold
+    menuUpdate $transparentT
+    jump doAgain
+}
+if $opt === "selectedPallet" {
+    assert selected
+    if $assertion === false {
+        log "Select a pallet, then click use."
+        jump doAgain
+    }
+    assert pallet
+    if $assertion === false {
+        log "Selected sprite is not a pallet."
+        jump doAgain
+    }
+    $selectedPallet = "Pallet Selected"
+    $pallet = selection[0].pallet
+    menuUpdate $selectedPallet
+    jump doAgain
+}
+if $opt === "selectedCaptureSprite" {
+    assert selected
+    if $assertion === false {
+        log "Select a image sprite, then click this button."
+        jump doAgain
+    }
+    assert captureSprite
+    if $assertion === false {
+        log "Selected sprite is not a capture sprite."
+        jump doAgain
+    }
+    $captureSprite = selection[0].image
+    $captureImage = selection[0].image
+    $selectedCaptureSprite = $captureSprite.image.w + "by" + $captureSprite.image.h + " Capture Sprite Selected"
+    menuUpdate $selectedCaptureSprite
+    jump doAgain
+}
+if $opt === "encoderStatus" {
+    if $captureImage === undefined {
+        $encoderStatus = "Require Capture sprite"
+        menuUpdate $encoderStatus
+        jump doAgain
+    }
+    $isLiveCapture = $captureSprite.type.liveCapture
+
+    if $isLiveCapture === false {
+        $encoderStatus = "Require Capture sprite"
+        menuUpdate $encoderStatus
+        jump doAgain
+
+    }
+    if $pallet === undefined {
+        $encoderStatus = "Require pallet"
+        menuUpdate $encoderStatus
+        jump doAgain
+    }
+    GIFEncoder.delay = $frameDelay
+    GIFEncoder.comment = "Painter V3, son of Groover created this GIF"
+    if $transparent === true {
+
+        $pCount = $pallet.length
+        GIFEncoder.transparentIndex = $pCount
+        $transIndex = $pCount
+        if $backgroundColor !== undefined {
+            $backgroundColorIndex = $pallet.closestColorIdx($backgroundColor.r, $backgroundColor.g, $backgroundColor.b)
+            GIFEncoder.backgroundIndex = $backgroundColorIndex
+            $BGColor = "Using pallet index " + $backgroundColorIndex
+            menuUpdate $BGColor
+        }
+
+    }
+    if $transparent === false {
+        GIFEncoder.transparentIndex = - 1
+    }
+    $pp = $pallet.asArray()
+    $captureImage.processedData = undefined
+    $res = GIFEncoder.start($pallet, $captureImage)
+    if $res === false {
+        $encoderStatus = GIFEncoder.errorMessage
+        $encoderReady = false
+        menuUpdate $encoderStatus
+        $res = GIFEncoder.close()
+        jump doAgain
+
+    }
+    $encoderStatus = "Encoding started. You can add frames"
+    $encoderReady = true
+    menuUpdate $encoderStatus
+    jump doAgain
+}
+jumpSub showAnimationLength
+jump doAgain
+
+{ // showUpdateAnimationLength
+label showUpdateAnimationLength
+    $res = $animationTo
+    if $animationFrom > $animationTo {
+        $animationTo = $animationFrom
+        $animationFrom = $res
+    }
+    $animationFromStr = timeToStr($animationFrom)
+    $animationToStr = timeToStr($animationTo)
+    menuUpdate $animationFrom
+    menuUpdate $animationFromStr
+    menuUpdate $animationTo
+    menuUpdate $animationToStr
+
+label showAnimationLength
+    if $captureMethod === "Animation" {
+        $animationLen = $animationTo - $animationFrom + 1
+        $animationTime = $animationFrom
+        $captureMethodDisplay = "Auto " + ($animationLen / $animationInterval|0)+ " frames " + (($animationLen / $animationInterval|0) * $frameDelay / 1000).toFixed(2) + "sec."
+        menuUpdate $captureMethodDisplay
+    }
+exitSub
+}
+{ // saveSettings
+    label saveSettings
+        $res = storage.write("frameDelay", $frameDelay)
+        $res = storage.write("animationInterval", $animationInterval)
+        $res = storage.write("randomDither", $randomDither)
+        $res = storage.write("transThreshold", $transThreshold)
+        $res = storage.write("animationFrom", $animationFrom)
+        $res = storage.write("animationTo", $animationTo)
+    exitSub
+}
+{// findContext
+label findContext
+    assert selected
+    if $assertion === false {
+        exitSub
+    }
+    $count = 0
+    $foundCount = 0
+    label nextspr
+        if $count === selection.length {
+            //jump searchComplete
+            exitSub
+        }
+        $spr = selection[$count]
+        if $spr.type.pallet === true {
+            if $pallet === undefined {
+                $pallet = $spr.pallet
+                $foundCount = $foundCount + 1
+                $selectedPallet = $pallet.length + " Pallet Selected"
+            }
+            jump nextSprite
+        }
+        if $spr.type.image === true {
+            if $captureImage  === undefined {
+                if $spr.type.liveCapture === true {
+                    $captureSprite = $spr
+                    $captureImage  = $spr.image
+                    $foundCount = $foundCount + 1
+                    $selectedCaptureSprite = $spr.image.w + "by" + $spr.image.h + " Capture Sprite Selected"
+                }
+            }
+        }
+        label nextSprite
+        if $foundCount === 2 {
+            exitSub
+        }
+        $count = $count + 1
+        jump nextspr
+}//=======================================================================================================================
+// Events
+// Warning onimageprocessed will be removed at some time.
+event onimageprocessed {
+    if $captureImage.processedData.w === 0 {
+        jump skipFrame
+    }
+    if $captureImage.processedData.h === 0 {
+        jump skipFrame
+    }
+    GIFEncoder.delay = $nextFrameIn
+    $frameTotalTime = $frameTotalTime + $nextFrameIn
+    $res = GIFEncoder.addFrame($captureImage.processedData)
+
+    $nextFrameIn = $frameDelay
+    jump endOfEvent
+    label skipFrame
+        log "Frame contained no new pixels"
+        $nextFrameIn = $nextFrameIn + $frameDelay
+    label endOfEvent
+
+    $frameCount = GIFEncoder.frames
+    $fSize = GIFEncoder.fileSize / 1024
+    $fSize = $fSize < 500 ? ($fSize.toFixed(2) + "kB") : (($fSize / 1024).toFixed(2) + "MB")
+    $encoderStatus = $frameCount + "/" + (($animationTo-$animationFrom+1)/$animationInterval | 0) + " frames." + (($frameTotalTime / 1000).toFixed(2)) + "sec. File size " + $fSize
+    if $capturingFrames === true {
+        $animationTime = $animationTime + $animationInterval
+        if $animationTime > $animationTo {
+            $res = GIFEncoder.stop();
+            $canSaveGif = true
+            $res = heartBeat.registerBusyProcess($id,false)
+
+            $encoderStatus = "🔥🔥🔥DONE!!! " + $frameCount + "frames " + $fSize+" 🔥🔥🔥"
+            $capturingFrames = false
+            jump animationDone
+        }
+
+        //animation.time = $animationTime
+
+        animation.time = animation.time + 1
+        frameRendered  // one time render event "onframerendered" Must put after setting animation.time or may
+                       // duplicate frames due to event not knowing that videos are seeking
+    }
+
+    label animationDone
+    menuUpdate $encoderStatus
+}
+event onanimtimechanged {
+    // fires when time has changed. Warning capture frames and video content may not be ready at this time
+    // Use event frameRendered to ensure capture content and videos have completed seeking to this time
+}
+event onframerendered {
+    if $capturingFrames === true {
+        if $animationTime === animation.time {
+            $res = localProcessImage.createJob("createIndexedLookup", $captureImage, undefined, $palletLookupType + " " + $ditherType,  $palletLookup, "color fixed",  $transparent, $transThreshold, $transIndex);
+        }
+        if $animationTime !== animation.time {
+            animation.time = animation.time + 1
+            frameRendered  // one time render event "onframerendered" Must put after setting animation.time or may
+                           // duplicate frames due to event not knowing that videos are seeking
+        }
+    }
+}
+

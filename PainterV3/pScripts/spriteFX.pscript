@@ -1,0 +1,134 @@
+debug on
+$startup = true
+$title = "16 Set Filter levels"
+menu title $title
+$blurVal = 0
+$brightnessVal = 100
+$contrastVal = 100
+$grayscaleVal = 0
+$saturateVal = 100
+$sepiaVal = 0
+$hueVal = 0
+$invertVal = 0
+
+
+menu exit "Done"
+$options = ""
+$options = $options + "$blurVal,slider Blur 0 64 1 0 #F00,"
+$options = $options + "$brightnessVal,slider Bright 1 200 1 100 #FF0,"
+$options = $options + "$contrastVal,slider Contrast 1 200 1 100 #0F0,"
+$options = $options + "$grayscaleVal,slider Gray Scale 0 100 1 0 #0FF,"
+$options = $options + "$saturateVal,slider Saturation 1 200 1 100 #00F,"
+$options = $options + "$sepiaVal,slider Sepia 0 100 1 0 #F0F,"
+$options = $options + "$hueVal,slider Hue -180 180 1 0 #000,"
+$options = $options + "$invertVal,slider Invert 0 100 1 0 #FFF"
+
+
+menu options $options
+menu keep
+timeout 100
+label doAgain
+$opt = call menu
+if $opt === "done" {
+    exit
+}
+if $opt === "cancel" {
+    exit
+}
+jump getFirstSelected
+jump doAgain
+
+
+label getFirstSelected
+    selected first a
+    jump setSelectedOpt
+
+label getNextSelected
+    selected next a
+    
+label setSelectedOpt
+    // if no more selected then exit
+    if $a === undefined {
+        jump doAgain
+    }
+
+    if $opt === "blurVal" {
+        $a.blur = $blurVal
+        jump getNextSelected
+    }
+    if $opt === "brightnessVal" {
+        $a.brightness = $brightnessVal
+        jump getNextSelected
+    }
+
+    if $opt === "contrastVal" {
+        $a.contrast = $contrastVal
+        jump getNextSelected
+    }
+
+    if $opt === "grayscaleVal" {
+        $a.grayscale = $grayscaleVal
+        jump getNextSelected
+    }
+
+    if $opt === "saturateVal" {
+        $a.saturate = $saturateVal
+        jump getNextSelected
+    }
+
+    if $opt === "sepiaVal" {
+        $a.sepia = $sepiaVal
+        jump getNextSelected
+    }
+
+    if $opt === "hueVal" {
+        $a.hue = $hueVal
+        jump getNextSelected
+    }
+
+    if $opt === "invertVal" {
+        $a.invert = $invertVal
+    }
+    jump getNextSelected
+
+label getSpriteState
+    if $a !== undefined {
+        if $a.blur !== undefined {
+            $blurVal = $a.blur;
+        }
+        if $a.brightness !== undefined {
+            $brightnessVal = $a.brightness;
+        }
+        if $a.contrast !== undefined {
+            $contrastVal = $a.contrast;
+        }
+        if $a.grayscale !== undefined {
+            $grayscaleVal = $a.grayscale;
+        }
+        if $a.saturate !== undefined {
+            $saturateVal = $a.saturate;
+        }
+        if $a.sepia !== undefined {
+            $sepiaVal = $a.sepia;
+        }
+        if $a.hue !== undefined {
+            $hueVal = $a.hue;
+        }
+        if $a.invert !== undefined {
+            $invertVal = $a.invert;
+        }
+        menuUpdate $blurVal $brightnessVal $contrastVal $grayscaleVal $saturateVal $sepiaVal $hueVal $invertVal
+    }
+exitSub
+
+// Fires when the sprite selection has changed
+event onselectionchanged {
+    selected first a
+    jumpSub getSpriteState
+}
+event ontimeout {
+    $startup = false
+    selected first a
+    jumpSub getSpriteState
+
+}

@@ -1,0 +1,42 @@
+#loadTemplate if $opt === %0 {;$res = storage.loadJSON(%1, $loadOptions); jump doAgain;};
+
+menu title "20 Template loader"
+menu exit "Exit"
+$options = ""
+$res = ""
+
+$options = $options + "IK Arm no joint?Simple IK  with no joints,"
+$options = $options + "IK Arm?Simple IK 2 joint arm with min max bends,"
+$options = $options + "IK Arm 3?Simple IK 3 joint arm with min max bends,"
+$options = $options + "Label Line?A line with label,"
+$options = $options + "Line Gadget?Line betwwen two handles,"
+$options = $options + "Angle Gizmo?Arrow Lines with arrowed angle arc between them,"
+$options = $options + "Vanish controls?Creates vanish grid sprite with controls to help align vanish point,"
+$options = $options + ",,,,textCenter Unsaveable templates,^,^,^,"
+$options = $options + "Arrow Gadget?Arrow Line betwwen two handles,"
+$options = $options + "Verlet Chain?Verlet solver hanging chain,"
+$options = $options + "Arrow Text Gadget?Arrow Line betwwen two handles with text,"
+
+
+menu options $options
+menu keep
+label doAgain
+$opt = call menu
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    exit
+}
+$loadOptions = "select collections"
+
+#loadTemplate "IK Arm no joint" "IK_Arm_NJ.json"
+#loadTemplate "IK Arm 3" "IK_Arm_4j.json"
+#loadTemplate "IK Arm" "IK_Arm.json"
+#loadTemplate "Label Line" "LabelLine.json"
+#loadTemplate "Line Gadget" "lineGadget.json"
+#loadTemplate "Arrow Gadget" "ArrowLine.json"
+#loadTemplate "Arrow Text Gadget" "ArrowTextLine.json"
+#loadTemplate "Angle Gizmo" "AngleGizmo.json"
+#loadTemplate "Verlet Chain" "GravityChainAuto.json"
+#loadTemplate "Vanish controls" "VanishControls.json"
+
+jump doAgain

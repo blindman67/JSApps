@@ -1,0 +1,12 @@
+log "Started test json"
+log $arg0
+log $arg1
+debug on
+menu title "Create tile image"
+menu exit "OK,create image {option}"
+menu exit "Cancel"
+menu options "8 8,16 16,24 24,32 32,48 48,64 64,80 80,96 96,128 128,196 196,256 256"
+menu show
+
+log "End test json"
+exit 12315

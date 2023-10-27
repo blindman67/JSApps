@@ -1,0 +1,16 @@
+H3 {
+    text-align: center;
+    border-bottom: 2px solid;    
+}
+h2 {
+    text-align: center;
+    border-bottom: 1px solid;    
+}
+img {
+}
+.mover {
+    padding-left: 10px;
+    font-weight: 100;
+    color: blue;
+    cursor: pointer;
+}    

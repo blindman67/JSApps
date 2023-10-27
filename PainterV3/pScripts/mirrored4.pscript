@@ -1,0 +1,57 @@
+create image a $arg0
+$a1 = $arg0 * 2
+$a2 = $arg0 * 3
+create sprite a 0 0
+create sprite a $a1 0
+create sprite a 0 $a1
+create sprite a $a1 $a1
+
+create sprite a $arg0 0
+select
+com edSprMirrorHor
+create sprite a $a2 0
+select
+com edSprMirrorHor
+create sprite a $arg0 $a1
+select
+com edSprMirrorHor
+create sprite a $a2 $a1 
+select
+com edSprMirrorHor
+
+
+create sprite a 0 $arg0
+select
+com edSprMirrorVer
+create sprite a 0 $a2
+select
+com edSprMirrorVer
+create sprite a $a1 $arg0
+select
+com edSprMirrorVer
+create sprite a $a1 $a2 
+select
+com edSprMirrorVer
+
+
+
+create sprite a $arg0 $arg0
+select
+com edSprMirrorVer
+com edSprMirrorHor
+create sprite a $arg0 $a2
+select
+com edSprMirrorVer
+com edSprMirrorHor
+create sprite a $a2 $arg0
+select
+com edSprMirrorVer
+com edSprMirrorHor
+create sprite a $a2 $a2 
+select
+com edSprMirrorVer
+com edSprMirrorHor
+
+
+com spritesSelectAll
+com edSprDrawing

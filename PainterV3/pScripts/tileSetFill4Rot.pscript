@@ -1,0 +1,107 @@
+
+create image a $arg0
+create image b $arg0
+create image c $arg0
+create image d $arg0
+
+
+setSize $arg0
+$randArray = ["a","b","c","d"]
+
+
+create row 0 a b a b a a b b c c d d 
+create row 1 c d c d a a b b c c d d
+create row 2 a c a c a d a d a b c d
+create row 3 d b d b b c b c a b c d
+create row 4 $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem
+create row 5 $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem
+create row 6 $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem
+create row 7 $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem $randItem
+
+$randMax = 12 * 8
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+select $randI
+com edSprRotCW    
+select $randI
+com edSprRotCCW    
+select $randI
+com edSprMirrorVer    
+select $randI
+com edSprMirrorHor    
+
+
+
+
+com spritesSelectAll

@@ -1,0 +1,161 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2019-06-13T13:08:49.990Z",
+        "id": 251291,
+        "author": "PainterV3",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018 - 2020",
+        "details": "\n##RG#===== ##R#IK Arm### =================================\n##RG#Change ##G#green### number to 1 to bend arm back\n##RG#Change ##G#green### number to -1 to bend arm forward\n##RG#==============================================\n",
+        "useLib": true,
+        "type": "scene",
+        "loadedCommands": ["edSprResetView","edSpriteActivateFunctionLinks"]
+    },
+    "lib" : {
+        "_A": {
+            "scale": true,
+            "rotate": true
+        },
+        "_AU": {
+            "scale": true,
+            "rotate": true,
+            "UI": true
+        },
+        "_B": {
+            "x": -64,
+            "w": 32,
+            "h": 32,
+            "locks": "_A",
+            "namedInLink": true,
+            "type": "cutter"
+        },
+        "_T": {
+            "x": 16,
+            "y": 16,
+            "rx": 0,
+            "ry": 1.571,
+            "ir": false,
+            "isx": false,
+            "isy": false,
+            "iax": false,
+            "comp": false
+        }
+    },
+    "scene": {
+        "sprites": [{
+                "name": "Foot",
+                "_B": 0,
+                "id": 251283,
+                "gridSpecial": "IK_foot",
+                "y": 0
+            }, {
+                "name": "Top",
+                "_B": 0,
+                "id": 251284,
+                "gridSpecial": "IK_start",
+                "y": -128
+            }, {
+                "name": "Look To Foot",
+                "id": 251285,
+                "x": -256,
+                "y": -128,
+                "w": 16,
+                "h": 16,
+                "locks": "_AU",
+                "hideOutline": true,
+                "lookat": [251283, 1.5707963267948966, 0],
+                "attachedTo": 251284,
+                "attachment": {
+                    "_T": 0
+                },
+                "type": "cutter",
+                "gridSpecial": "IK_lookat"
+            }, {
+                "name": "Top Arm",
+                "id": 251286,
+                "x": -64,
+                "y": -384,
+                "w": 16,
+                "h": 64,
+                "locks": "_AU",
+                "attachedTo": 251284,
+                "hideOutline": true,
+                "attachment": {
+                    "y": 174,
+                    "_T": 0,
+                    "ir": true
+                },
+                "type": "cutter",
+                "gridSpecial": "bone"
+            }, {
+                "name": "Bend Knee",
+                "id": 251287,
+                "x": -64,
+                "y": -256,
+                "w": 8,
+                "h": 8,
+                "locks": "_AU",
+                "attachedTo": 251286,
+                "hideOutline": true,
+                "attachment": {
+                    "x": 8,
+                    "y": 110,
+                    "_T": 0
+                },
+                "type": "cutter",
+                "gridSpecial": "hinge"
+            }, {
+                "name": "Bottom Arm",
+                "id": 251288,
+                "x": -64,
+                "y": -128,
+                "w": 16,
+                "h": 64,
+                "locks": "_AU",
+                "attachedTo": 251287,
+                "hideOutline": true,
+                "attachment": {
+                    "y": 220,
+                    "_T": 0,
+                    "ir": true
+                },
+                "type": "cutter",
+                "gridSpecial": "bone"
+            }, {
+                "name": "Bend Direction",
+                "id": 251289,
+                "x": 452,
+                "y":  -448,
+                "w": 28.45,
+                "h": 38.4,
+                "locks": "_A",
+                "rgb": "#00ff00",
+                "namedInLink": true,
+                "type": "text",
+                "text": "-1",
+                "font": "arial",
+                "size": 32,
+                "lineWidth": 1
+            }, {
+                "name": "IK Arm function link",
+                "id": 251290,
+                "x": 264,
+                "y": -448,
+                "w": 96,
+                "h": 16,
+                "locks": "_A",
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [251286, 251288, 251283, 251284, 251287, 251289, 251285],
+                    "outputs": [251287, 251286, 251288, 251284],
+                    "linked": [251283, 251284, 251285, 251286, 251287, 251288, 251289],
+                    "source": "var spr251286, spr251287, spr251288, spr251283, spr251284, spr251285, spr251289;\nvar linkCount = 0, linksCount = 0;\nconst spriteIDS = [251286, 251287, 251288, 251283, 251284, 251289, 251285];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nconst vals = [];\nfunction update() {\n    var x,y, roff,angle;\n    if (!API.active) { return }\n    const dir = -(spr251289.type.text ? (isNaN(spr251289.textInfo.text) ? 0 : Number(spr251289.textInfo.text)) : 0);\n    const h1 = (spr251286.type.normalisable ? spr251286.h : spr251286.h * spr251286.sy);\n    const h2 = (spr251288.type.normalisable ? spr251288.h : spr251288.h * spr251288.sy);\n    x = spr251283.x - spr251284.x;\n    y = spr251283.y - spr251284.y;\n    const h22 = h2 * h2;\n    const h11 = h1 * h1;\n    const h33 = x * x + y * y;\n    const ab21 = (h1 * Math.sqrt(h33)) * 2;\n    const ab22 = (h1 * h2) * 2;\n    spr251287.type.attached && (spr251287.attachment.y = h1, spr251287.attachment.position());\n    x = ((spr251284.type.normalisable ? spr251284.w : spr251284.w * spr251284.sx)) * 0.5;\n    y = ((spr251284.type.normalisable ? spr251284.h : spr251284.h * spr251284.sy) + h1) * 0.5;\n    spr251286.type.attached && (spr251286.attachment.x = x, spr251286.attachment.y = y, spr251286.attachment.position());\n    spr251286.key.update();\n    x = ((spr251287.type.normalisable ? spr251287.w : spr251287.w * spr251287.sx)) * 0.5;\n    y = ((spr251287.type.normalisable ? spr251287.h : spr251287.h * spr251287.sy) + h2) * 0.5;\n    spr251288.type.attached && (spr251288.attachment.x = x, spr251288.attachment.y = y, spr251288.attachment.position());\n    spr251288.key.update();\n    angle = spr251285.rx + dir * Math.acosc((h22 - (h11 + h33)) / (ab21 ? ab21 : 1));\n    roff = spr251284.ry - spr251284.rx;\n    spr251284.rx = angle;\n    spr251284.ry = angle + roff;\n    spr251284.key.update();\n    angle += dir * Math.acosc((h33 - (h11 + h22)) / (ab22 ? ab22 : 1));\n    roff = spr251287.ry - spr251287.rx;\n    spr251287.rx = angle;\n    spr251287.ry = angle + roff;\n    spr251287.key.update();\n    API.updateWidget = spr251286.selected || spr251287.selected || spr251288.selected || spr251284.selected;\n}\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if(spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    spr251286 = getSprite(251286);\n    spr251287 = getSprite(251287);\n    spr251288 = getSprite(251288);\n    spr251283 = getSprite(251283);\n    spr251284 = getSprite(251284);\n    spr251289 = getSprite(251289);\n    spr251285 = getSprite(251285);\n    API.active = linksCount === linkCount;\n    reset();\n}\nfunction reset() {}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset, spriteIDS, spriteList, update,\n    inputs: [['Foot',251283], ['Top',251284], ['Direction',251289]],\n    outputs: [],\n    bind(spr, id) {\n        if(spriteList.has(id)) {\n            spriteList.set(id,spr);\n            setSprites();\n        }\n    },\n    getById(id) { return spriteList.get(id) },\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "groups": [],
+        "collections": []
+    }
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html id="topDoc" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
+        <title>P3</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/> <!--maximum-scale=1.0, user-scalable=0.0">-->
+        <meta name="keywords" content="Image editor, bitmap editor, drawing, pixelart, game design, Mark Spronck" />
+        <meta name="description" content="Iamge editor and drawing application for the browser." />
+        <meta name="author" content="Mark Spronck" />
+        <link rel="icon" type="image/svg" href="icons/Icon.svg" >
+        <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css' id = "googleFonts">
+        <link rel="stylesheet" type="text/css" href="PainterV3.css">
+        <style id="dinamicStyleElement"></style>
+        <script src="firstLoadScript.js"></script>
+        <script src="./scripts/UI/customCursors.js"></script>
+        <script src="./geeQuery/geeQuery.js"></script>
+        <script src="./LZipper/LZipperLite.js"></script>
+        <script src="./PracticalSVG/createSVG.js" ></script>
+        <script src="./SVGFilters/SVGFilters.js"></script>
+        <script src="./CanvasShapes/canvasShapesExtension.js"></script>
+        <script src="./EZWebWorkers/EZWebWorkers.js"></script>
+        <script src="quant256.js"></script>
+        <script src="./scripts/UI/commands.js"></script>
+        <script src="./scripts/WorkSpace/filters.js"></script>
+        <script src="utils.js"></script>
+        <script src="fileReadWriter.js"></script>
+        <script src="./scripts/UI/buttons.js"></script>
+        <script src="./EZView/EZView.js"></script>
+        <script src="Events.js"></script>
+        <script src="./scripts/Drawing/curves.js"></script>
+        <script src="./scripts/UI/nameBrushPresets.js"></script>
+        <script src="media.js"></script>
+        <script src="localProcessImage.js"></script>
+        <script src="./scripts/WorkSpace/IKSolver.js"></script>
+        <script src="./scripts/WorkSpace/functionLinkBuilder.js"></script>
+        <script src="./scripts/WorkSpace/spriteShapes.js"></script>
+        <script src="./scripts/WorkSpace/spriteText.js"></script>
+        <script src="./scripts/WorkSpace/sprite.js"></script>
+        <script src="./scripts/WorkSpace/sprites.js"></script>
+        <script src="./scripts/WorkSpace/selection.js"></script>
+        <script src="./scripts/WorkSpace/groups.js"></script>
+        <script src="./scripts/WorkSpace/collections.js"></script>
+        <script src="./scripts/WorkSpace/layers.js"></script>
+        <script src="./scripts/animation/animation.js"></script>
+        <script src="./scripts/WorkSpace/spriteRender.js"></script>
+        <script src="./scripts/UI/drop.js"></script>
+        <script src="./scripts/UI/colours.js"></script>
+        <script src="./scripts/UI/mediaList.js"></script>
+        <script src="./scripts/UI/spriteList2.js"></script>
+        <script src="./scripts/UI/extrasList.js"></script>
+        <script src="./scripts/UI/webGLFilters.js"></script>
+        <script src="./scripts/UI/editSprites.js"></script>
+        <script src="./scripts/UI/paint.js"></script>
+        <script src="./scripts/WorkSpace/extraRenders.js"></script>
+        <script src="./scripts/WorkSpace/snaps.js"></script>
+        <script src="./scripts/WorkSpace/guides.js"></script>
+        <script src="./scripts/Drawing/mouseBrush.js"></script>
+        <script src="./scripts/Drawing/cuttingTools.js"></script>
+        <script src="./scripts/Drawing/specialBrushes.js"></script>
+        <script src="./scripts/Drawing/curved.js"></script>
+        <script src="./scripts/Drawing/pens.js"></script>
+        <script src="./scripts/WorkSpace/widget.js"></script>
+        <script src="./scripts/WorkSpace/grid.js"></script>
+        <script src="./scripts/animation/timeline.js"></script>
+        <script src="./scripts/animation/LightBoxPannel.js"></script>
+        <script src="./scripts/WorkSpace/spriteSVGRender.js"></script>
+        <script src="ShadowPath2D.js"></script>
+        <!--<script src="WaveFuncCollapse.js"></script>-->
+    </head>
+    <body style="background-color:#4488ff;font-family : arial;" id="doc">
+        <div id="editContainer" style="left: 0px; right: 521px; top: 0px; bottom: 0px;">
+            <canvas id="mainCanvas"></canvas>
+            <div id="sizeBar" class="sizerBar" data-type = "vert"></div>
+        </div>
+        <div id="logContainer" style="left: 1079px; right: 0px; top: 0px; bottom: 266px;">
+            <div id="logs" class="logger"></div>
+            <div id="commandBar">
+                <input type="text" class = "commandInput font12" id="commandInput" spellcheck="false" data-allow-context-menu="true">
+				<label for="commandInput">Painter commands.</label>
+            </div>
+            <div id="sizeBarLog" class="sizerBarHor" data-type = "hor"></div>
+        </div>
+        <div id="uiContainer" style="left: 1079px; right: 0px; top: 219px; bottom: 0px;">
+        <div id="buttons"></div>
+        </div>
+        <div id="timeContainer" style="left: 0px; right: 0px; top: 800px; bottom: 0px;">
+        <div id="sizeBarTime" class="sizerBarHorTime" data-type = "horTime"></div>
+        <div id="timeline"></div>
+        </div>
+        <div id="floatingContainer"></div>
+        <div id="floatingInfoContainer"></div>
+        <div id="noUIInfoContainer"></div>
+        <div id="IMAGE_ZOOM_DATA" style="display:none"></div>
+        <div id="IMAGE_ZOOM_DATA_IN" style="display:none"></div>
+        <span style='display:none;' id="runLocation"></span>
+        <span style='display:none;' id="svgFilterContainer"></span>
+        <script src="APIs.js"></script>
+        <script src="./scripts/UI/mouseKeyboard.js"></script>
+        <script src="./scripts/WorkSpace/displaySizer.js"></script>
+        <script src="./scripts/WorkSpace/heartBeat.js"></script>
+        <script src="./scripts/UI/logger.js"></script>
+        <script src="kinematics.js"></script>
+        <script src="./scripts/WorkSpace/render.js"></script>
+        <script src="system.js"></script>
+
+        <script src="./scripts/UI/commandManager.js"></script>
+        <script src="./scripts/UI/infoPannel.js"></script>
+        <script src="./scripts/UI/SpritePannel.js"></script>
+        <script src="./scripts/UI/menu.js"></script>
+        <script src="tracker.js"></script>
+        <script src="storage.js"></script>
+        <script src="./scripts/UI/commandLine.js"></script>
+        <script src="undos.js"></script>
+        <script src="PainterV3.js"></script>
+        <script src="HTMLAnimationExport.js" defer=true></script>
+        <script src="functionLinkCompiler.js" defer=true></script>
+        <script src="./GIFGroover/GIFGroover.js" defer=true></script>
+        <script src="./FilterGL/FilterGL.js" defer=true></script>
+        <!--<script src="../GitHub/FilterGL/FilterGL3.js" defer=true></script>-->
+        <script src="workers/worker_Lzipper.js" defer=true></script>
+        <script src="workers/worker_Dithering.js" defer=true></script>
+        <script src="workers/worker_HighLowFilters.js" defer=true></script>
+        <script src="workers/worker_ImageMorpher.js" defer=true></script>
+        <script src="gifEncoder.js" defer=true></script>
+        <script src="webmEncoder.js" defer=true></script>
+        <script src="canvasRecorder1.js" defer=true></script>
+        <script src="ScriptLoader.js" defer=true></script>
+
+
+    </body>
+</html>

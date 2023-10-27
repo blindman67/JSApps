@@ -1,0 +1,119 @@
+///debug
+
+menu title "Image source"
+menu exit "OK"
+menu exit "Cancel"
+menu options "Selected sprites?Creates animated sprite from images in selected sprites,Selected images?Creates animated sprite from selected image in media tab,All images?Creates animated sprite from all images in media tab,From GIF?Creates an animated sprite from the gif associated with a selected image in the media tab,Change Time?Change the timing of a animated image sprite,Blank animation?Creates an animation sprite newly created blank images"
+$res = call menu
+if $res === "cancel" {
+   exit
+}
+if $res === "From GIF" {
+
+
+    $result = animation.createImageAnimation("From GIF")
+    log $result
+    exit
+}
+if $res === "Blank animation" {
+    if selection.length !== 1 {
+        warn Select a sprite with image as template
+        exit
+    }
+    if selection[0].type.image === false {
+        warn Selected sprite is not an image
+        exit
+    }
+    $w = selection[0].image.w
+    $h = selection[0].image.h    
+    menu title "Number of images"
+    menu exit "OK"
+    menu exit "Cancel"
+    $opts = ",,text Image size "+$w+ "px by " + $h+"px,,{,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,17,18,19,20,21,22,23,24,},{,25,26,27,28,29,30,31,32,},{,33,34,35,36,37,38,39,40,},"
+     
+    menu options $opts     
+    $count = call menu
+    if $count === "cancel" {
+       exit
+    }
+
+    $r = mediaList.mediaSelected.clear()
+    
+    $count = Number($count)
+    label createImageLoop
+        create image animImg $w $h sel
+        $count = $count - 1
+        if $count > 0 {
+            jump createImageLoop
+        }
+    
+    $res = "Selected images"
+    jump animImageInterval
+
+
+}
+if $res === "Change Time" {
+    assert animated
+    if $assertion === false {
+        log "No animated sprites are selected"
+        exit
+    }    
+    label doItAgain
+    menu title "Animated image time"
+    menu exit "OK"
+    menu exit "Cancel"
+    menu options "Back 1 frame,Forward 1 frame"
+    $change = call menu
+    if $change === "cancel" {
+        exit
+    }
+    
+    if $change === "Back 1 frame" {
+        $result = animation.createImageAnimation("Time change","back",-1)
+        log $result    
+        jump doItAgain    
+    }
+    if $change === "Forward 1 frame" {
+        $result = animation.createImageAnimation("Time change","forward",1)
+        log $result        
+        jump doItAgain    
+    }
+    
+    exit
+
+
+}
+
+menu title "Image order"
+menu exit "OK"
+menu exit "Cancel"
+menu options "Selection order,Forward,Backward"
+$sort = call menu
+if $sort === "cancel" {
+   exit
+}
+
+
+label animImageInterval
+menu title "Frame interval"
+menu exit "OK"
+menu exit "Cancel"
+menu options "1,2,3,4,5,6,7,8,9,10,12,15,20,30,45,60"
+$frames = call menu
+if $frames === "cancel" {
+   exit
+}
+$frames = Number($frames)
+if $frames > 2 {
+    $result = animation.createImageAnimation($res,$sort,$frames,true)
+    log $result
+    exit
+}
+
+$result = animation.createImageAnimation($res,$sort,$frames)
+
+log $result
+
+
+
+

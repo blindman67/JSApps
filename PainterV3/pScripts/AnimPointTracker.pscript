@@ -1,0 +1,129 @@
+debug
+// run AnimPointTracker
+assert selected
+if $assertion === false {
+    log "No sprite selected to capture with"
+    exit
+}
+assert drawable
+if $assertion === false {
+    log "No sprite selected that is drawable"
+    exit
+}
+$trackingSpr = selection[0]
+$metricSpr = undefined
+
+
+
+menu title "Point track helper"
+menu exit "Cancel"
+menu exit "Done"
+$options = ""
+$options = $options + "Goto start,"
+$options = $options + "Capture,"
+$options = $options + "Selected as metric,"
+$options = $options + "Next,"
+$options = $options + "Capture & Next,"
+$options = $options + "Log difference"
+
+menu options $options
+menu keep
+label doAgain
+
+
+$opt = call menu
+
+if $opt === "cancel" {
+    log "Canceled by user"
+    exit
+}
+if $opt === "done" {
+    log "Canceled by user"
+    exit
+}
+
+if $opt === "Next" {
+    $res = timeline.addKeyToSpr($trackingSpr,commands.animSetKeyPosScale)
+    $res = animation.nextFrame()
+    $mess =  "Stepped"
+    jump doAgain
+
+
+}
+if $opt === "Capture & Next" {
+    //$res = selection.clear()
+    //$res = selection.add($trackingSpr)
+    $res = timeline.addKeyToSpr($trackingSpr,commands.animSetKeyPosScale)
+    //$res = timeline.addKeyToSpr($trackingSpr,commands.animSetKeyPos)
+    //$res = timeline.addKeyToSpr($trackingSpr,commands.animSetKeyScale)
+    //$res = timeline.addKeyToSpr($trackingSpr,commands.animSetKeyRotate)
+    $trackingSpr.a = 0
+    $res = spriteRender.capture($trackingSpr, $trackingSpr.image)
+    $trackingSpr.a = 1
+    $res = animation.nextFrame()
+    $mess =  "Capture & stepped"
+    log $mess
+    jump doAgain
+}
+
+    
+if $opt === "Selected as metric" {
+    assert selected
+    if $assertion === false {
+        log "No sprite selected"
+        jump doAgain
+    }
+    if $trackingSpr.guid === selection[0].guid {
+        log "Can not use tracking sprite as metric"
+        jump doAgain
+    }
+    assert drawable
+    if $assertion === false {
+        log "Selected sprite is not drawable"
+        jump doAgain
+    }
+    $metricSpr = selection[0]
+    $metricSpr.a = 0
+    $res = selection.clear()
+    $res = selection.add($trackingSpr)
+    log "Metric sprite selected"
+    jump doAgain
+}
+
+if $opt === "Log difference" {
+    if $metricSpr === undefined {
+        log "No metric sprite set"
+        jump doAgain
+    }
+    $res = $metricSpr.fitTo($trackingSpr,true,false)
+    $metricSpr.a = 0
+    $res = spriteRender.capture($metricSpr, $metricSpr.image)
+    $metric = "Image value: " + localProcessImage.calcImageValueMetric($metricSpr.image)
+    $res = $metricSpr.image.restore()
+    log $metric
+    jump doAgain
+
+}
+if $opt === "Goto start" {
+    $res = animation.startFrame();
+    $mess =  "Goto start "
+    log $mess
+    jump doAgain
+}    
+
+if $opt === "Capture" {
+    $trackingSpr.a = 0
+    $res = spriteRender.capture($trackingSpr, $trackingSpr.image)
+    $trackingSpr.a = 1
+    $mess =  "Captured " + animation.time
+    log $mess
+    jump doAgain
+}
+    
+
+
+
+
+jump doAgain
+
+

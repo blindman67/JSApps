@@ -1,0 +1,826 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2023-02-03T23:25:51.599Z",
+        "id": 309314,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018",
+        "scene": "Wav sliders",
+        "type": "scene"
+    },
+    "scene": {
+        "workspace": {
+            "showGrid": false,
+            "snapMode": 0,
+            "pixelSnap": "1",
+            "backgroundColor": "rgb(29, 0, 118)"
+        },
+        "sprites": [
+            {
+                "name": "ay#",
+                "id": 309279,
+                "x": 451.75,
+                "y": -664.83,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309301
+                    ],
+                    "inFrom": "ay",
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "ax#",
+                "id": 309280,
+                "x": 451.17,
+                "y": -705.41,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309302
+                    ],
+                    "outputs": [
+                        309301
+                    ],
+                    "inFrom": "w",
+                    "outTo": "ax",
+                    "scale": 0.5,
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "div#",
+                "id": 309281,
+                "x": 451.75,
+                "y": -644.83,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309279,
+                        309282
+                    ],
+                    "textColor": "#FFF",
+                    "type": "div"
+                }
+            },
+            {
+                "name": "h#",
+                "id": 309282,
+                "x": 451.75,
+                "y": -684.83,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309302
+                    ],
+                    "inFrom": "h",
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "SVol#",
+                "id": 309283,
+                "x": 451.75,
+                "y": -584.83,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ff0000",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309284
+                    ],
+                    "outTo": "SVol",
+                    "scale": -1,
+                    "offset": 1,
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "clamp#",
+                "id": 309284,
+                "x": 451.75,
+                "y": -604.83,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309281
+                    ],
+                    "textColor": "#FFF",
+                    "type": "clamp"
+                }
+            },
+            {
+                "name": "ay#",
+                "id": 309285,
+                "x": 451.75,
+                "y": -624.83,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309282,
+                        309284
+                    ],
+                    "outputs": [
+                        309301
+                    ],
+                    "outTo": "ay",
+                    "textColor": "#FFF",
+                    "type": "mult"
+                }
+            },
+            {
+                "name": "ay#",
+                "id": 309286,
+                "x": 579.34,
+                "y": -664.48,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309303
+                    ],
+                    "inFrom": "ay",
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "ax#",
+                "id": 309287,
+                "x": 579.34,
+                "y": -704.48,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309304
+                    ],
+                    "outputs": [
+                        309303
+                    ],
+                    "inFrom": "w",
+                    "outTo": "ax",
+                    "scale": 0.5,
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "div#",
+                "id": 309288,
+                "x": 579.34,
+                "y": -644.48,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309286,
+                        309289
+                    ],
+                    "textColor": "#FFF",
+                    "type": "div"
+                }
+            },
+            {
+                "name": "h#",
+                "id": 309289,
+                "x": 579.34,
+                "y": -684.48,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309304
+                    ],
+                    "inFrom": "h",
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "SOff#",
+                "id": 309290,
+                "x": 579.34,
+                "y": -584.48,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ff8800",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309291
+                    ],
+                    "outTo": "SOff",
+                    "scale": -1,
+                    "offset": 1,
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "clamp#",
+                "id": 309291,
+                "x": 579.34,
+                "y": -604.48,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309288
+                    ],
+                    "textColor": "#FFF",
+                    "type": "clamp"
+                }
+            },
+            {
+                "name": "ay#",
+                "id": 309292,
+                "x": 579.34,
+                "y": -624.48,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309289,
+                        309291
+                    ],
+                    "outputs": [
+                        309303
+                    ],
+                    "outTo": "ay",
+                    "textColor": "#FFF",
+                    "type": "mult"
+                }
+            },
+            {
+                "name": "ay#",
+                "id": 309293,
+                "x": 690.94,
+                "y": -678.51,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309306
+                    ],
+                    "inFrom": "ay",
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "ax#",
+                "id": 309294,
+                "x": 690.94,
+                "y": -718.51,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309305
+                    ],
+                    "outputs": [
+                        309306
+                    ],
+                    "inFrom": "w",
+                    "outTo": "ax",
+                    "scale": 0.5,
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "div#",
+                "id": 309295,
+                "x": 690.94,
+                "y": -658.51,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309293,
+                        309296
+                    ],
+                    "textColor": "#FFF",
+                    "type": "div"
+                }
+            },
+            {
+                "name": "h#",
+                "id": 309296,
+                "x": 690.94,
+                "y": -698.51,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309305
+                    ],
+                    "inFrom": "h",
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "SRate#",
+                "id": 309297,
+                "x": 695.97,
+                "y": -583.43,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ffff00",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309300
+                    ],
+                    "outTo": "SRate",
+                    "offset": 0.5,
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "clamp#",
+                "id": 309298,
+                "x": 690.94,
+                "y": -618.51,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309295
+                    ],
+                    "textColor": "#FFF",
+                    "type": "clamp"
+                }
+            },
+            {
+                "name": "ay#",
+                "id": 309299,
+                "x": 690.94,
+                "y": -638.51,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309296,
+                        309298
+                    ],
+                    "outputs": [
+                        309306
+                    ],
+                    "outTo": "ay",
+                    "textColor": "#FFF",
+                    "type": "mult"
+                }
+            },
+            {
+                "name": "v#",
+                "id": 309300,
+                "x": 694.17,
+                "y": -601.02,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "hidden": true,
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [
+                        309298
+                    ],
+                    "textColor": "#FFF"
+                }
+            },
+            {
+                "name": "Cutter",
+                "id": 309301,
+                "x": 535.04,
+                "y": -541.94,
+                "w": 37.41,
+                "h": 16,
+                "ry": 1.571,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "gridX": 1,
+                "attachedTo": 309302,
+                "attachment": {
+                    "x": 9.36,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            },
+            {
+                "name": "Cutter",
+                "id": 309302,
+                "x": 535.04,
+                "y": -413.94,
+                "w": 18.71,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "gridX": 1,
+                "gridY": 1,
+                "type": "cutter"
+            },
+            {
+                "name": "Cutter",
+                "id": 309303,
+                "x": 575.73,
+                "y": -285.94,
+                "w": 37.41,
+                "h": 16,
+                "ry": 1.571,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "gridX": 1,
+                "attachedTo": 309304,
+                "attachment": {
+                    "x": 9.35,
+                    "y": 256,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            },
+            {
+                "name": "Cutter",
+                "id": 309304,
+                "x": 575.73,
+                "y": -413.94,
+                "w": 18.71,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "gridX": 1,
+                "gridY": 1,
+                "type": "cutter"
+            },
+            {
+                "name": "Cutter",
+                "id": 309305,
+                "x": 616.37,
+                "y": -413.94,
+                "w": 18.71,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "gridX": 1,
+                "gridY": 1,
+                "type": "cutter"
+            },
+            {
+                "name": "Cutter",
+                "id": 309306,
+                "x": 616.37,
+                "y": -413.9,
+                "w": 37.41,
+                "h": 16,
+                "ry": 1.571,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "gridX": 1,
+                "attachedTo": 309305,
+                "attachment": {
+                    "x": 9.36,
+                    "y": 128.04,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            },
+            {
+                "name": "Text",
+                "id": 309307,
+                "x": 535.1,
+                "y": -293.23,
+                "w": 21.34,
+                "h": 38.4,
+                "sx": 0.5,
+                "sy": 0.5,
+                "ry": 1.571,
+                "a": 0.482,
+                "locks": {
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "attachedTo": 309302,
+                "attachment": {
+                    "x": 9.41,
+                    "y": 248.71,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "sx": 0.5,
+                    "sy": 0.5,
+                    "ir": true
+                },
+                "type": "text",
+                "textId": 309310
+            },
+            {
+                "name": "Text",
+                "id": 309308,
+                "x": 575.88,
+                "y": -293.23,
+                "w": 24.89,
+                "h": 38.4,
+                "sx": 0.5,
+                "sy": 0.5,
+                "ry": 1.571,
+                "a": 0.482,
+                "locks": {
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "attachedTo": 309304,
+                "attachment": {
+                    "x": 9.5,
+                    "y": 248.71,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "sx": 0.5,
+                    "sy": 0.5,
+                    "ir": true
+                },
+                "type": "text",
+                "textId": 309311
+            },
+            {
+                "name": "Text",
+                "id": 309309,
+                "x": 616.85,
+                "y": -293.09,
+                "w": 21.34,
+                "h": 38.4,
+                "sx": 0.5,
+                "sy": 0.5,
+                "ry": 1.571,
+                "a": 0.482,
+                "locks": {
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffffff",
+                "attachedTo": 309305,
+                "attachment": {
+                    "x": 9.83,
+                    "y": 248.85,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "sx": 0.5,
+                    "sy": 0.5,
+                    "ir": true
+                },
+                "type": "text",
+                "textId": 309312
+            }
+        ],
+        "vectors": [],
+        "groups": [],
+        "collections": [
+            {
+                "name": "Wav sliders",
+                "guid": 309313,
+                "children": [
+                    309279,
+                    309280,
+                    309281,
+                    309282,
+                    309283,
+                    309284,
+                    309285,
+                    309286,
+                    309287,
+                    309288,
+                    309289,
+                    309290,
+                    309291,
+                    309292,
+                    309293,
+                    309294,
+                    309295,
+                    309296,
+                    309297,
+                    309298,
+                    309299,
+                    309300,
+                    309301,
+                    309302,
+                    309303,
+                    309304,
+                    309305,
+                    309306,
+                    309307,
+                    309308,
+                    309309
+                ]
+            }
+        ],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            },
+            "timeMarks": []
+        },
+        "animation": {
+            "time": 0,
+            "start": 0,
+            "end": 1443,
+            "length": 1443,
+            "speed": 1
+        },
+        "kinematics": [],
+        "text": [
+            {
+                "text": "V",
+                "id": 309310,
+                "local": true
+            },
+            {
+                "text": "O",
+                "id": 309311,
+                "local": true
+            },
+            {
+                "text": "S",
+                "id": 309312,
+                "local": true
+            }
+        ],
+        "media": [],
+        "images": []
+    }
+}

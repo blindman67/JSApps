@@ -1,0 +1,25 @@
+create image a %arg0
+create image b %arg0
+create image c %arg0
+create image d %arg0
+
+create image e %arg0
+create image f %arg0
+
+create image g %arg0
+create image h %arg0
+create image i %arg0
+create image j %arg0
+create image k %arg0
+create image l %arg0
+
+
+setSize %arg0
+
+create row 0 a b c d l a b e k h h h j f
+create row 1 e c b k a i f e g b d a e e
+create row 2 f l k j g d f e a c i k e j
+create row 3 g h c i l g i e g h h e e e
+create row 4 h h h h h h h c h h h c c c
+
+com spritesSelectAll

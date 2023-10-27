@@ -1,0 +1,69 @@
+assert selected
+if $assertion === false {
+    log No sprites are selected
+    exit
+}
+assert drawable
+if $assertion === false {
+    log None of the selected sprites are drawble
+    exit
+}
+
+menu title "Select image process"
+menu exit "Done"
+menu options "Black and White,Move R>G G>B B>R,Pull Alpha Down,Push Alpha Up"
+menu keep
+label doAgain
+$res = call menu
+if $res === "done" {
+    exit
+}
+
+if $res === "Pull Alpha Down" {
+    $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none, localProcessImage.pixelFunctions.alphaDown)
+    jump doAgain
+}
+if $res === "Push Alpha Up" {
+    $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none, localProcessImage.pixelFunctions.alphaUp)
+    jump doAgain
+}
+
+if $res === "Move R>G G>B B>R" {
+    $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none, localProcessImage.pixelFunctions.RGBRotate)
+    jump doAgain
+
+}
+if $res === "Black and White" {
+    menu title "Select Black and white method"
+    menu exit "OK"
+    menu exit "Cancel"
+    menu options "Mean RGB,Max RGB,Min RGB,Preceptual,From red,From green,From blue"
+    $res = call menu
+    if $res === "Cancel" {
+        log "Batch canceled by user"
+        exit
+    }
+    if $res === "Mean RGB" {
+        $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none, localProcessImage.pixelFunctions.meanRGB)
+    }
+    if $res === "Max RGB" {
+        $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none,localProcessImage.pixelFunctions.maxRGB)
+    }
+    if $res === "Min RGB" {
+        $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none,localProcessImage.pixelFunctions.minRGB)
+    }
+    if $res === "Preceptual" {
+        $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none,localProcessImage.pixelFunctions.preceptualMeanRGB)
+    }
+    if $res === "From red" {
+        $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none,localProcessImage.pixelFunctions.redToGreenBlue)
+    }
+    if $res === "From green" {
+        $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none,localProcessImage.pixelFunctions.greenToRedBlue)
+    }
+    if $res === "From blue" {
+        $a = utils.processSelectedImages(localProcessImage.channelCopy, localProcessImage.pixelFunctions.none,localProcessImage.pixelFunctions.blueToRedGreen)
+    }
+
+    exit
+}

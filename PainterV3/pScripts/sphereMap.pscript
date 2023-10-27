@@ -1,0 +1,91 @@
+//debug
+assert selected
+if $assertion === false {
+    log "No sprites are selected"
+    exit
+}
+
+assert drawable
+if $assertion === false {
+    log "No drawable image selected"
+    exit
+}
+
+$imgSpr = undefined
+selected as spr
+label nextspr
+    if $spr === undefined {
+        jump process
+    }
+
+    if $spr.image !== undefined {
+        if $imgSpr === undefined {
+            $imgSpr = $spr
+        }
+    }    
+    selected next spr
+    jump nextspr
+    
+label process
+$i = $imgSpr.image
+
+menu title "30 Position center & alias level"
+menu exit "Cancel"
+menu exit "Sphere"
+menu exit "Shadow"
+$res = storage.file("sphereMap")
+$longitude = storage.read("longitude",0)
+$latitude = storage.read("latitude",0)
+$aliasing = storage.read("aliasing",1)
+$options = ""
+$options = $options + "$longitude,slider Longitude 180 -180 -1 "+$longitude+" #000,"
+$options = $options + "$latitude,slider Latitude 90 -90 -1 "+$latitude+" #000,"
+$options = $options + "$aliasing,slider Alias 1 16 1 "+$aliasing+" #000"
+
+menu options $options
+menu keep
+label doAgain
+
+$opt = call menu
+
+if $opt === "sphere" {
+    // NOTE sliders move from + to - as the interface only displays the value negate the lon and lat
+    // to correct the sign
+    $res = storage.write("longitude",$longitude)
+    $res = storage.write("latitude",$latitude)
+    $res = storage.write("aliasing",$aliasing)
+    $longitude = -$longitude
+    $latitude = -$latitude
+    $res = localProcessImage.createJob("mapImageToSphere", $i, $longitude, $latitude, $aliasing);
+    $res = storage.close()
+    exit
+}
+if $opt === "shadow" {
+    log "Alias setting not applied to shadow map"
+    $res = storage.write("longitude",$longitude)
+    $res = storage.write("latitude",$latitude)
+    $res = storage.write("aliasing",$aliasing)    
+    $longitude = -$longitude
+    $latitude = -$latitude
+    $res = localProcessImage.createJob("mapDayNightToCylinderProjection", $i, $longitude, $latitude);
+    $res = storage.close()
+    exit
+
+
+}
+if $opt === "cancel" {
+    log "Filter canceled by user."
+    $res = storage.close()
+    exit
+ }
+jump doAgain
+
+
+
+
+
+
+
+
+
+

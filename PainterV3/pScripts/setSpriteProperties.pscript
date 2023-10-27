@@ -1,0 +1,216 @@
+
+assert selected
+if $assertion === false {
+    log No sprites are selected
+    exit
+}
+
+label menuStart
+
+menu title "Select property"
+menu exit "Exit"
+menu exit "Cancel"
+menu options "GridX,GridY,*GridXY,SubSprite,ShowAnimationPath,"
+$res = call menu
+
+if $res === "cancel" {
+    exit
+}
+if $res === "exit" {
+    exit
+}
+
+assert selected
+if $assertion === false {
+    log No sprites are selected
+    exit
+}
+
+if $res === "GridX" {
+    $modifyTittle = "Grid X count"
+    jump getGrid
+}
+if $res === "GridY" {
+    $modifyTittle = "Grid Y count"
+    jump getGrid
+}
+if $res === "GridXY" {
+    $modifyTittle = "Grid X & Y count"
+    jump getGrid
+}
+if $res === "ShowAnimationPath" {
+    $modifyTittle = "Show Animation Path"
+    jump getShowAnimationPath
+}
+if $res === "SubSprite" {
+	if selection.length === 1 {
+        $modifyTittle = "Set sub sprite"
+        jump getSubSprite
+	}
+	warn No sprite selected
+}
+jump menuStart
+
+exit
+
+label getSubSprite
+	$isSubSprite = false
+	if selection[0].type.subSprite === true {
+		$isSubSprite = true
+	}
+
+	if $isSubSprite === false {
+		if selection[0].type.image {
+			if selection[0].image.desc.sprites !== undefined {
+				selection[0].changeToSubSprite(0)
+			}
+		}
+		if selection[0].type.subSprite === true {
+			$isSubSprite = true
+		}			
+
+	}
+	if $isSubSprite === false {
+		warn sprite image does not contain sub sprites
+		jump menuStart
+	}
+		
+
+	$sprIdx = selection[0].subSpriteIdx
+	$sprCount = selection[0].image.desc.sprites.length
+		 
+
+
+	$options = "$sprIdx,slider SubSprite 0 " + ($sprCount-1) + " 1 " + $sprIdx +"  #000,"
+
+	menu title $modifyTittle
+	menu exit "Exit"
+	menu exit "Back"
+
+	menu options $options
+	menu keep
+	label subSprOptAgain
+	$res1 = call menu
+
+
+	if $res1 === "back" menuStart
+	if $res1 === "exit" {
+		exit
+	}
+
+	assert selected
+	if $assertion === true {
+		selection[0].changeToSubSprite($sprIdx)
+	}
+
+
+	jump subSprOptAgain
+
+label getGrid
+
+	$gridCount
+
+	menu title $modifyTittle
+	menu exit "Exit"
+	menu exit "Back"
+
+	menu options "$gridCount,slider Gridlines 1 32 1 2 #000,"
+	menu keep
+	label gridOptAgain
+	$res1 = call menu
+
+
+	if $res1 === "back" menuStart
+	if $res1 === "exit" {
+		exit
+	}
+
+	assert selected
+	if $assertion === true {
+		$sprCount = selection.length
+		$count = 0
+		label sprLoop
+		if $count < $sprCount {
+			$spr = selection[$count]
+			 
+			if $res === "GridXY" {
+				$spr.gridX = $gridCount
+				$spr.gridY = $gridCount
+			}
+			if $res === "GridX" {
+				$spr.gridX = $gridCount
+			}
+			if $res === "GridY" {
+				$spr.gridY = $gridCount
+			}
+		
+		
+			$count = $count + 1
+			jump sprLoop
+		}
+	} 
+
+jump gridOptAgain
+
+label getShowAnimationPath
+
+	$ShowAnimationPath = "Off"
+    $ShowAnimationPathBool = false
+    
+	assert selected
+	if $assertion === true {    
+        $ShowAnimationPath = selection[0].type.showAnimPath ? "On" : "Off"
+        $ShowAnimationPathBool = selection[0].type.showAnimPath
+    }
+	menu title $modifyTittle
+	menu exit "Exit"
+	menu exit "Back"
+
+	menu options "$ShowAnimationPath,Show animation path,"
+	menu keep
+	label showAnimationPathAgain
+	$res1 = call menu
+
+
+	if $res1 === "back" menuStart
+	if $res1 === "exit" {
+		exit
+	}
+
+	assert selected
+	if $assertion === true {
+        $ShowAnimationPath = selection[0].type.showAnimPath ? "On" : "Off"
+        if $ShowAnimationPath === "On" {
+            $ShowAnimationPath = "Off"
+            $ShowAnimationPathBool = false
+        } else {
+            $ShowAnimationPath = "On"
+            $ShowAnimationPathBool = true
+        }
+		$sprCount = selection.length
+		$count = 0
+		label sprLoopA
+		if $count < $sprCount {
+			$spr = selection[$count]
+
+			$spr.type.showAnimPath = $ShowAnimationPathBool
+            if $ShowAnimationPathBool === true {
+                $res = $spr.updateWidgetAnimPath()
+            }
+		
+		
+			$count = $count + 1
+			jump sprLoopA
+		}
+        menuUpdate $ShowAnimationPath
+	} 
+
+jump showAnimationPathAgain
+
+
+
+
+
+
+
+

@@ -1,0 +1,47 @@
+create image topLeft 64
+create image top 64
+create image topRight 64
+create image right 64
+create image bottomRight 64
+create image bottom 64
+create image bottomLeft 64
+create image left 64
+create image center 64
+
+create sprite topLeft 0 0
+create sprite top 64 0
+create sprite topRight 128 0
+create sprite right 128 64
+create sprite bottomRight 128 128
+create sprite bottom 64 128
+create sprite bottomLeft 0 128
+create sprite left 0 64
+create sprite center 64 64
+
+create sprite topLeft 192 0
+create sprite topRight 256 0
+create sprite bottomRight 256 64
+create sprite bottomLeft 192 64
+
+create sprite topLeft 320 0
+create sprite topRight 384 0
+create sprite left 320 64
+create sprite right 384 64
+create sprite left 320 128
+create sprite right 384 128
+create sprite left 320 192
+create sprite right 384 192
+create sprite bottomLeft 320 256
+create sprite bottomRight 384 256
+
+create sprite topLeft 0 192
+create sprite bottomLeft 0 256
+create sprite top 64 192
+create sprite bottom 64 256
+create sprite top 128 192
+create sprite bottom 128 256
+create sprite topRight 192 192
+create sprite bottomRight 192 256
+
+com spritesSelectAll
+

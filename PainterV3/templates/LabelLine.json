@@ -1,0 +1,93 @@
+{
+    "info": {
+        "app": "painterv3",
+        "id": 481594,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018",
+        "collectionName": "LabelLine",
+        "type": "scene",
+        "loadedCommands": ["edSpriteActivateFunctionLinks"]
+    },
+    "scene": {
+        "workspace": {},
+        "sprites": [
+            {"name": "line", "id": 481580,
+                "x": 0, "y": 0, "w": 200, "h": 2,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "arrow", "id": 481577, "inner": 7, "sides": 1 }
+            },
+            {"name": "leftHandle", "id": 5520,
+                "x": 0, "y": 0, "w": 32, "h": 32, "a": 0.1,
+                "gridSpecial": 11,
+                "locks": {"scale": true, "rotate": true}, "hideOutline": true,
+                "namedInLink": true,
+                "type": "cutter"
+            }, 
+            {"name": "rightHandle", "id": 5521,
+                "x": 200, "y": 0, "w": 32, "h": 32, "a": 0.1,
+                "gridSpecial": 11,
+                "locks": {"scale": true, "rotate": true}, "hideOutline": true,
+                "namedInLink": true,
+                "type": "cutter"
+            },            
+            {"name": "cirStart", "id": 481582,
+                "x": -149.54, "y": 0.73, "w": 8, "h": 8,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "circle", "id": 481551 }
+            },
+            {"name": "cirEnd", "id": 481584,
+                "x": 149.85, "y": 0.73, "w": 8, "h": 8,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "circle", "id": 481551 }
+            },
+            {"name": "labelLineLeft", "id": 481585,
+                "x": -112.24, "y": 20.86, "w": 72.74, "h": 2,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "arrow", "id": 481586, "inner": 4, "sides": 2 }
+            },
+            {"name": "labelLineRight", "id": 481587,
+                "x": 112.06, "y": 21.59, "w": 72.74, "h": 2,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "arrow", "id": 481588, "inner": 4 }
+            },
+            {"name": "rightEdge", "id": 481589,
+                "x": 149.78, "y": 13.45, "w": 26.19, "h": 2, "rx": 1.570796, "ry": 3.141592,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "arrow", "id": 481590, "inner": 4, "sides": 1 }
+            },
+            {"name": "leftEdge", "id": 481591,
+                "x": -150.08, "y": 14.84, "w": 26.19, "h": 2, "rx": 1.570796, "ry": 3.141592,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "arrow", "id": 481590, "inner": 4, "sides": 1 }
+            },
+            {"name": "label", "id": 481592,
+                "x": 0, "y": 20, "w": 128.08, "h": 38.4, "sx": 0.5, "sy": 0.5,
+                "locks": {"scale": true, "rotate": true}, "hideOutline": true,
+                "type": "text",
+                "textId": 481593
+            },
+            { "name": "LabelLine", "id": 451520,
+                "x": 203.43, "y": -74.74, "w": 96, "h": 16,
+                "locks": {"scale": true, "rotate": true}, "hideOutline": true,
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [],
+                    "outputs": [],
+                    "linked": [481580, 5520, 5521, 481582, 481584, 481585, 481587, 481589, 481591, 481592],
+                    "source": "templates/LabelLine.js",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                } 
+            }
+        ],
+        "text": [{"text": "Test Line", "id": 481593,"local": true}]
+    }
+}

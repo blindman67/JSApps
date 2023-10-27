@@ -1,0 +1,150 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2019-07-10T21:06:23.220Z",
+        "id": 301800,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018 - 2020",
+        "type": "scene",
+        "loadedCommands": ["edSprResetView","edSpriteActivateFunctionLinks"]
+    },
+    "scene": {
+        "sprites": [{
+                "name": "Top",
+                "id": 301750,
+                "y": -512,
+                "w": 64,
+                "h": 64,
+                "rx": -2111.150263,
+                "ry": -2109.579467,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ffff00",
+                "namedInLink": true,
+                "namedOutLink": true,
+                "lookat": [301751, -1.5707963267948966, 0],
+                "type": "cutter"
+            }, {
+                "name": "Bottom",
+                "id": 301751,
+                "w": 64,
+                "h": 64,
+                "rx": -2104.867078,
+                "ry": -2103.296282,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ffff00",
+                "namedInLink": true,
+                "namedOutLink": true,
+                "lookat": [301750, 1.5707963267948966, 0],
+                "type": "cutter"
+            }, {
+                "name": "Rod",
+                "id": 301752,
+                "y": -128,
+                "w": 32,
+                "rx": -2104.867078,
+                "ry": -2103.296078,
+                "locks": {
+                    "UI": true
+                },
+                "gridX": 0,
+                "gridY": 0,
+                "namedInLink": true,
+                "attachedTo": 301751,
+                "attachment": {
+                    "x": 32,
+                    "y": -96,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter"
+            }, {
+                "name": "Sleave",
+                "id": 301753,
+                "y": -380,
+                "w": 48,
+                "h": 264,
+                "rx": -2111.150263,
+                "ry": -2109.579264,
+                "locks": {
+                    "UI": true
+                },
+                "gridX": 0,
+                "gridY": 0,
+                "namedInLink": true,
+                "attachedTo": 301750,
+                "attachment": {
+                    "x": 32,
+                    "y": 164,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter"
+            }, {
+                "name": "Arm",
+                "id": 301754,
+                "y": -256,
+                "w": 64.59,
+                "h": 512,
+                "rx": 5425.530513,
+                "ry": 5427.101309,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "rgb": "#0088ff",
+                "gridX": 0,
+                "gridY": 0,
+                "namedOutLink": true,
+                "lookat": [301751, 1.5707963267948966, 0],
+                "type": "cutter"
+            }, {
+                "name": "IKPiston",
+                "id": 301799,
+                "x": 289,
+                "y": -462,
+                "w": 96,
+                "h": 16,
+                "ry": 1.570796,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [301750, 301751, 301753, 301752],
+                    "outputs": [301754, 301750, 301751],
+                    "linked": [301750, 301751, 301752, 301753, 301754],
+                    "source": "var topInOut,  bottomInOut, sleaveIn, rodIn, armOut, linkCount = 0, linksCount = 0;\nconst spriteIDS = [301750, 301751, 301753, 301752, 301754];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nfunction update() {\n    if (!API.active) { return }\n    const tx = topInOut.x;\n    const ty = topInOut.y;\n    const bx = bottomInOut.x;\n    const by = bottomInOut.y;\n    const vx1 = tx - bx;\n    const vy1 = ty - by;\n    const minD = (rodIn.type.normalisable ? rodIn.h : rodIn.h * rodIn.sy);\n    const maxD = (sleaveIn.type.normalisable ? sleaveIn.h : sleaveIn.h * sleaveIn.sy) + minD;\n    const dist = Math.hypot(vx1, vy1);\n    const nx = vx1 / (dist ? dist : 1);\n    const ny = vy1 / (dist ? dist : 1);\n    const d = Math.max(Math.min(dist, maxD), minD);\n    const dx = nx * d;\n    const dy = ny * d;\n    const dx2 = dx * 0.5;\n    const dy2 = dy * 0.5;\n    if (topInOut.selected) {\n        armOut.x   = tx - dx2;\n        armOut.y   = ty - dy2;\n        topInOut.x = tx;\n        topInOut.y = ty;\n        topInOut.key.update();\n        bottomInOut.x = tx - dx;\n        bottomInOut.y = ty - dy;        \n    } else {\n        armOut.x   = bx + dx2;\n        armOut.y   = by + dy2;\n        topInOut.x = bx + dx;\n        topInOut.y = by + dy;\n        topInOut.key.update();\n        bottomInOut.x = bx;\n        bottomInOut.y = by;\n    }\n    bottomInOut.key.update();\n    armOut.setScale(armOut.sx, d / armOut.h);\n    API.updateWidget = topInOut.selected || bottomInOut.selected || armOut.selected;\n}\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if(spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    topInOut = getSprite(301750);\n    bottomInOut = getSprite(301751);\n    sleaveIn = getSprite(301753);\n    rodIn = getSprite(301752);\n    armOut = getSprite(301754);\n    API.active = linksCount === linkCount;\n}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset() { },\n    spriteIDS,\n    spriteList,\n    inputs: [['Top',301750], ['Bottom',301751], ['Sleave',301753], ['Rod',301752]],\n    outputs: [['Arm',301754], ['Top',301750], ['Bottom',301751]],\n    bind(spr, id) {\n        if(spriteList.has(id)) {\n            spriteList.set(id,spr);\n            setSprites();\n        }\n    },\n    getById(id) { return spriteList.get(id) },\n    update,\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "groups": [],
+        "collections": [],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            }
+        }
+    }
+}

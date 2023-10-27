@@ -1,0 +1,65 @@
+{
+    "info": {
+        "app": "painterv3",
+        "id": 5536,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018 - 2020",
+        "type": "scene",
+        "collectionName": "LineGadget",
+        "loadedCommands": ["edSpriteActivateFunctionLinks"]
+    },
+    "scene": {
+        "sprites": [
+            {"name": "leftHandle", "id": 5520,
+                "x": 0, "y": 0, "w": 32, "h": 32, "a": 0.1,
+                "gridSpecial": 11,
+                "locks": {"scale": true, "rotate": true}, "hideOutline": true,
+                "namedInLink": true,
+                "type": "cutter"
+            }, 
+            {"name": "line", "id": 5522,
+                "x": 100, "y": 0, "w": 200, "h": 2,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "namedOutLink": true,
+                "type": "shape",
+                "shape": {"name": "arrow", "id": 5523}
+            },
+            {"name": "rightHandle", "id": 5521,
+                "x": 200, "y": 0, "w": 32, "h": 32, "a": 0.1,
+                "gridSpecial": 11,
+                "locks": {"scale": true, "rotate": true}, "hideOutline": true,
+                "namedInLink": true,
+                "type": "cutter"
+            }, 
+             {"name": "cirStart", "id": 481582,
+                "x": 0, "y": 0, "w": 8, "h": 8,
+                "hidden": true,
+                "locks": {"scale": true, "rotate": true, "UI": true},
+                "hideOutline": true,
+                "type": "shape",
+                "shape": {"name": "circle", "id": 481551}
+            },
+            {"name": "cirEnd", "id": 481584,
+                "x": 200, "y": 0, "w": 8, "h": 8,
+                "hidden": true,
+                "locks": {"scale": true, "rotate": true, "UI": true}, "hideOutline": true,
+                "type": "shape",
+                "shape": {"name": "circle", "id": 481551}
+            },           
+            { "name": "Line", "id": 5534,
+                "x": 300, "y": -150, "w": 96, "h": 16,
+                "locks": {"scale": true, "rotate": true}, "hideOutline": true,
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [],
+                    "outputs": [],
+                    "linked": [5520, 5522, 5521, 481582, 481584],
+                    "source": "templates/lineGadget.js",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ]
+    }
+}

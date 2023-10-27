@@ -1,0 +1,277 @@
+#callOnOpt if $opt === "%0" {;jumpSub %1;jump doAgain;};
+#callOnSubOpts $subOp = $opt.includes("%0");if $subOp === true {;jumpSub %1;jump doAgain;};
+//debug
+
+
+$res = storage.file("spriteDialog")
+$moveStep = storage.read("moveStep",1)
+$rotateSteps = storage.read("rotateSteps",180)
+$spr = undefined
+$sprPos = "" 
+
+$sprR = 0
+$sprSX = 0
+$sprSY = 0
+$startup = true
+menu title "26 Position center & Tracker"
+menu exit "Exit"
+menu exit "Update"
+$options = ""
+$options = $options + "$sprName,Name ,"
+$options = $options + "$sprInfo,Info ,"
+$options = $options + "$sprPos,Pos ,,"
+$options = $options + "$moveStep,slider MoveStep 1 64 1 1 #000,"
+$options = $options + "Move%Left%Up%Right%Down%Snap%Home,"
+$options = $options + "Size%W-%W+%H-%H+%Snap,"
+
+$options = $options + "$rotateSteps,slider RotateStep 1 180 1 180 #000,"
+$options = $options + "Rotate%CCW%CW%Home,"
+$options = $options + "Grid%X-%X+%Y-%Y+%X=Y%Y=X%XY=2,"
+$options = $options + ",$feedbackInfo,Capture ,"
+$options = $options + "Feedback%Cap On%Cap Off%FB On%FB Off,"
+
+menu options $options
+menu keep
+timeout 100
+label doAgain
+$opt = call menu
+
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    $res = storage.close()
+    if $spr !== undefined {
+        $res = $spr.removeAllEventsByUID($sprEventUID)
+    }
+    exit
+}
+
+#callOnSubOpts Move moveSprite
+#callOnSubOpts Rotate rotateSprite
+#callOnSubOpts Grid gridSprite
+#callOnSubOpts Size sizeSprite
+#callOnSubOpts Feedback feedbackSprite
+#callOnOpt update updateSprite
+#callOnOpt rotateSteps updateUI
+
+jump doAgain
+
+
+//============================================================================================================================
+// functions
+
+label setMenuOptions
+    if $spr !== undefined {
+        $res = storage.write("moveStep", $moveStep)
+        $res = storage.write("rotateSteps", $rotateSteps)
+        menuUpdate $sprName $sprInfo $sprPos $moveStep $rotateSteps $feedbackInfo  
+
+    }
+exitSub
+
+
+label updateUI    
+    $rotAng = 180 / $rotateSteps
+    $rotSetlabel = $rotAng.toFixed(1) + "deg"
+    menuButton $rotateSteps label.element.textContent $rotSetlabel
+
+exitSub
+
+
+label updateSprite
+    if $spr !== undefined {
+        $sprName = $spr.name
+        $sprPos = "X: " + ($spr.x).toFixed(1) + " Y: " + ($spr.y).toFixed(1)
+        $sprRX = $spr.rx * 180 / Math.PI
+        $sprRY = $spr.ry * 180 / Math.PI
+        $sprInfo = "Size: {" + ($spr.w * $spr.sx).toFixed(1) + ", " + ($spr.h * $spr.sy).toFixed(1) + "} R: " + $sprRX.toFixed(3)+"d Skew: " + $sprRY.toFixed(3)+"d";
+        if $spr.type.cutter === true {
+            $sprInfo = $sprInfo + " Grid:  {" + ($spr.gridX) + ", " + ($spr.gridY) +"}"       
+        }
+        
+        $feedbackInfo = ($spr.type.liveCapture ? "Capture On" : "Capture Off") + " Feedback: " + ($spr.type.captureFeedback ? "On" : "Off")
+
+    }
+    if $spr === undefined {
+        $sprName = ""
+        $sprRX = 0
+        $sprRY = 0
+        $sprPos = ""
+        $sprInfo = "No sprite selected"
+        $feedbackInfo = ""
+    }
+    jumpSub setMenuOptions
+exitSub
+
+
+label refreshSprite
+    if $spr !== undefined {
+        $res = $spr.key.update()
+    }
+exitSub
+
+
+label rotateSprite
+    if $spr !== undefined {
+        $rotRadians = (180 / $rotateSteps) * Math.PI / 180
+        if $opt === "Rotate CCW" {
+            $spr.rx = $spr.rx - $rotRadians
+            $spr.ry = $spr.ry - $rotRadians
+        }        
+        if $opt === "Rotate CW" {
+            $spr.rx = $spr.rx + $rotRadians
+            $spr.ry = $spr.ry + $rotRadians
+        }
+        if $opt === "Rotate Snap" {
+            $rotSkew = $spr.ry - $spr.rx
+            $rx = Math.abs($spr.rx)
+            $ry = Math.abs($spr.ry)
+            $rx = Math.round($rx / $rotRadians) * $rotRadians * Math.sign($spr.rx)
+            $ry = $rx + $rotSkew
+            $ry = Math.round($ry / $rotRadians) * $rotRadians * Math.sign($spr.ry)
+            $spr.rx = $rx
+            $spr.ry = $ry
+        }
+        if $opt === "Rotate Home" {
+            $spr.rx = 0;
+            $spr.ry = Math.PI / 2;
+        }        
+    }
+    jumpSub refreshSprite
+exitSub
+
+label gridSprite
+    if $spr !== undefined {
+        if $opt === "Grid X+" {
+            $spr.gridX = $spr.gridX  + 1
+        }        
+        if $opt === "Grid Y+" {
+            $spr.gridY = $spr.gridY  + 1
+        }        
+        if $opt === "Grid X-" {
+            $spr.gridX = $spr.gridX > 1 ? $spr.gridX  - 1 : 1
+        }        
+        if $opt === "Grid Y-" {
+            $spr.gridY = $spr.gridY > 1 ? $spr.gridY  - 1 : 1
+        }        
+        if $opt === "Grid Y=X" {
+            $spr.gridY = $spr.gridX
+        }        
+        if $opt === "Grid X=Y" {
+            $spr.gridX = $spr.gridY
+        }        
+        if $opt === "Grid XY=2" {
+            $spr.gridX = 2
+            $spr.gridY = 2
+        }               
+    }
+    jumpSub updateSprite
+exitSub
+label sizeSprite
+    if $spr !== undefined {
+        if $opt === "Size W+" {
+            $spr.sx = ($spr.w * $spr.sx + 1) / $spr.w
+        }        
+        if $opt === "Size W-" {
+            $spr.sx = ($spr.w * $spr.sx - 1) / $spr.w
+        }        
+        if $opt === "Size H+" {
+            $spr.sy = ($spr.h * $spr.sy + 1) / $spr.h
+        }        
+        if $opt === "Size H-" {
+            $spr.sy = ($spr.h * $spr.sy - 1) / $spr.h
+        }        
+        if $opt === "Size Snap" {
+            $spr.sx = Math.round($spr.w * $spr.sx) / $spr.w
+            $spr.sy = Math.round($spr.h * $spr.sy) / $spr.h
+        } 
+    }
+    jumpSub updateSprite
+exitSub
+label feedbackSprite
+    if $spr !== undefined {
+        if $opt === "Feedback Cap Off" {
+            $spr.type.liveCapture = false
+        }        
+        if $opt === "Feedback Cap On" {
+            $spr.type.liveCapture = true
+        }           
+        if $opt === "Feedback FB Off" {
+            $spr.type.captureFeedback = false
+        }        
+        if $opt === "Feedback FB On" {
+            $spr.type.captureFeedback = true
+        }        
+        if $opt === "Feedback Toggle" {
+            $spr.type.captureFeedback = !$spr.type.captureFeedback
+        }        
+    }
+    jumpSub updateSprite
+exitSub
+
+
+
+label moveSprite
+    if $spr !== undefined {
+        if $opt === "Move Left" {
+            $spr.x = $spr.x - $moveStep
+        }
+        if $opt === "Move Up" {
+            $spr.y = $spr.y - $moveStep
+        }
+        if $opt === "Move Right" {
+            $spr.x = $spr.x + $moveStep
+        }
+        if $opt === "Move Down" {
+            $spr.y = $spr.y + $moveStep
+        }
+        if $opt === "Move Snap" {
+            $x = Math.abs($spr.x)
+            $y = Math.abs($spr.y)
+            $x = Math.round($x / $moveStep) * $moveStep * Math.sign($spr.x)
+            $y = Math.round($y / $moveStep) * $moveStep * Math.sign($spr.y)
+            $spr.x = $x
+            $spr.y = $y
+        }
+        if $opt === "Move Home" {
+            $spr.x = 0;
+            $spr.y = 0;
+        }        
+    }
+    jumpSub refreshSprite
+exitSub
+
+label selectActiveSprite
+    if $spr !== undefined {
+        $res = $spr.removeAllEventsByUID($sprEventUID)
+    
+    }
+    if selection.length > 0 {
+        $spr = selection[0]
+        $sprEventUID = $spr.addEvent("onupdate",(e)=>eventHandler(e,"onspriteupdate"))
+    }
+    if selection.length === 0 {
+        $spr = undefined
+    }
+exitSub
+
+
+//============================================================================================================================
+// Events
+
+event onspriteupdate {
+    jumpSub updateSprite
+}
+event onselectionchanged {
+    jumpSub selectActiveSprite
+    jumpSub updateSprite
+}
+event ontimeout {
+    if $startup === true {
+        $startup = false
+        jumpSub selectActiveSprite
+        jumpSub updateUI
+        jumpSub updateSprite
+    }
+}
+    
+

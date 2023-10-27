@@ -1,0 +1,52 @@
+#menuOpts menu exit "OK";menu exit "Cancel";menu options $opts;$res = call menu;if $res === "cancel" exit
+
+
+assert selected
+if $assertion === false {
+    log "No sprites are selected"
+    exit
+}
+assert pallet
+if $assertion === false {
+    log "No pallet selected or pallet is empty"
+    exit
+}
+assert drawable
+if $assertion === false {
+    log "No drawable image selected"
+    exit
+}
+
+
+$palSpr = undefined
+$imgSpr = undefined
+selected as spr
+label nextspr
+    if $spr === undefined {
+        jump process
+    }
+    if $spr.pallet !== undefined {
+        if $palSpr === undefined {
+            $palSpr = $spr
+        }
+    }
+    if $spr.image !== undefined {
+        if $imgSpr === undefined {
+            $imgSpr = $spr
+        }
+    }    
+    selected next spr
+    jump nextspr
+    
+label process
+    
+menu title "Use random dither?"
+$opts = "Yes,No"
+#menuOpts
+$dither = $res === "Yes"
+
+$p = $palSpr.pallet
+$i = $imgSpr.image
+$processed = false
+$res = localProcessImage.applyPallet($i, $p, $dither)
+

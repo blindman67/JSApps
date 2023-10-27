@@ -1,0 +1,88 @@
+
+$comaW = ""
+$comaH = ""
+$optionsW = ""
+$optionsH = ""
+$optionCountA = 0
+$optionCountB = 0
+$size = 8
+selected next a
+if $a !== undefined {
+    $w = $a.w
+    $h = $a.h
+    $w2 = $w / 2
+    $h2 = $h / 2
+    
+    label loop
+        $ww1 = $w / $size
+        $ww2 = $w / $size | 0
+        if $ww1 === $ww2 {
+            $optionsW = $optionsW + $comaW + $size
+            $comaW = ","
+            $optionCountA = $optionCountA + 1
+        }
+        
+        $hh1 = $h / $size
+        $hh2 = $h / $size | 0
+        if $hh1 === $hh2 {
+            $optionsH = $optionsH + $comaH + $size
+            $comaH = ","
+            $optionCountB = $optionCountB + 1
+        }   
+        
+        $size = $size + 8
+        if $size < $w2 {
+            if $size < $h2 {
+                jump loop
+            }
+        }
+}
+
+if $optionCountB > 0 && $optionCountA > 0  allGood
+    menu title "Could not fit tiles"
+    menu exit "OK"
+    call menu
+    exit
+
+
+label allGood
+
+
+menu title "Select width tiles"
+menu exit "OK"
+menu options $optionsW
+$ws = call menu
+
+menu title "Select height tiles"
+menu exit "OK"
+menu options $optionsH
+$hs = call menu
+
+$xx = $a.x - $a.w / 2
+$yy = $a.y - $a.h / 2
+$xxp = $xx;
+
+$jc = $a.h / $hs
+label loopY
+    $ic = $a.w / $ws
+    label loopX
+        
+        com edSprCreateCutter
+        select
+        selected as b
+        $b.w = $ws
+        $b.h = $hs
+        $b.x = $xx + $ws / 2
+        $b.y = $yy + $hs / 2
+        $xx = $xx + $ws
+        
+        $ic = $ic -1
+    if $ic > 0 loopX
+    $xx = $xxp
+    $yy = $yy + $hs
+
+    $jc = $jc -1
+if $jc > 0 loopY
+    
+    
+    

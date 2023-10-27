@@ -1,0 +1,105 @@
+
+assert help
+if $assertion === true {
+    log ===================================================
+    info Help for IsoGrid batch
+    info Opens dialog for creating isometric grids
+    info Creates grids aligned to standard Isometric axis
+    info Must select sprite to align axis to.
+    log ----------------------------------------------------
+    exit
+}
+
+assert selected
+if $assertion === false {
+    log "No sprites are selected"
+    exit
+}
+
+$spr = selection[0]
+
+menu title "Select iso type"
+menu exit "OK"
+menu exit "Cancel"
+menu options "xAxis 2 to 1 by yAxis 2 to 1,xAxis 2 to 1 by yAxis 1 to 1,xAxis 1 to 1 by yAxis 2 to 1,xAxis 1 to 1 by yAxis 1 to 1,xAxis 2 to 1 by yAxis 1 to 2,xAxis 1 to 2 by yAxis 2 to 1,xAxis 3 to 1 by yAxis 3 to 1,xAxis 3 to 1 by yAxis 1 to 3,xAxis 1 to 3 by yAxis 3 to 1"
+$res = call menu
+if $res === "cancel" exit
+
+
+// get the axis options
+$res = $res.replace("xAxis ","")
+$res = $res.replace("by yAxis ","")
+$res = $res.replace("to ","")
+$res = $res.replace("to ","")
+
+$yAxisX = ($res).split(" ")[0]
+$yAxisY = ($res).split(" ")[1]
+$xAxisX = ($res).split(" ")[2]
+$xAxisY = ($res).split(" ")[3]
+
+name selected isoImageBase
+
+$angY = Math.asin($xAxisY/(($xAxisX * $xAxisX + $xAxisY * $xAxisY) ** 0.5))
+$angX = Math.asin($yAxisY/(($yAxisX * $yAxisX + $yAxisY * $yAxisY) ** 0.5))
+
+log $res X $angX  Y $angY
+
+$w = $spr.w
+$h = $spr.h
+
+
+// Guide X
+com edSprCreateGrid
+select
+selected as guideX
+com edSprAlpha 160
+$guideX.width = 32
+$guideX.angle = -(Math.PI-$angX)
+$a1 = Math.sin($angX) * $w
+$a2 = Math.cos($angX) * $h
+$gh = $a1 + $a2
+$guideX.h = $gh
+$a3 = ($guideX.w / 2) / Math.sin($angX)
+$a4 = (($a3 + $h) * Math.cos($angX)) - ($gh / 2)
+$xx = Math.sin($angX) * $a4
+$yy = Math.cos($angX) * $a4
+$guideX.x = $spr.x + $w / 2 + $xx
+$guideX.y = $spr.y + $h / 2 + $a3 - $yy
+
+// Guide Y
+com edSprCreateGrid
+select
+selected as guideY
+com edSprAlpha 160
+$guideY.w = 32
+$guideY.angle = -$angY
+$a1 = Math.sin($angY) * $w
+$a2 = Math.cos($angY) * $h
+$gh = $a1 + $a2
+$guideY.h = $gh
+$a3 = ($guideY.w / 2) / Math.sin($angY)
+$a4 = (($a3 + $h) * Math.cos($angY)) - ($gh / 2)
+$xx = Math.sin($angY) * $a4
+$yy = Math.cos($angY) * $a4
+$guideY.x = $spr.x - $w / 2 - $xx
+$guideY.y = $spr.y + $h / 2 + $a3 - $yy
+
+
+
+
+// Guide Z
+com edSprCreateGrid
+select
+selected as guideZ
+com edSprAlpha 160
+$guideZ.w = 32
+$guideZ.angle = Math.PI / 2
+$guideZ.y = $spr.y - $h / 2 - $guideZ.w / 2
+$guideZ.x = $spr.x
+$guideZ.height = $spr.w
+
+
+
+$res = selection.clear()
+$res = selection.add($spr)
+

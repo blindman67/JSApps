@@ -1,0 +1,170 @@
+$startup = true
+
+menu title "16 Animation time Utils"
+
+
+$status = "Starting"
+$timeoutMessage = ""
+$message = ""
+$section = ({start:0,end:0})
+
+$res = storage.file("animTimeDialog")  // stores variables for dialog only for life of page (session)
+//$compare = storage.read("comp","Difference")
+
+
+
+menu exit "Exit"
+$options = ""
+$options = $options + "$message,Info ,"
+$options = $options + "Clear all markers,"
+$options = $options + "{,$markA,: ,$markB,: ,$secTime,: ,},"
+$options = $options + "{,Delete,Clear,Trim,},{,Reverse,Contract,Expand,},"
+
+menu options $options
+menu keep   // ensures dialog is not closed after input
+timeout 100 // 100ms for dialog to get set up then ontimeout batch event is called
+
+label doAgain     // jump back to here to reuse dialog
+$opt = call menu  // waits for input putting result into $opt
+
+
+$close = $opt === "exit" || $opt === "cancel"    // My bad :( exit may return "cancel" when exit is clicked depending on PainterV3 UI state
+if $close === true {
+    $res = storage.close()   // does not save states. Must use storage.write("name",$name) for state to be saved
+    exit
+}
+jumpSub menuInput
+jump doAgain
+
+
+
+//============================================================================================================================
+// Subrotines
+label menuInput
+
+    if $opt === "Clear all markers" {
+        $res = timeline.marks.clearAll()
+        $message = "Removed all markers"
+        jump updateUI  // jump rather than jumpSub is like tail call. UpdateUIs exitSub will return to caller of menuInput
+    }
+    
+    
+    if $opt === "Delete" {
+        $command = commands.animMarksDeleteSection
+        $secFailMess = "Could not delete section!"
+        $secMess = "Deleted"
+        jump sectionCommand    
+    }
+    if $opt === "Clear" {
+        $command = commands.animMarksClearSection
+        $secFailMess = "Could not clear section!"
+        $secMess = "Cleared"
+        jump sectionCommand    
+    }
+    if $opt === "Trim" {
+        $command = commands.animMarksTrimSection
+        $secFailMess = "Could not trim section!"
+        $secMess = "Trimed"
+        jump sectionCommand    
+    }
+    if $opt === "Contract" {
+        $command = commands.animMarksContractSection
+        $secFailMess = "Could not contract section!"
+        $secMess = "Contracted"
+        jump sectionCommand    
+    }
+    if $opt === "Expand" {
+        $command = commands.animMarksExpandSection
+        $secFailMess = "Could not expand section!"
+        $secMess = "Expanded"
+        jump sectionCommand    
+    }
+    if $opt === "Reverse" {
+        $command = commands.animMarksReverseSection
+        $secFailMess = "Could not reverse section!"
+        $secMess = "Reversed"
+        jump sectionCommand    
+    }
+    
+    
+
+exitSub
+
+
+
+label updateUI
+    menuUpdate $message
+    $message = ""
+exitSub
+
+label updateStatus
+
+    $message = "Frame " + animation.time + " of " + animation.maxLength
+    $mark_A = timeline.marks.findPrev(animation.time)
+    if $mark_A !== undefined {
+        $markA = $mark_A.name + " F" + $mark_A.time
+        $section.start = $mark_A.time
+    } 
+    if $mark_A === undefined {
+    
+        $markA = "na F" + animation.startTime
+        $section.start = animation.startTime
+    }
+    
+    $mark_B = timeline.marks.findNext(animation.time)
+    if $mark_B !== undefined {
+        $markB = $mark_B.name + " F" + $mark_B.time
+        $section.end = $mark_B.time
+    } 
+    if $mark_B === undefined {
+        $markB = "na F" + animation.endTime
+        $section.end = animation.endTime
+    }
+    $secTime = ($section.end - $section.start) + " frames"
+    menuUpdate $message $markA $markB $secTime
+    $message = ""
+exitSub
+
+label sectionCommand
+    $res = timeline.marks.sectionCommand($command, $section.start, $section.end);
+    if $res === false {
+        $message = $secFailMess
+        warn $secFailMess
+        timeout 2000
+        jump updateUI
+    
+    
+    }
+    $message = $secMess + " " + ($section.end - $section.start) + " frames"
+    timeout 2000
+    jump updateUI
+    
+exitSub    
+
+
+
+    
+//============================================================================================================================
+// Events
+
+event onspriteupdate {
+    
+}
+event onselectionchanged {
+
+}
+event ontimeout {
+    if $startup === false {
+        jumpSub updateStatus
+    }
+    if $startup === true {
+        $startup = false
+        jumpSub updateStatus
+    }
+
+}
+
+event onanimtimechanged {
+    jumpSub updateStatus
+
+}

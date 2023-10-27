@@ -1,0 +1,59 @@
+$spr = selection[0]
+jumpSub checkSpr
+$spr = selection[1]
+jumpSub checkSpr
+
+if $imgSpr !== undefined {
+    if $palletSpr !== undefined {
+        jump okDoIt
+    }
+}
+warn Did not find selected sprite needed
+exit
+
+label checkSpr
+    if $spr === undefined {
+        warn No image selected
+        exit
+    }
+    if $spr.type.pallet === true {
+        $palletSpr = $spr
+        exitSub
+    }
+
+    if $spr.type.image === true {
+        if $spr.image.isDrawable === true {
+            $imgSpr = $spr
+            exitSub
+        }
+        warn Image is not drawable
+        exit
+    }
+    warn Sprite is not of type image
+    exit
+
+
+label okDoIt
+
+$palletLookup = $palletSpr.pallet.getLookup()
+$matrixSpread = ""
+if localProcessImage.palletApplyValues === "FloydSteinberg" {
+
+
+    $res = localProcessImage.createJob("applyPalletToImageFloydSteinberg", $imgSpr.image, $palletLookup)
+    jump completed
+
+}
+
+if localProcessImage.palletApplyValues !== "FloydSteinberg" {
+    //$colorSpace = "RGB linear " + localProcessImage.palletApplyValues
+    //$colorSpace = "YIQ " + localProcessImage.palletApplyValues
+    $colorSpace = localProcessImage._palletModel + localProcessImage.palletApplyValues
+    log $colorSpace
+    $res = localProcessImage.createJob("applyPalletToImage", $imgSpr.image, $colorSpace, $palletLookup, $matrixSpread)
+
+}
+label completed
+exit
+
+

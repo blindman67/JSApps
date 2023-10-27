@@ -1,0 +1,312 @@
+
+
+$menuOn = false
+
+$capturingFrames = false
+$animationTime = 0
+$pallet = undefined
+$captureSprite = undefined
+
+$captureMethod = "Manual"
+$captureMethodDisplay = "Manual capture"
+$starting = true
+
+jumpSub findContext
+menu title "20 Animation capture"
+menu exit "Exit"
+menu exit "Capture"
+$capturingFrames = false
+$res = storage.file("animCreator")
+$animationInterval = storage.read("animationInterval",1)
+$animationFrom = storage.read("animationFrom",animation.startTime)
+$animationTo = storage.read("animationTo",animation.endTime)
+$menuStatus ="Ready"
+$funcLinkSync = ""
+jumpSub getFunctionLinkStatus
+
+$frameTotalTime = 0
+$animationTo = $animationTo > animation.endTime ? animation.endTime : $animationTo
+$animationFrom = $animationFrom < animation.startTime ? animation.startTime : $animationFrom
+$animationFrom = $animationFrom > $animationTo ? $animationTo - 1 : $animationFrom
+$animationTimes = animation.startTime + " " + animation.endTime
+$animationFromStr = timeToStr($animationFrom)
+$animationToStr = timeToStr($animationTo)
+
+$options = ""
+
+$options = $options + "$animationInterval,slider Interval 1 30 1 1 #000,"
+$options = $options + ",,$animationFromStr,From time ,"
+$options = $options + "$animationFrom,slider From "+$animationTimes+" 1 1 #000,"
+$options = $options + ",$animationTo,slider To "+$animationTimes+" 1 1 #000,"
+$options = $options + "$animationToStr,To time ,"
+$options = $options + ",,$selectedCaptureSprite,Use capture sprite ,"
+$options = $options + "$funcLinkSync,Function links ,"
+$options = $options + "$captureMethodDisplay,Capture method,"
+$options = $options + "$menuStatus,Status,"
+menu options $options
+$menuOn = true
+menu keep
+
+
+//=======================================================================================================================
+// Start of main menu loop
+//=======================================================================================================================
+label doAgain
+$opt = call menu
+
+
+if $opt === "cancel" {
+    $res = storage.close()
+    exit
+}
+if $opt === "exit" {
+    jumpSub saveSettings
+    $res = storage.close()
+    exit
+}
+
+if $opt === "capture" {
+    if $captureSprite === undefined {
+        log "Capture sprite not selected"
+        jump doAgain
+    }
+    if $captureMethod === "Animation" {    
+        log "Sarting animation capture"
+        $capturingFrames = true
+        $menuStatus = "Capturing animation"
+        $animationTime = $animationFrom
+        $starting = true
+        timeout 50   
+        //animation.time = $animationTime
+        //frameRendered
+        menuUpdate $menuStatus         
+        jump doAgain
+    }    
+    
+
+    label waitForJob
+    $menuStatus = "Added frame"
+    jump doAgain
+}    
+if $opt === "animationFrom" {
+    jumpSub showUpdateAnimationLength
+    jump doAgain
+}
+if $opt === "animationTo" {
+    jumpSub showUpdateAnimationLength
+    jump doAgain
+}
+if $opt === "animationFromStr" {
+    $res = mouse.oldButton & 4
+    if $res === 4 {
+        animation.time = $animationFrom
+        jump doAgain
+    }
+    $animationFrom = animation.time
+    $animationFromStr = timeToStr($animationFrom)
+    jumpSub showUpdateAnimationLength
+    jump doAgain
+}
+if $opt === "animationToStr" {
+    $res = mouse.oldButton & 4
+    if $res === 4 {
+        animation.time = $animationTo
+        jump doAgain
+    }
+    $animationTo = animation.time
+    jumpSub showUpdateAnimationLength
+    jump doAgain
+}
+if $opt === "selectedCaptureSprite" {
+    assert selected
+    if $assertion === false {
+        log "Select a image spritw, then click this button."
+        jump doAgain
+    }
+    assert drawable
+    if $assertion === false {
+        log "Selected sprite is not drawable."
+        jump doAgain
+    }
+    $selectedCaptureSprite = "Capture Sprite Selected"
+    $captureSprite = selection[0]
+    menuUpdate $selectedCaptureSprite 
+    jump doAgain
+}
+
+if $opt === "captureMethodDisplay" {
+    if $captureMethod === "Manual" {
+        $captureMethod = "Animation"
+        $res = animation.startFrame()
+        animation.time = $animationFrom
+        jumpSub showAnimationLength
+        jump doAgain     
+    }
+    $captureMethod = "Manual"
+    $captureMethodDisplay = "Manual"
+    menuUpdate $captureMethodDisplay 
+    jump doAgain     
+}
+if $opt === "funcLinkSync" {
+    if sprites.hasFunctionLinks === true {
+        if sprites.functionLinksOn === true {
+            if sprites.functionLinksAnimated === true {
+                com edSpriteFreeSyncFunctionLinks
+                jump doAgain    
+            }
+            if sprites.functionLinksAnimated === false {
+                com edSpriteSyncFunctionLinks
+                jump doAgain    
+            }
+        }
+        if sprites.functionLinksOn === false {
+            com edSpriteActivateFunctionLinks
+            jump doAgain    
+        }
+    }
+}
+jumpSub showAnimationLength
+jump doAgain
+
+label getFunctionLinkStatus
+    if sprites.hasFunctionLinks === true {
+        if sprites.functionLinksOn === true {
+            if sprites.functionLinksAnimated === true {
+                $funcLinkSync = "Animate sync ON [Click Off]"
+            }
+            if sprites.functionLinksAnimated === false {
+                $funcLinkSync = "Animate sync OFF [Click On]"
+            }
+        }
+        if sprites.functionLinksOn === false {
+            $funcLinkSync = "Links inactive [Click activate]"
+        }
+    }
+    if sprites.hasFunctionLinks === false {
+        $funcLinkSync = "No links found"
+    }
+    
+    if $menuOn === true {
+        menuUpdate $funcLinkSync
+    }
+
+exitSub
+
+
+{ // showUpdateAnimationLength 
+label showUpdateAnimationLength 
+    $res = $animationTo
+    if $animationFrom > $animationTo {
+        $animationTo = $animationFrom
+        $animationFrom = $res
+    }
+    $animationFromStr = timeToStr($animationFrom)
+    $animationToStr = timeToStr($animationTo)
+    menuUpdate $animationFrom
+    menuUpdate $animationFromStr
+    menuUpdate $animationTo
+    menuUpdate $animationToStr
+    
+label showAnimationLength
+    if $captureMethod === "Animation" {
+        $animationLen = $animationTo - $animationFrom + 1
+        $animationTime = $animationFrom
+        $captureMethodDisplay = "Animation " + ($animationLen / $animationInterval|0)+ " frames" 
+        menuUpdate $captureMethodDisplay 
+    }
+exitSub
+}  
+{ // saveSettings
+    label saveSettings
+        $res = storage.write("animationInterval", $animationInterval)
+        $res = storage.write("animationFrom", $animationFrom)
+        $res = storage.write("animationTo", $animationTo)  
+    exitSub
+} 
+{// findContext
+label findContext
+    assert selected
+    if $assertion === false {
+        exitSub
+    }
+    $count = 0 
+    label nextspr
+        if $count === selection.length {
+            exitSub
+        }
+        $spr = selection[$count]
+        if $spr.type.image === true {
+            if $captureSprite  === undefined {
+                $captureSprite  = $spr
+                $selectedCaptureSprite = $spr.image.w + "by" + $spr.image.h + " Capture Sprite Selected"
+                exitSub    
+            }
+        }        
+        $count = $count + 1
+        jump nextspr
+}
+//=======================================================================================================================
+// Events
+
+event onframerendered {
+
+    if $capturingFrames === true {
+        if $animationTime !== animation.time {
+            timeout 50    
+            jump animationDone
+        }
+        
+        $res = selection.clear()
+        $res = selection.add($captureSprite)
+        com edSprCopy    
+        if $animSprite !== undefined {
+            $image = selection[0].image
+            $res = sprites.remove(selection[0])
+
+        }        
+        if $animSprite === undefined {
+            $animSprite = selection[0];
+            $image = selection[0].image;
+            $res = $animSprite.setPos($animSprite.x + $animSprite.w * $animSprite.sx, $animSprite.y)
+        }
+        $res = selection.clear()
+        $res = selection.add($animSprite)
+        $res = $animSprite.changeImage($image)
+        com animSetKey_image
+        $animationTime = $animationTime + $animationInterval
+        if $animationTime > $animationTo {
+            $menuStatus = "🔥🔥🔥DONE!!! " + $frameCount + "frames  🔥🔥🔥"
+            $capturingFrames = false
+            
+            $res = selection.clear()
+            $res = selection.add($animSprite)
+            
+            jump animationDone
+        }
+        timeout 50    
+        label animationDone
+        menuUpdate $menuStatus         
+    }
+    label eventDone
+}
+event onspritesupdated {
+    if $capturingFrames === false {
+
+        jumpSub getFunctionLinkStatus
+    
+    
+    }
+}
+event ontimeout {
+    if $capturingFrames === true {
+        if $starting !== true {
+            animation.time = animation.time + 1
+        }
+        if $starting === true {
+           animation.time = $animationTime
+           $starting = false
+        }
+        frameRendered        
+    }    
+}
+

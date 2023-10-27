@@ -1,0 +1,105 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2019-07-07T21:17:18.349Z",
+        "id": "296749A",
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018 - 2020",
+        "details": "Function linker that keeps point above line segment made by two markers. This function link can chain markers to create a surface.",
+        "useLib": true,
+        "type": "scene",
+        "loadedCommands": ["edSprResetView","edSpriteActivateFunctionLinks"]
+    },
+    "lib" : {
+        "_A": {
+            "scale": true,
+            "rotate": true
+        },
+        "_B": {
+            "w": 32,
+            "h": 32,
+            "locks": "_A",
+            "namedInLink": true,
+            "type": "marker"
+        }
+    },
+    "scene": {
+        "sprites": [{
+                "name": "FootControl",
+                "id": 296717,
+                "x": -512,
+                "y": -256,
+                "w": 64,
+                "h": 64,
+                "locks": "_A",
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "A",
+                "_B": 0,
+                "id": 101,
+                "x": -1024,
+                "y": 0,
+                "lookat": [102, 0, 0],
+                "marker": "A"
+            }, {
+                "name": "B",
+                "_B": 0,
+                "id": 102,
+                "x": -512,
+                "y": 0,
+                "lookat": [103, 0, 0],
+                "marker": "B"
+            }, {
+                "name": "C",
+                "_B": 0,
+                "id": 103,
+                "x": 0,
+                "y": 0,
+                "lookat": [104, 0, 0],
+                "marker": "C"
+            }, {
+                "name": "D",
+                "_B": 0,
+                "id": 104,
+                "x": 512,
+                "y": 0,
+                "lookat": [103, 0, 0],
+                "marker": "D"
+            }, {
+                "name": "Foot",
+                "id": 296742,
+                "x": 0,
+                "y": 0,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "_B": 0,
+                    "UI": true
+                },
+                "namedOutLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Foot Stop function",
+                "id": 296748,
+                "x": 32,
+                "y": -64,
+                "w": 96,
+                "h": 16,
+                "locks": "_A",
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [296717, 101,102,103,104],
+                    "outputs": [296742],
+                    "linked": [296717, 101, 102, 103, 104, 296742],
+                    "source": "const _footControlIn = 296717, AA = 101, BB = 102, CC = 103, DD = 104,_footOut = 296742;\nconst spriteIDS = [_footControlIn, AA, BB, CC, DD, _footOut];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nvar footControlIn, A, B, C, D, footOut, linkCount, linksCount; \n\nfunction checkPoints(a, b) {        \n    const vx1 = footControlIn.x - a.x;\n    const vy1 = footControlIn.y - a.y;\n    const vx2 = a.x - b.x;\n    const vy2 = a.y - b.y;\n    d2 = vx2 * vx2 + vy2 * vy2;\n    dot = Math.vecDot2d(vx2, vy2, vx1, vy1) / (d2 ? d2 : 1);     \n    if (dot <= 0 && dot >= -1) {     \n        if(Math.floor((Math.uVecCross2d(vx1, vy1, vx2, vy2) + 0.5) * 2) < 1) {\n            footOut.x = footControlIn.x;\n            footOut.y = footControlIn.y;\n        } else {       \n            footOut.x = dot * vx2 + a.x;\n            footOut.y = dot * vy2 + a.y;\n        }\n        const roff = footOut.ry - footOut.rx;\n        footOut.rx = a.rx;\n        footOut.ry = a.rx + roff;\n        footOut.key.update();\n        API.updateWidget = footOut.selected;\n    }\n}\nfunction update() {\n    if (API.active) {\n        checkPoints(A,B);\n        checkPoints(B,C);\n        checkPoints(C,D);\n    }\n}\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if (spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    footControlIn = getSprite(_footControlIn);\n    A = getSprite(AA);\n    B = getSprite(BB);\n    C = getSprite(CC);\n    D = getSprite(DD);\n    footOut = getSprite(_footOut);\n    API.active = linksCount === linkCount;\n}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset() {},\n    spriteIDS,\n    spriteList,\n    inputs: [['FootControl', _footControlIn], ['A', AA], ['B', BB],['C', CC], ['D', DD]],\n    outputs: [['Foot', _footOut]],\n    bind(spr, id) { spriteList.has(id) && (spriteList.set(id,spr), setSprites()) },\n    getById(id) { return spriteList.get(id) },\n    update,\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "groups": [],
+        "collections": []
+    }
+}

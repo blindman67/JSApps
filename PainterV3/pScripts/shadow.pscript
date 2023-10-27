@@ -1,0 +1,21 @@
+
+if $arg0 === "help" showHelp
+
+label getNextSelected
+selected next a
+// if no more selected then exit
+if $a === undefined exit
+
+$a.shadow.x = $arg0
+$a.shadow.y = $arg0
+$a.shadow.blur = $arg1
+$a.shadow.color = $arg2
+
+jump getNextSelected
+
+label showHelp
+log
+log Help for batch shadow.json
+log shadow offset blur color
+log offset and blur in px
+log color as #RGB #RGBA #RRGGBB or #RRGGBBAA

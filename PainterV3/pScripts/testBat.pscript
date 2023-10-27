@@ -1,0 +1,19 @@
+create image a $arg0
+
+$x = Number(1000)
+$y = Number(1000)
+$rad = Number(300)
+$ang = Number(0)
+$count = Number($arg1)
+$step = Number(Math.PI * 2) / $count
+label loop1
+    $px = Number(Math.cos(Number($ang)) * Number($rad) + Number($x))
+    $py = Number(Math.sin(Number($ang)) * Number($rad) + Number($y))
+    create sprite a $px $py
+    select
+    $xyz = selection[0].rx = Number($ang)
+    $xyz = selection[0].ry = Number($ang + Math.PI / 2)
+    $xyz = selection[0].key.update()
+    $ang += Number($step)
+    $count -= Number(1)
+if $count > 0 loop1

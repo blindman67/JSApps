@@ -1,0 +1,850 @@
+#updateUIOpt if $opt === "%0UI" {;$%0 = $%0 ? false : true;jumpSub setMenuOptions;jump doAgain;}
+#updateMenu if $opt === "%0" {;jumpSub setMenuOptions; jump doAgain;}
+#assertSelFail  assert selected; if $assertion === false {;log No sprite selected;exitSub;}
+
+
+$res = storage.file("trackerDialog")
+$scanPixels = storage.read("scanPixels",100)
+$scanSpeed = storage.read("scanSpeed",10)
+$cornerK = storage.read("cornerK",0.05)
+$cornerQ = storage.read("cornerQ",50)
+$color = storage.read("color",false)
+$captureType = storage.read("captureType",0)
+$captureTypes = ["Absolute","Relative","TrackCapture"]
+$scanType = storage.read("scanType",0)
+$scanTypes = ["position","rotate","scale","Follow","Corners3","Corners4","Corners5","Corners7"];
+//$scanTypes = ["position","rotate","scale","Corners3","Corners4","Corners5","Corners7"];
+$hunt = storage.read("hunt",0)
+$huntOptions = ["Scan","hunt","livehunt"];
+$startAuto = false
+$multyTrack = false
+$trackingSprite = null
+$tracking = false
+
+$startup = true
+jumpSub setMenuOptions
+
+$selSpr = undefined
+jumpSub selectAnimationSprite
+
+
+$currentFunction = ""
+menu title "Tracker"
+menu exit "Exit"
+menu exit "Stop"
+menu exit "Track"
+$options = ""
+$options = $options + "$scanPixels,slider Scanpixels 2 50 1 1 #000,"
+$options = $options + "$scanSpeed,slider Scanspeed 0 250 1 1 #000,"
+$options = $options + "$cornerK,slider CornerK 0.05 0.25 0.005 0.01 #000,"
+$options = $options + "$cornerQ,slider Points 1 200 1 50 #000,"
+
+$options = $options + "$colorUI,Metric type ,"
+$options = $options + "$captureUI,Sample source ,"
+$options = $options + "Track%Absolute%Relative%Capture,"
+
+$options = $options + "$scanTypeUI,Sample type ,"
+$options = $options + "Scan%Pos%Rot%Sca%Fol%C3%C4%C5%C7,"
+$options = $options + ",ABSOLUTE SNAP,"
+$options = $options + ",Tracker to position dragger?Converts a tracking sprite to a draging sprite\nUse to keep tracked item in one place,"
+$options = $options + "To absolute%Position%Rotation%Scale?Converts a relative track to absolute tracking sprite,"
+$options = $options + ",Copy first%Position%Rotation%Scale%All?Copy first frame anim keys to all frames in current anim range,"
+$options = $options + "Clear anim%Position%Rotation%Scale%All?Remove all keys pos/rot/scale in current anim range,"
+$options = $options + ",,Set animation sprite,"
+$options = $options + "Set/clear info sprite?Click to set current selected sprite as debug info sprite,"
+$options = $options + ",,Link%points%paths fast%paths,"
+$options = $options + "Select paths,"
+$options = $options + "Select paths to sprite,"
+$options = $options + "Process%clean%trans%stand%same%link%norm,"
+$options = $options + "Process%decon%trans2%cleanN%pLess,"
+$options = $options + "Hide corners toggle,"
+
+menu options $options
+menu keep
+label doAgain
+$opt = call menu
+
+
+//log $opt
+if $opt === "cancel" {
+    $res = storage.close()
+    exit
+}
+if $opt === "exit" {
+    $res = storage.close()
+    exit
+}
+
+if $opt === "stop" {
+    
+    $allSel = []
+    $multyTrack = false
+    $startAuto = false
+    $res = animation.endFrame()
+    log Stopped by user!!!
+    jump doAgain
+}
+if $opt === "Hide corners toggle" {
+    if $selSpr === undefined {
+        log Animation sprite has not been defined
+        jump doAgain
+    }
+    $selSpr.hideCorners = !$selSpr.hideCorners
+    log Toggled hide corners on first selected
+    jump doAgain
+}
+$optS = $opt.includes("Process ")
+if $optS === true {
+    if $selSpr === undefined {
+        log Animation sprite has not been defined
+        jump doAgain
+    }
+    $hasCorners = $selSpr.image.desc.corners !== undefined
+    if $hasCorners === false {
+        log Animation sprite has no corners detected
+        jump doAgain
+    }
+    
+    if $opt === "Process clean" {
+        //localProcessImage.processCornersSprite($selSpr, "isolatestatic" + "near" + "paths" + "removeconverging" + "similarpath"+ "pathlinking");
+        $res = localProcessImage.processCornersSprite($selSpr, "cleanpoints");
+    }
+    if $opt === "Process cleanN" {
+        $res = localProcessImage.processCornersSprite($selSpr, "cleanPaths");
+    }
+    if $opt === "Process trans" {
+        $res = localProcessImage.processCornersSprite($selSpr, "translatesearch1");
+    }
+    if $opt === "Process trans2" {
+        $res = localProcessImage.processCornersSprite($selSpr, "translatesearch2");
+    }
+    if $opt === "Process decon" {
+        $res = localProcessImage.processCornersSprite($selSpr, "removeconverging");
+    }
+    if $opt === "Process stand" {
+        $res = localProcessImage.processCornersSprite($selSpr, "isolatestatic" + "near" + "paths" + "removeconverging" + "similarpath"+ "pathlinking");
+    }
+    if $opt === "Process same" {
+        $res = localProcessImage.processCornersSprite($selSpr,  "similarpathnear");
+    }
+    if $opt === "Process link" {
+        $res = localProcessImage.processCornersSprite($selSpr,  "pathlinking");
+    }
+    if $opt === "Process norm" {
+        $res = localProcessImage.processCornersSprite($selSpr,  "normalise");
+    }    
+    if $opt === "Process pLess" {
+        $res = localProcessImage.processCornersSprite($selSpr,  "removepathless");
+    }
+    jump doAgain
+}
+
+
+$optS = $opt.includes("Link ")
+if $optS === true {
+    if $selSpr === undefined {
+        log Animation sprite has not been defined
+        jump doAgain
+    }
+    $hasCorners = $selSpr.image.desc.corners !== undefined
+    if $hasCorners === false {
+        log Animation sprite has no corners detected
+        jump doAgain
+    }
+
+
+    
+    if $opt === "Link points" {
+        $selSpr.hideCorners = false
+        $selSpr.linkPointFrom = undefined
+        $selSpr.linkPathLast = undefined
+        $selSpr.linkPaths = false
+        $selSpr.selectPaths = false
+        $selSpr.linkPathsFast = false
+        if $selSpr.linkPoints === true {
+            $selSpr.linkPoints = false
+            log Linking points OFF
+            jump doAgain    
+        }
+        $selSpr.linkPoints = true
+        log Linking points On
+    }
+    if $opt === "Link paths" {
+        $selSpr.hideCorners = false    
+        $selSpr.linkPoints = false
+        $selSpr.linkPointFrom = undefined
+        $selSpr.linkPathLast = undefined
+        $selSpr.selectPaths = false
+        $selSpr.linkPathsFast = false
+        if $selSpr.linkPaths === true {
+            $selSpr.linkPaths = false
+            log Linking paths OFF
+            jump doAgain
+        
+        }
+        $selSpr.linkPathsFast = false
+        $selSpr.linkPaths = true
+        log Linking paths On
+    }
+    if $opt === "Link paths fast" {
+        $selSpr.hideCorners = false    
+        $selSpr.linkPoints = false
+        $selSpr.linkPointFrom = undefined
+        $selSpr.linkPathLast = undefined
+        $selSpr.selectPaths = false
+        $selSpr.linkPathsFast = false
+        if $selSpr.linkPaths === true {
+            $selSpr.linkPaths = false
+            $selSpr.linkPathsFast = false
+            log Linking paths OFF
+            jump doAgain
+        
+        }
+        $selSpr.linkPaths = true
+        $selSpr.linkPathsFast = true
+        log Linking paths FAST On    
+    }
+    jump doAgain
+}
+
+if $opt === "ABSOLUTE SNAP" {
+    $frameTimeStep = timeline.frameStep
+    if $frameTimeStep === 0 {
+        $frameTimeStep = 1
+    }
+    
+    $snap = selection[0];
+    if $snap === undefined {
+        log Nothing selected
+        jump doAgain
+    }
+    $isOk = $snap.type.animated
+    $isOk = $isOk && $snap.type.image
+    $isOk = $isOk && $snap.animation.tracks.x
+    $isOk = $isOk && $snap.animation.tracks.y
+    
+    if $isOk === false {
+        log Requierd animated sprite with image
+        jump doAgain
+    }
+
+
+    timeline.editMode = timeline.editModes.place
+    $time = animation.time
+    $x = $snap.x
+    $y = $snap.y
+    $sm = $snap.compMode
+    $snap.x = $snap.animation.tracks.x.keys[0].value
+    $snap.y = $snap.animation.tracks.y.keys[0].value
+    $snap.compMode = "source-over"
+    $res = $snap.key.update()
+    com edSprLiveCapture right
+    animation.time = $time + $frameTimeStep
+    timeline.editMode = timeline.editModes.record
+    $snap.x = $x
+    $snap.y = $y
+    $snap.compMode = $sm
+    $res = $snap.key.update()
+    jump doAgain
+        
+
+}
+
+if $opt === "Select paths" {
+    if $selSpr === undefined {
+        log Animation sprite has not been defined
+        jump doAgain
+    }
+    $hasCorners = $selSpr.image.desc.corners !== undefined
+    if $hasCorners === false {
+        log Animation sprite has no corners detected
+        jump doAgain
+    }
+    $selSpr.hideCorners = false
+    $selSpr.linkPoints = false
+    $selSpr.linkPointFrom = undefined
+    $selSpr.linkPathLast = undefined
+    $selSpr.linkPaths = false
+    $selSpr.linkPathsFast = false
+    if $selSpr.selectPaths === true {
+        $selSpr.selectPaths = false
+        log Select paths OFF
+        jump doAgain
+    
+    }
+    $selSpr.selectPaths = true
+    log Select paths On
+    jump doAgain
+}
+
+if $opt === "Select paths to sprite" {
+    $sl = selection.length
+    if $sl === 0 {
+        log No tracking sprites selected
+        jump doAgain
+    }
+    if $selSpr !== undefined {
+        if $selSpr.selectedPaths !== undefined {
+            $sl = Math.min(selection.length, $selSpr.selectedPaths.length)
+            $keyX = utils.animKey("x",0,0)
+            $keyY = utils.animKey("y",0,0)
+            $point = utils.point
+            $count = 0
+            label pathCreateLoop
+                $path = $selSpr.selectedPaths[$count]
+                $tSpr = selection[$count]
+                $time = $path.time
+                $next = $path.path
+                label loopPath
+                    $keyX.time = $time
+                    $keyY.time = $time
+                    $point = $selSpr.key.toWorldPoint($next.x, $next.y, $point)
+                    $keyX.value = $point.x
+                    $keyY.value = $point.y
+                    $res = $tSpr.addAnimKey($keyX)   
+                    $res = $tSpr.addAnimKey($keyY)   
+                    $time = $time + 1
+                    $next = $next.next
+                    if $next !== undefined {
+                        jump loopPath
+                    }
+                $count = $count + 1
+                if $count < $sl {
+                    jump pathCreateLoop
+                }
+            $selSpr.selectedPaths = undefined
+            $res = animation.forceUpdate();
+            jump doAgain
+            
+        
+        
+        }
+    }
+    log No selected paths found
+    jump doAgain
+}
+
+if $opt === "Set animation sprite"  {
+    jumpSub selectAnimationSprite
+    jump doAgain
+
+}
+if $opt === "Set/clear info sprite" {
+   $infoSpr = sprites.find(spr => spr.name.includes("TrackingInfo"));
+   if $infoSpr !== undefined {
+        $res = $infoSpr.image.clear(false)
+        log Info sprite cleared
+        jump doAgain
+    }
+    assert selected 
+    if $assertion === false {
+        log No sprite selected
+        jump doAgain
+    }
+    if selection.length !== 1 {
+        log Select only one info sprite
+        jump doAgain
+    }
+    assert image
+    if $assertion === false {
+        log Selected is not an image
+        jump doAgain
+    }
+    assert drawable
+    if $assertion === false {
+        log Selected sprite image must be drawable
+        jump doAgain
+    }    
+    
+    selection[0].name = "TrackingInfo"
+    log Info sprite set
+    jump doAgain
+
+}
+if $opt === "track" {
+    $res = animation.pause()
+    assert selected 
+    if $assertion === false {
+        log No sprite selected
+        jump doAgain
+    }
+    assert image
+    if $assertion === false {
+        log Selected is not an image
+        jump doAgain
+    }
+    if $capture === true {
+        assert drawable
+        if $assertion === false {
+            log Selected sprite image must be drawable
+            jump doAgain
+        }
+    }
+    $editMode = timeline.editMode
+    if $editMode !== timeline.editModes.place {
+        timeline.editMode = timeline.editModes.place;
+        log Animation edit mode needed switching. Click again to start
+        jump doAgain
+    }
+    if $tracking === true {
+        log Tracker still mounted. can not start new track
+        jump doAgain
+    
+    }
+    $multyTrack = false
+    if selection.length > 1 {
+        $allSel = [...selection]
+        $res = $allSel.forEach(s => s.a = 0)
+        $res = selection.clear()
+        $res = selection.add($allSel.shift())
+        $multyTrack = true
+    }
+   // if selection.length === 1 {
+       // $trackingSprite = selection[0];
+   // }
+    
+
+    $startAuto = true
+    commandLine "mount tracker " $command
+
+    jump doAgain
+}
+if $opt === "dismount" {
+    dismount
+    jump doAgain
+}
+$optS = $opt.includes("To absolute ")
+if $optS === true {
+    jumpSub  travelSprites
+    jump doAgain
+}
+$optS = $opt.includes("Tracker to ")
+if $optS === true {
+    jumpSub toPosDragger
+    jump doAgain
+}
+$optS = $opt.includes("Copy first ")
+if $optS === true {
+    jumpSub resetAnimPos
+    jump doAgain
+}
+$optS = $opt.includes("Clear anim ")
+if $optS === true {
+    jumpSub clearAnimPos
+    jump doAgain
+}
+
+#updateMenu scanPixels
+#updateMenu cornerQ
+#updateMenu scanSpeed
+#updateMenu cornerK
+
+if $opt === "colorUI" {
+    $color = !$color
+    jumpSub setMenuOptions
+    jump doAgain
+}
+
+if $opt === "captureUI" {
+    $captureType = ($captureType + 1) % $captureTypes.length
+    jumpSub setMenuOptions
+    jump doAgain
+}
+if $opt === "scanTypeUI" {
+    $scanType = ($scanType + 1) % $scanTypes.length
+    jumpSub setMenuOptions
+    jump doAgain
+}
+// ["position","rotate","scale","Follow","Corners3","Corners4","Corners5","Corners7"];
+if $opt === "Scan Pos" {
+    $scanType = 0;
+    jumpSub setMenuOptions
+    jump doAgain
+}    
+if $opt === "Scan Rot" {
+    $scanType = 1;
+    jumpSub setMenuOptions
+    jump doAgain
+}    
+if $opt === "Scan Sca" {
+    $scanType = 2;
+    jumpSub setMenuOptions
+    jump doAgain
+}    
+if $opt === "Scan Fol" {
+    $scanType = 3;
+    jumpSub setMenuOptions
+    jump doAgain
+}    
+if $opt === "Scan C3" {
+    $scanType = 4;
+    jumpSub setMenuOptions
+    jump doAgain
+} 
+if $opt === "Scan C4" {
+    $scanType = 5;
+    jumpSub setMenuOptions
+    jump doAgain
+} 
+if $opt === "Scan C5" {
+    $scanType = 6;
+    jumpSub setMenuOptions
+    jump doAgain
+} 
+if $opt === "Scan C7" {
+    $scanType = 7;
+    jumpSub setMenuOptions
+    jump doAgain
+} 
+
+if $opt === "Track Absolute" {
+    $captureType = 0;
+    jumpSub setMenuOptions
+    jump doAgain
+} 
+if $opt === "Track Relative" {
+    $captureType = 1;
+    jumpSub setMenuOptions
+    jump doAgain
+} 
+if $opt === "Track Capture" {
+    $captureType = 2;
+    jumpSub setMenuOptions
+    jump doAgain
+} 
+
+if $opt === "huntUI" {
+    $hunt = ($hunt + 1) % $huntOptions.length
+    jumpSub setMenuOptions
+    jump doAgain
+}
+
+jump doAgain
+label travelSprites
+    #assertSelFail
+    assert animated
+    if $assertion === false {
+        log Selected sprite does not contain animation
+        exitSub
+    }
+    
+    $sC = 0;
+    label loopA   
+        $s = selection[$sC];
+        if $opt === "To absolute Position" {
+            $x = $s.animation.tracks.x.keys[0].value
+            $y = $s.animation.tracks.y.keys[0].value
+            $x1 = $s.animation.tracks.x.keys[0].value
+            $y1 = $s.animation.tracks.y.keys[0].value 
+            $keyCount = $s.animation.tracks.x.keys.length
+        }        
+        if $opt === "To absolute Rotation" {
+            $rx = $s.animation.tracks.rx.keys[0].value
+            $ry = $s.animation.tracks.ry.keys[0].value
+            $rx1 = $s.animation.tracks.rx.keys[0].value
+            $ry1 = $s.animation.tracks.ry.keys[0].value 
+            $keyCount = $s.animation.tracks.rx.keys.length
+        }        
+        if $opt === "To absolute Scale" {
+            $sx = $s.animation.tracks.sx.keys[0].value
+            $sy = $s.animation.tracks.sy.keys[0].value
+            $sx1 = $s.animation.tracks.sx.keys[0].value
+            $sy1 = $s.animation.tracks.sy.keys[0].value 
+            $keyCount = $s.animation.tracks.sx.keys.length
+        }         
+        $count = 1
+        label loopitA
+            if $opt === "To absolute Position" {
+                $x = $x + ($s.animation.tracks.x.keys[$count].value - $x1)
+                $y = $y + ($s.animation.tracks.y.keys[$count].value - $y1)
+                $res = $s.animation.tracks.x.keys[$count].value = $x
+                $res = $s.animation.tracks.y.keys[$count].value = $y
+            }
+            if $opt === "To absolute Rotation" {
+                $rx = $rx + ($s.animation.tracks.rx.keys[$count].value - $rx1)
+                $ry = $ry + ($s.animation.tracks.ry.keys[$count].value - $ry1)
+                $res = $s.animation.tracks.rx.keys[$count].value = $rx
+                $res = $s.animation.tracks.ry.keys[$count].value = $ry
+            }
+            if $opt === "To absolute Scale" {
+                $sx = $sx * ($s.animation.tracks.sx.keys[$count].value / $sx1)
+                $sy = $sy * ($s.animation.tracks.sy.keys[$count].value / $sy1)
+                $res = $s.animation.tracks.sx.keys[$count].value = $sx
+                $res = $s.animation.tracks.sy.keys[$count].value = $sy
+            }
+            $count = $count + 1
+            if $count < $keyCount {
+                jump loopitA
+            }
+        $sC = $sC + 1
+        if $sC < selection.length {
+            jump loopA
+        }        
+    log Done
+exitSub
+label toPosDragger
+    #assertSelFail
+    assert animated
+    if $assertion === false {
+        log Selected sprite does not contain animation
+        exitSub
+    }
+    $sC = 0;
+    label loopC
+        $s = selection[$sC];
+        $kx = $s.animation.tracks.x.keys
+        $ky = $s.animation.tracks.y.keys
+        $x = $s.animation.tracks.x.keys[0].value
+        $y = $s.animation.tracks.y.keys[0].value
+        $count = 1
+        label loopit
+            $res = $s.animation.tracks.x.keys[$count].value = $x - ($s.animation.tracks.x.keys[$count].value - $x)
+            $res = $s.animation.tracks.y.keys[$count].value = $y - ($s.animation.tracks.y.keys[$count].value - $y)
+            $count = $count + 1
+            if $count < $s.animation.tracks.x.keys.length {
+                jump loopit
+            }
+        $sC = $sC + 1
+        if $sC < selection.length {
+            jump loopC
+        }
+    log Done
+exitSub
+label setMenuOptions
+    $colorUI = $color ? "Color" : "Value"
+    $huntUI = $huntOptions[$hunt]
+    $scanTypeUI = $scanTypes[$scanType]
+    $captureUI = $captureTypes[$captureType]
+    $rotateUI = $rotate ? "Rotate" : "Position"
+    $res = storage.write("color", $color)
+    $res = storage.write("hunt", $hunt)
+    $res = storage.write("captureType", $captureType)
+    $res = storage.write("scanType", $scanType)
+    $res = storage.write("scanPixels", $scanPixels)
+    $res = storage.write("scanSpeed", $scanSpeed)
+    $res = storage.write("cornerK", $cornerK)
+    $res = storage.write("cornerQ", $cornerQ)
+    $command = " " +  $scanSpeed + " " + ($scanPixels)+ " hunt " + $colorUI + " " + $captureUI + " " + $scanTypeUI + " " + $cornerK + " " + $cornerQ
+    if $startup === false {
+         menuUpdate $colorUI $huntUI $captureUI $scanTypeUI $scanPixels $scanSpeed $cornerK $cornerQ
+         
+    }
+    $startup = false
+exitSub
+
+
+label resetAnimPos
+    #assertSelFail
+    $frameTimeStep = 1
+    $sC = 0;
+    label loopCC    
+        $s = selection[$sC];
+        $x = $s.x
+        $y = $s.y
+        $sx = $s.sx
+        $sy = $s.sy
+        $rx = $s.rx
+        $ry = $s.ry
+        if $s.type.animated === true {
+            if $s.animation.tracks.x !== undefined {
+                $x = $s.animation.tracks.x.keys[0].value
+            }
+            if $s.animation.tracks.y !== undefined {
+                $y = $s.animation.tracks.y.keys[0].value
+            }
+            if $s.animation.tracks.sx !== undefined {
+                $sx = $s.animation.tracks.sx.keys[0].value
+            }
+            if $s.animation.tracks.sy !== undefined {
+                $sy = $s.animation.tracks.sy.keys[0].value
+            }
+            if $s.animation.tracks.rx !== undefined {
+                $rx = $s.animation.tracks.rx.keys[0].value
+            }
+            if $s.animation.tracks.ry !== undefined {
+                $ry = $s.animation.tracks.ry.keys[0].value
+            }
+        }
+        if $opt === "Copy first Position" {
+            $res = $s.removeAnimTrack("x", true)
+            $res = $s.removeAnimTrack("y", true)
+        }
+        if $opt === "Copy first Rotation" {
+            $res = $s.removeAnimTrack("rx", true)
+            $res = $s.removeAnimTrack("ry", true)
+        }
+        if $opt === "Copy first Scale" {
+            $res = $s.removeAnimTrack("sx", true)
+            $res = $s.removeAnimTrack("sy", true)
+        }
+        if $opt === "Copy first All" {
+            $res = $s.removeAnimTrack("x", true)
+            $res = $s.removeAnimTrack("y", true)
+            $res = $s.removeAnimTrack("rx", true)
+            $res = $s.removeAnimTrack("ry", true)
+            $res = $s.removeAnimTrack("sx", true)
+            $res = $s.removeAnimTrack("sy", true)
+        }
+        $key = utils.animKey("x",0,$x)
+        $time = animation.startTime
+        label loopitC
+            $key.time = $time
+            if $opt === "Copy first Position" {
+                $key.name = "x"        
+                $key.value = $x       
+                $res = $s.addAnimKey($key)                  
+                $key.name = "y"        
+                $key.value = $y       
+                $res = $s.addAnimKey($key)  
+            }
+            if $opt === "Copy first Rotation" {
+                $key.name = "rx"        
+                $key.value = $rx       
+                $res = $s.addAnimKey($key)                  
+                $key.name = "ry"        
+                $key.value = $ry       
+                $res = $s.addAnimKey($key)  
+            }
+            if $opt === "Copy first Scale" {
+                $key.name = "sx"        
+                $key.value = $sx       
+                $res = $s.addAnimKey($key)                  
+                $key.name = "sy"        
+                $key.value = $sy       
+                $res = $s.addAnimKey($key)  
+            }
+            if $opt === "Copy first All" {
+                $key.name = "x"        
+                $key.value = $x       
+                $res = $s.addAnimKey($key)                  
+                $key.name = "y"        
+                $key.value = $y       
+                $res = $s.addAnimKey($key)  
+                $key.name = "rx"        
+                $key.value = $rx       
+                $res = $s.addAnimKey($key)                  
+                $key.name = "ry"        
+                $key.value = $ry       
+                $res = $s.addAnimKey($key)  
+                $key.name = "sx"        
+                $key.value = $sx       
+                $res = $s.addAnimKey($key)                  
+                $key.name = "sy"        
+                $key.value = $sy       
+                $res = $s.addAnimKey($key)  
+            }
+                
+                
+            $time = $time + $frameTimeStep
+            $frameTimeStep = timeline.frameStep
+            if $frameTimeStep === 0 {
+                $frameTimeStep = 1
+            }
+            if $time <= animation.endTime {
+                jump loopitC
+            }
+     
+        $sC = $sC + 1
+        if $sC < selection.length {
+            jump loopCC
+        }        
+        
+    com animUpdateUI   
+    log Done
+exitSub
+label clearAnimPos
+    #assertSelFail
+    $sC = 0;
+    label loopDD   
+        $s = selection[$sC];
+        
+        if $opt === "Clear anim Position" {
+            $res = $s.removeAnimTrack("x", true)
+            $res = $s.removeAnimTrack("y", true)
+        }
+        if $opt === "Clear anim Rotation" {
+            $res = $s.removeAnimTrack("rx", true)
+            $res = $s.removeAnimTrack("ry", true)
+        }
+        if $opt === "Clear anim Scale" {
+            $res = $s.removeAnimTrack("sx", true)
+            $res = $s.removeAnimTrack("sy", true)
+        }
+        if $opt === "Clear anim All" {
+            $res = $s.removeAnimTrack("x", true)
+            $res = $s.removeAnimTrack("y", true)
+            $res = $s.removeAnimTrack("sx", true)
+            $res = $s.removeAnimTrack("sy", true)
+            $res = $s.removeAnimTrack("rx", true)
+            $res = $s.removeAnimTrack("ry", true)
+        }
+        $sC = $sC + 1
+        if $sC < selection.length {
+            jump loopDD
+        }        
+    com animUpdateUI
+    log Done
+exitSub
+label selectAnimationSprite
+    $sl = selection.length
+    if $sl !== 1 {
+        log Select one sprite only
+        exitSub    
+    }
+    $selSpr = selection[0]
+    if $selSpr.type.image === false {
+        log Select sprite with an image
+        $selSpr = undefined
+        exitSub    
+    }
+    if $selSpr.type.animated === false {
+        log Select sprite must have animation
+        $selSpr = undefined
+        exitSub    
+    }
+    if $selSpr.animation.tracks.image === undefined {
+        log Select sprite must have animated image track
+        $selSpr = undefined
+        exitSub    
+    }
+    $imgcount = $selSpr.animation.tracks.image.keys.length
+    log Animation sprite selected with $imgcount frames
+exitSub    
+
+event onmountedtracker {
+    $tracking = true
+    //$st = $scanTypeUI.includes("Corners")
+    //if $st === true {
+    //    $t = animation.time;
+    //    if $t !== 0 {
+    //        log Start at frame 0
+    //        $res = animation.time = 0
+    //    }
+    //    if $t === 0 {
+    //        log Forced start
+   //        // $res = animation.forceUpdate()
+
+   //     } 
+   // }
+  //  if $st === false {
+        $res = animation.time = 1
+ //   }
+}
+event ondismountedtracker {
+    $tracking = false
+    if $multyTrack === true {
+        if $allSel.length > 0 {
+            selection[0].a = 0
+            $res = selection.clear()
+            $res = selection.add($allSel.shift())
+            $multyTrack = true
+        }
+        if $allSel.length === 0 {
+            $multyTrack = false
+        }
+
+        $startAuto = true
+        commandLine "mount tracker " $command
+    }
+
+}

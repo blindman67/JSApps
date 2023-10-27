@@ -1,0 +1,168 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2023-09-25T18:42:44.138Z",
+        "id": 451524,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018",
+        "collectionName": "IK_ArmGizmo",
+        "type": "scene"
+    },
+    "scene": {
+        "workspace": { },
+        "sprites": [
+            { "name": "IK_Start", "id": 451515,
+                "x": -32,
+                "y": -16,
+                "w": 32,
+                "h": 32,
+                "locks": { "scale": true, "rotate": true },
+                "gridSpecial": 6,
+                "type": "cutter"
+            },
+            { "name": "TopBone", "id": 451516,
+                "x": 31.39,
+                "y": -15.03,
+                "w": 128,
+                "h": 16,                
+                "gridSpecial": 2,
+                "attachedTo": 451515,
+                "attachment": {
+                    "x": 80,
+                    "y": 16,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            },
+            { "name": "JoinA", "id": 300101,
+                "x": 95,
+                "y": -15,
+                "w": 8,
+                "h": 8,
+                "locks": { "scale": true, "rotate": true },
+                "gridSpecial": 3,
+                "_attachedTo": 451516,
+                "_attachment": {
+                    "x": 128,
+                    "y": 12,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },                
+                "_lookat": [
+                    451517,
+                    0,
+                    0
+                ],
+                "type": "cutter"
+            },            
+            { "name": "MiddleBone", "id": 300100,
+                "x": 159,
+                "y": -15,
+                "w": 96,
+                "h": 16,
+                "gridSpecial": 2,
+                "attachedTo": 300101,
+                "attachment": {
+                    "x": 68,
+                    "y": 4,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            },
+            { "name": "JoinB", "id": 451517,
+                "x": 95,
+                "y": -15,
+                "w": 8,
+                "h": 8,
+                "locks": { "scale": true, "rotate": true },
+                "gridSpecial": 3,
+                "_attachedTo": 300100,
+                "_attachment": {
+                    "x": 128,
+                    "y": 12,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },                
+                "_lookat": [
+                    451519,
+                    0,
+                    0
+                ],
+                "type": "cutter"
+            },            
+            { "name": "BottomBone", "id": 451518,
+                "x": 159,
+                "y": -15,
+                "w": 64,
+                "h": 16,
+                "gridSpecial": 2,
+                "attachedTo": 451517,
+                "attachment": {
+                    "x": 68,
+                    "y": 4,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            },         
+            { "name": "IK_End", "id": 451519,
+                "x": 223.39,
+                "y": -15.03,
+                "w": 32,
+                "h": 32,
+                "locks": { "scale": true, "rotate": true },
+                "gridSpecial": 4,
+                "type": "cutter"
+            },          
+            { "name": "IK_Arm", "id": 451520,
+                "x": 200,
+                "y": -200,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [],
+                    "outputs": [],
+                    "linked": [451515, 451516, 300101, 300100, 451517, 451518, 451519],
+                    "source": "templates/IK_Arm_4J.js",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                } 
+            }
+        ],
+        "vectors": [],
+        "groups": [],
+        "collections": [],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            },
+            "timeMarks": []
+        },
+        "animation": {
+            "time": 0,
+            "start": 0,
+            "end": 120,
+            "length": 120,
+            "speed": 1
+        },
+        "kinematics": [],
+        "text": [{ "text": "0.2",  "id": 446312, "local": true }, { "text": "1.8",  "id": 446313, "local": true }],
+        "media": [],
+        "images": []
+    }
+}

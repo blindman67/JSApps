@@ -1,0 +1,717 @@
+#callOnOpt if $opt === "%0" {;jumpSub %1;jump doAgain;};
+#callOnSubOpts $subOp = $opt.includes("%0");if $subOp === true {;jumpSub %1;jump doAgain;};
+
+
+$res = storage.file("spriteShapekDialog")
+$spr = undefined
+$startup = true
+//$sprName = ""
+$spritesSelected = 0
+$sprArr = []
+$shapeTypes = "circle,ellipse,ellipsoid,square,rectangle,polygon,poly,star,gear,compoundShape,compoundCirle,compoundLine,arrow,angleArrow,tube,sphere,vector,vectorCommited".split(",")
+$shapeNames = "Circle,Ellipse,Ellipsoid,Square,Rectangle,Polygon,Polygon,Star,Gear,Compound Shape,Compound Cirle,Compound Line,Arrow,Angle,Tube,Sphere,Vector,Vector Commited".split(",")
+$shapeType = "Circle"
+$innerVal = 0
+$radiusVal = 0
+$valA = 0
+$valB = 0
+$valC = 0
+$valD = 0
+$offSetting = "Absolute"
+$valAOld = 0
+$valBOld = 0
+$valCOld = 0
+$valDOld = 0
+$relativeOffset = 0
+$sides = 3
+$width = 128
+$height = 128
+menu title "20 Shapes dialog"
+menu exit "Exit"
+menu exit "Update"
+$options = ""
+//$options = $options + "$sprName,Name ,,,,"
+$options = $options + "$shapeType,Shape%" + ($shapeNames.join("%")) + ","
+$options = $options + "{,Make_unique?Converts instanced shapes to copies,"
+$options = $options + "Join?Adds control sprites to compound shapes,},"
+//$options = $options + "Bake_Shape?Fixes shape removing all dynamic rules,"
+$options = $options + "$shapeOptions,Shape options%0%1%2%3%4%5%6%7,"
+$options = $options + "$sides,slider Points 1 64 1 3 #008 0,"
+$options = $options + "$innerVal,slider Inner 0 256 1 0 #440 0.2,"
+$options = $options + "$radiusVal,slider Radius 0 512 0.5 0 #044 0.2,,"
+$options = $options + "$offSetting,Modify%Absolute%Relative,"
+$options = $options + "$valA,slider Start -4 4 0.001 1 #400 0.3,"
+$options = $options + "$valB,slider Length -4 4 0.001 0 #440 0.3,"
+$options = $options + "$valC,slider Length -4 4 0.01 0 #040 0.2,"
+$options = $options + "$valD,slider Length -4 4 0.01 0 #046 0.2,"
+$options = $options + ",{,$aA,.,$aB,.,$aC,.,$aD,.,},"
+$options = $options + "$width,slider Size width 1 512 1 128  #040 0,"
+$options = $options + "$height,slider Heigth 1 512 1 128  #040 0"
+menu options $options
+menu keep
+timeout 100
+label doAgain
+$opt = call menu
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    $res = storage.close()
+    exit
+}
+#callOnSubOpts shapeType shapeSelect
+#callOnOpt radiusVal radiusSlide
+#callOnOpt innerVal innerSlide
+#callOnOpt shapeOptions shapeOptionSelect
+#callOnOpt sides pointsSlide
+//#callOnOpt Bake_Shape bakeShape
+#callOnOpt valA valASlide
+#callOnOpt valB valBSlide
+#callOnOpt valC valCSlide
+#callOnOpt valD valDSlide
+#callOnOpt width sizeSlide
+#callOnOpt height heightSlide
+#callOnOpt Join joinShapes
+#callOnOpt aA shapeAction
+#callOnOpt aB shapeAction
+#callOnOpt aC shapeAction
+#callOnOpt aD shapeAction
+if $opt === "offSetting" {
+    $offSetting = $offSetting.replace("Modify ","")
+    if $offSetting === "Relative" {
+        $valB = 0
+        $valA = 0
+        $valC = 0
+        $valD = 0
+        $valAOld = 0
+        $valBOld = 0
+        $valCOld = 0
+        $valDOld = 0
+    }
+    jumpSub setMenuOptions
+    jump doAgain
+}
+if $opt === "Make_unique" {
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            $radius = $spr.shape.radius
+            $inner  = $spr.shape.inner
+            $sides  = $spr.shape.sides
+            $valA   = $spr.shape.valA
+            $valB   = $spr.shape.valB
+            $valC   = $spr.shape.valC
+            $valD   = $spr.shape.valD
+            $res = selection.changeShape($spr.shapeName, true)
+            $spr.shape.radius = $radius
+            $spr.shape.inner = $inner
+            $spr.shape.sides = $sides
+            $spr.shape.valA  = $valA
+            $spr.shape.valB  = $valB
+            $spr.shape.valC  = $valC
+            $spr.shape.valD  = $valD
+        }
+    }
+    jump doAgain
+}
+log $opt
+jump doAgain
+//============================================================================================================================
+// functions
+label setMenuOptions
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            $idx = $shapeTypes.indexOf($spr.shapeName)
+            if $idx > -1 {
+                $shapeType = $shapeNames[$idx]
+            }
+            if $offSetting === "Relative" {
+                $valB = $valBOld
+                $valA = $valAOld
+                $valC = $valCOld
+                $valD = $valDOld
+            }
+            if $spr.shape.namedOptions !== undefined {
+                $shapeOptions = $spr.shape.namedOptions[($sides - 1) % $spr.shape.namedOptions.length]
+                menuUpdate $shapeOptions
+            }
+            menuUpdate $innerVal $radiusVal $sides $offSetting $valA $valB $valC $valD $width $height $shapeType
+        }
+    }
+exitSub
+label noShapeSelected
+    menuDisable Button_Join Button_Make_unique $innerVal $radiusVal $sides $valA $valB $valC $valD $width $height $aA $aB $aC $aD
+exitSub
+label updateOptionNames
+
+     if $spr === undefined {
+        jump noShapeSelected
+     }
+     if $spr !== undefined {
+        if $spr.type.shape !== true {
+            jump noShapeSelected
+        }
+        if $spr.type.shape === true {
+            if $spr.type.shadow === true {
+                menuDisable $width $height Button_Make_unique
+            }
+            if $spr.type.shadow !== true {
+                menuEnable $width $height Button_Make_unique
+            }
+            if $spr.shape.isCompound === true {
+                menuEnable Button_Join
+            }
+            if $spr.shape.isCompound !== true {
+                menuDisable Button_Join
+            }
+            $canNotMakeUnique = $spr.shape.name === "vectorCommited" || $spr.shape.name === "vector"
+            if $canNotMakeUnique === true {
+                menuDisable Button_Make_unique
+            }
+            if $canNotMakeUnique === false {
+
+            }
+
+            if $spr.shape.names !== undefined {
+                $inVal = $innerVal
+                $rVal = $radiusVal
+                $sVal = $sides
+                $aVal = $valA
+                $bVal = $valB
+                $cVal = $valC
+                $dVal = $valD
+                $innerVal = "#" + $spr.shape.names.inner
+                $radiusVal = "#" + $spr.shape.names.radius
+                $sides = "#" + $spr.shape.names.sides
+                $valA = "#" + $spr.shape.names.valA
+                $valB = "#" + $spr.shape.names.valB
+                $valC = "#" + $spr.shape.names.valC
+                $valD = "#" + $spr.shape.names.valD
+                menuUpdate $innerVal $radiusVal $sides $valA $valB $valC $valD
+                if $spr.shape.namedOptions === undefined {
+                    menuDisable $shapeOptions
+                }
+                if $spr.shape.namedOptions !== undefined {
+                    menuEnable $shapeOptions
+                }
+                if $sides === "#NA" {
+                    menuDisable $sides
+                }
+                if $sides !== "#NA" {
+                    menuEnable $sides
+                }
+                if $innerVal === "#NA" {
+                    menuDisable $innerVal
+                }
+                if $innerVal !== "#NA" {
+                    menuEnable $innerVal
+                }
+                if $radiusVal === "#NA" {
+                    menuDisable $radiusVal
+                }
+                if $radiusVal !== "#NA" {
+                    menuEnable $radiusVal
+                }
+                if $valA === "#NA" {
+                    menuDisable $valA
+                }
+                if $valA !== "#NA" {
+                    menuEnable $valA
+                }
+                if $valB === "#NA" {
+                    menuDisable $valB
+                }
+                if $valB !== "#NA" {
+                    menuEnable $valB
+                }
+                if $valC === "#NA" {
+                    menuDisable $valC
+                }
+                if $valC !== "#NA" {
+                    menuEnable $valC
+                }
+                if $valD === "#NA" {
+                    menuDisable $valD
+                }
+                if $valD !== "#NA" {
+                    menuEnable $valD
+                }
+                if $spr.shape.actions !== undefined {
+                    if $spr.shape.actions[0] !== undefined {
+                        $aA = $spr.shape.actions[0]
+                        menuUpdate $aA
+                        menuEnable $aA
+                    }
+                    if $spr.shape.actions[0] === undefined {
+                        $aA = ""
+                        menuUpdate $aA
+                        menuDisable $aA
+                    }
+                    if $spr.shape.actions[1] !== undefined {
+                        $aB = $spr.shape.actions[1]
+                        menuUpdate $aB
+                        menuEnable $aB
+                    }
+                    if $spr.shape.actions[1] === undefined {
+                        $aB = ""
+                        menuUpdate $aB
+                        menuDisable $aB
+                    }
+                    if $spr.shape.actions[2] !== undefined {
+                        $aC = $spr.shape.actions[2]
+                        menuUpdate $aC
+                        menuEnable $aC
+                    }
+                    if $spr.shape.actions[2] === undefined {
+                        $aC = ""
+                        menuUpdate $aC
+                        menuDisable $aC
+                    }
+                    if $spr.shape.actions[3] !== undefined {
+                        $aD = $spr.shape.actions[3]
+                        menuUpdate $aD
+                        menuEnable $aD
+                    }
+                    if $spr.shape.actions[3] === undefined {
+                        $aD = ""
+                        menuUpdate $aD
+                        menuDisable $aD
+                    }
+                }
+                if $spr.shape.actions === undefined {
+                    menuDisable $aA $aB $aC $aD
+                }
+                $innerVal = $inVa;
+                $radiusVal = $rVal
+                $sides = $sVal
+                $valA = $aVal
+                $valB = $bVal
+                $valC = $cVal
+                $valD = $dVal
+            }
+        }
+    }
+exitSub
+label updateNamedOptions
+     if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.namedOptions !== undefined {
+                $shapeOptions = $spr.shape.namedOptions
+                menuUpdate $shapeOptions
+                $shapeOptions = $spr.shape.namedOptions[($sides-1) % $spr.shape.namedOptions.length]
+            }
+            if $spr.shape.namedOptions === undefined {
+                $shapeOptions = ["-","-","-","-","-","-","-","-"]
+                menuUpdate $shapeOptions
+                $shapeOptions = "none"
+            }
+        }
+    }
+exitSub
+label updateUI
+    if $spr !== undefined {
+        if $spr.type.shape === false {
+            exitSub
+        }
+    }
+exitSub
+label shapeAction
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.actions !== undefined {
+                $actionIdx = ["aA","aB","aC","aD"].indexOf($opt)
+                if $actionIdx !== -1 {
+                    if $spr.shape.actions[$actionIdx] !== undefined {
+                        $actionName = $spr.shape.actions[$actionIdx].split("?")[0]
+                        if $spr.shape[$actionName] !== undefined {
+                            $res = $spr.shape[$actionName]($spr)
+                        }
+                    }
+                }
+            }
+        }
+     }
+exitSub
+label radiusSlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.radius !== undefined {
+                $spr.shape.radius =  $radiusVal
+                $propName = "radius"
+                jumpSub setShapeProp
+                jumpSub updateSprite
+            }
+        }
+    }
+exitSub
+label innerSlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.inner !== undefined {
+                $spr.shape.inner =  $innerVal
+                $propName = "inner"
+                jumpSub setShapeProp
+                jumpSub updateSprite
+            }
+        }
+    }
+exitSub
+label pointsSlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.sides !== undefined {
+                $spr.shape.sides =  $sides
+                $propName = "sides"
+                jumpSub setShapeProp
+                jumpSub updateSprite
+            }
+        }
+    }
+exitSub
+label valASlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.valA !== undefined {
+                if $offSetting === "Relative" {
+                    $relativeOffset = $valA - $valAOld
+                    $spr.shape.valA =  $spr.shape.valA + $relativeOffset
+                    $valAOld = $valA
+                    $propName = "valA"
+                    jumpSub setRelativeShapeProp
+                }
+                if $offSetting === "Absolute" {
+                    $spr.shape.valA =  $valA
+                    $propName = "valA"
+                    jumpSub setShapeProp
+                }
+                jumpSub updateSprite
+            }
+        }
+    }
+exitSub
+label valBSlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.valB !== undefined {
+                if $offSetting === "Relative" {
+                    $relativeOffset = $valB - $valBOld
+                    $spr.shape.valB = $spr.shape.valB + $relativeOffset
+                    $valBOld = $valB
+                    $propName = "valB"
+                    jumpSub setRelativeShapeProp
+                }
+                if $offSetting === "Absolute" {
+                    $spr.shape.valB =  $valB
+                    $propName = "valB"
+                    jumpSub setShapeProp
+                }
+                jumpSub updateSprite
+                exitSub
+            }
+        }
+    }
+exitSub
+label valCSlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.valC !== undefined {
+                if $offSetting === "Relative" {
+                    $relativeOffset = $valC - $valCOld
+                    $spr.shape.valC = $spr.shape.valC + $relativeOffset
+                    $valCOld = $valC
+                    $propName = "valC"
+                    jumpSub setRelativeShapeProp
+                }
+                if $offSetting === "Absolute" {
+                    $spr.shape.valC =  $valC
+                    $propName = "valC"
+                    jumpSub setShapeProp
+                }
+                jumpSub updateSprite
+                exitSub
+            }
+        }
+    }
+exitSub
+label valDSlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.valD !== undefined {
+                if $offSetting === "Relative" {
+                    $relativeOffset = $valD - $valDOld
+                    $spr.shape.valD = $spr.shape.valD + $relativeOffset
+                    $valDOld = $valD
+                    $propName = "valD"
+                    jumpSub setRelativeShapeProp
+                }
+                if $offSetting === "Absolute" {
+                    $spr.shape.valD =  $valD
+                    $propName = "valD"
+                    jumpSub setShapeProp
+                }
+                jumpSub updateSprite
+                exitSub
+            }
+        }
+    }
+exitSub
+//label bakeShape
+//    if $spr !== undefined {
+//        if $spr.type.shape === true {
+//
+//        }
+//    }
+//    warn Bake Shape is not avialible
+//exitSub
+label sizeSlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.isSquare === true {
+                $res = $spr.setScale($width / $spr.w, $width / $spr.h)
+            }
+            if $spr.shape.isSquare === false {
+                $res = $spr.setScale($width / $spr.w, $spr.sy)
+            }
+            jumpSub setShapeSize
+            jumpSub updateSprite
+            exitSub
+        }
+    }
+exitSub
+label heightSlide
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.isSquare === true {
+                $res = $spr.setScale($height / $spr.w, $height / $spr.h)
+            }
+            if $spr.shape.isSquare === false {
+                $res = $spr.setScale($spr.sx, $height / $spr.h)
+            }
+            jumpSub setShapeSize
+            jumpSub updateSprite
+            exitSub
+        }
+    }
+exitSub
+label joinShapes
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.isCompound === true {
+                com edSprJoinCompoundShape
+                exitSub
+            }
+            warn Shape is not a compound shape
+        }
+    }
+exitSub
+label shapeSelect
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            $opt = $shapeType.replace("Shape ","")
+            $idx = $shapeNames.indexOf($opt)
+            if $idx > -1 {
+                $shapeType = $shapeTypes[$idx]
+                $res = selection.changeShape($shapeType)
+                jump continueInputSelect
+            }
+            exitSub
+            label continueInputSelect
+            jumpSub updateSprite
+        }
+    }
+exitSub
+label shapeOptionSelect
+    if $spr !== undefined {
+        if $spr.type.shape === true {
+            if $spr.shape.namedOptions !== undefined {
+                $opt = $shapeOptions.replace("Shape options ","")
+                $cc = $sides
+                $idx = $spr.shape.namedOptions.indexOf($opt)
+                if $idx > -1 {
+                    $sides = ($idx % $spr.shape.namedOptions.length) + 1
+                    $spr.shape.sides =  $sides
+                    $propName = "sides"
+                    jumpSub setShapeProp
+                    jump continueOptSelect
+                }
+                if $idx === -1 {
+                    $sides = $cc
+                    $spr.shape.sides =  $sides
+                    $propName = "sides"
+                    jumpSub setShapeProp
+                    jump continueOptSelect
+                }
+                exitSub
+                label continueOptSelect
+                jumpSub updateSprite
+            }
+        }
+    }
+exitSub
+label updateSprite
+    if $spr !== undefined {
+        if $spr.type.shape === false {
+            exitSub
+        }
+        //$sprName = ""
+        //if $spritesSelected > 1 {
+        //    $sprName = "Sel(" + $spritesSelected +") "
+        //}
+        $s = $spr.shape
+        $n =  $s.info ? $s.info : ""
+       // $sprName = $sprName + $spr.shapeName + " " + $n
+        $idx = $shapeTypes.indexOf($spr.shapeName)
+        $shapeType = $shapeNames[$idx]
+        if $spr !== undefined {
+            if $spr.shape !== undefined {
+                $radiusVal = $spr.shape.radius
+                $innerVal = $spr.shape.inner
+                $valA = $spr.shape.valA
+                $valB = $spr.shape.valB
+                $valC = $spr.shape.valC
+                $valD = $spr.shape.valD
+                if $offSetting === "Relative" {
+                    $valAOld = $valA
+                    $valBOld = $valB
+                    $valCOld = $valC
+                    $valDOld = $valD
+                }
+                $sides = $spr.shape.sides
+                if $spr.shape.isSquare === true {
+                    $width = Math.min($spr.w, $spr.h);
+                    $height = $width
+                }
+                if $spr.shape.isSquare === false {
+                    $width = $spr.w;
+                    $height = $spr.h
+                }
+            }
+        }
+    }
+   // if $spr === undefined {
+    //    $sprName = "No shape sprite selected"
+   // }
+    jumpSub setMenuOptions
+exitSub
+label refreshSprite
+    if $spr !== undefined {
+        $res = $spr.key.update()
+    }
+exitSub
+label setShapeProp
+    if $spritesSelected > 0 {
+        $s = $sprArr[0]
+        if $spritesSelected > 1 {
+            $idx = 1
+            label inputSetLoop
+                $s = $sprArr[$idx]
+                if $s.shape[$propName] !== undefined {
+                    $res = $s.shape[$propName] = $spr.shape[$propName]
+                }
+                $idx = $idx + 1
+                if $idx < $spritesSelected {
+                    jump inputSetLoop
+                }
+        }
+    }
+exitSub
+label setRelativeShapeProp
+    if $spritesSelected > 0 {
+        $s = $sprArr[0]
+        if $spritesSelected > 1 {
+            $idx = 1
+            label inputSetRLoop
+                $s = $sprArr[$idx]
+                if $s.shape[$propName] !== undefined {
+                    $res = $s.shape[$propName] = $s.shape[$propName] + $relativeOffset
+                }
+                $idx = $idx + 1
+                if $idx < $spritesSelected {
+                    jump inputSetRLoop
+                }
+        }
+    }
+exitSub
+label setShapeSize
+    if $spritesSelected > 0 {
+        $s = $sprArr[0]
+        if $spritesSelected > 1 {
+            $idx = 1
+            label inputSetSizeLoop
+                $s = $sprArr[$idx]
+                if $spr.shape.isSquare === true {
+                    $res = $s.setScale($width / $s.w, $width / $s.h)
+                }
+                if $spr.shape.isSquare === false {
+                    $res = $s.setScale($width / $s.w, $height / $s.h)
+                }
+                $idx = $idx + 1
+                if $idx < $spritesSelected {
+                    jump inputSetSizeLoop
+                }
+        }
+    }
+exitSub
+label selectActiveSprite
+    if $spr !== undefined {
+    }
+    if selection.length > 0 {
+        $sprArr.length = 0
+        $spritesSelected = 0
+        $sel = undefined
+        $idx = 0
+        label loopSelecter
+            if selection[$idx].type.shape === true {
+                if $sel === undefined {
+                    $sel = selection[$idx]
+                }
+                $res = $sprArr.push(selection[$idx])
+                $spritesSelected = $spritesSelected + 1
+            }
+            $idx = $idx + 1
+            if $idx < selection.length {
+                jump loopSelecter
+            }
+        if $spritesSelected > 0 {
+            $spr = $sprArr[0]
+        }
+    }
+    if selection.length === 0 {
+        $spr = undefined
+    }
+exitSub
+//============================================================================================================================
+// Events
+event onspriteupdate {
+    jumpSub updateSprite
+}
+event onselectionchanged {
+    jumpSub selectActiveSprite
+    jumpSub updateNamedOptions
+    jumpSub updateOptionNames
+    jumpSub updateSprite
+}
+event ontimeout {
+    if $startup === true {
+        $startup = false
+        jumpSub selectActiveSprite
+        jumpSub updateNamedOptions
+        jumpSub updateOptionNames
+        jumpSub updateUI
+        jumpSub updateSprite
+    }
+}
+event onmaincolorchanged {
+    if $spr !== undefined {
+        if $spr.selected === true {
+            if $spr.type.shape === true {
+                if $spr.shape.name === "vector" {
+                    $same = $spr.rgb.isSame(colours.mainColor)
+                    if $same === false {
+                        $res = $spr.rgb.fromRGB(colours.mainColor)
+                        $res = $spr.shape.colorChanged(true)
+                        $col = colours.mainColor.css
+                        info Vector color selector changed to $col
+                    }
+                }
+            }
+        }
+    }
+}

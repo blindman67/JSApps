@@ -1,0 +1,52 @@
+debug on
+$b = 10
+label repeat
+    $a = Math.random()
+    if $a < 0.5 {
+        log heads
+        $a = Math.random()
+        if $a < 0.5 {
+            log heads 1
+            $a = Math.random()
+            if $a < 0.5 {
+                log heads 2
+            } else {
+                log tails 2
+            }
+        } else {
+            log tails 1
+            $a = Math.random()
+            if $a < 0.5 {
+                log heads 3
+            } else {
+                log tails 3
+            }
+        }
+    } else {
+        log tails
+        $a = Math.random()
+        if $a < 0.5 {
+            log heads 4
+            $a = Math.random()
+            if $a < 0.5 {
+                log heads 5
+            } else {
+                log tails 5
+            }
+        } else {
+            log tails 4
+            $a = Math.random()
+            if $a < 0.5 {
+                log heads 6
+            } else {
+                log tails 6
+            }
+        }
+    }
+    $b = $b - 1
+    if $b > 0 repeat
+    else testElse
+log done testofelse
+exit
+label testElse
+log if else test completed

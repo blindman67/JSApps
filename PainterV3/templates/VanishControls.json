@@ -1,0 +1,58 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2020-09-17T13:52:28.591Z",
+        "id": 26250,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018-200",
+        "collectionName": "VanishHelpers",
+        "type": "scene"
+    },
+    "scene": {
+        "sprites": [
+            { "name": "Vanish Guide", "id": 26220,
+                "x": -406.84, "y": 20, "h": 174.35,
+                "rx": -50.25615,
+                "ry": -48.685353,
+                "locks": { "scale": true, "rotate": true },
+                "rgb": "#FF0000",
+                "a": 0.5,
+                "gridY": 8,
+                "type": "vanish"
+            }, { "name": "Center Line", "id": 26221,
+                "x": 98.7, "y": 24.72, "w": 64, "h": 64,
+                "locks": { "scale": true, "rotate": true },
+                "gridSpecial": 5,
+                "hideOutline": true,
+                "lookat": [26220, 1.5707963267948966, 0],                   
+                "rgb": "#FF0000",
+                "type": "cutter"
+            }, { "name": "Outer Near", "id": 26222,
+                "x": -122.92, "y": -169.51, "w": 64, "h": 64,
+                "locks": { "scale": true, "rotate": true },
+                "gridSpecial": 5,
+                "hideOutline": true,
+                "lookat": [26220, 1.5707963267948966, 0],                
+                "rgb": "#FF0000",
+                "type": "cutter"
+            }, { "name": "Outer Far", "id": 26223,
+                "x": 54.44, "y": -287.9, "w": 32, "h": 32,
+                "locks": { "scale": true, "rotate": true },
+                "gridSpecial": 6,
+                "rgb": "#FF0000",
+                "type": "cutter"
+            }, { "name": "Vanish Guide function link", "id": 26249,
+                "x": 88.7, "y": -492.93, "w": 96, "h": 16,
+                "locks": { "scale": true, "rotate": true},
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "linked": [26220, 26221, 26222, 26223],
+                    "source": "templates/VanishControls.js",
+                    "textColor": "#F00",
+                    "type": "Compiled"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,118 @@
+$com = $arg0.replace(" ","")
+$selector = $com.includes("Sel")
+$selt = $com.replace("Sel","").replace("+"," ")
+$axis = new Object()
+$axis.p = 0
+$axis.n = 2
+
+$faces = new Object()
+$faces.Top = "xpyp"
+$faces.Bottom = "xpyn"
+$faces.Front = "xpzp"
+$faces.Back = "xpzn"
+$faces.Right = "ynzp"
+$faces.Left = "ynzn"
+
+
+$faces.TB = "xpyp,xpyn"
+$faces.FB = "xpzp,xpzn"
+$faces.RL = "ynzp,ynzn"
+
+$rot = new Object()
+$rot.RotateX = "xpzp,xpyp,xpzn,xpyn,xnzp,xnyp,xnzn,xnyn,ynzp,zpyp,ypzn,znyn,ynzn,zpyn,ypzp,znyp,zpxp,ypxp,znxp,ynxp,zpxn,ypxn,znxn,ynxn".split(",")
+$rot.RotateZ = "ynxp,xpyp,ypxn,xnyn,ynxn,xpyn,ypxp,xnyp,ynzp,xpzp,ypzp,xnzp,ynzn,xpzn,ypzn,xnzn,znyp,znxn,znyn,znxp,zpyp,zpxn,zpyn,zpxp".split(",")
+$rot.RotateY = "zpxn,xnzn,znxp,xpzp,zpxp,xnzp,znxn,xpzn,zpyn,xnyn,znyn,xpyn,zpyp,xnyp,znyp,xpyp,ypzn,ypxp,ypzp,ypxn,ynzn,ynxp,ynzp,ynxn".split(",")
+
+$PI = Math.PI
+$PI2 = Math.PI2
+$PI90 = Math.PI90
+
+$xAxisX = $arg3 === undefined ? 2 : $arg3
+$xAxisY = $arg4 === undefined ? 1 : $arg4
+$yAxisX = $arg1 === undefined ? 2 : $arg1
+$yAxisY = $arg2 === undefined ? 1 : $arg2
+
+$hyp = (($xAxisX * $xAxisX  + $xAxisY * $xAxisY) ** 0.5)
+$angX = Math.asin($xAxisY / $hyp)
+$scaleX = $hyp / Math.max($xAxisX, $xAxisY)
+
+$hyp = (($yAxisX * $yAxisX  + $yAxisY * $yAxisY) ** 0.5)
+$angY = Math.asin($yAxisY / $hyp)
+$scaleY = $hyp / Math.max($yAxisX, $yAxisY)
+
+$axis.x = [$scaleX, $angX, $scaleX, $angX + $PI]
+$axis.y = [$scaleY, -$angY + $PI, $scaleY, -$angY + $PI2]
+$axis.z = [1, $PI90, 1, $PI90 + $PI]
+
+$reSelect = []
+label getNextSelected
+selected next a
+if $a === undefined {
+    if $reSelect.length > 0 {
+        $r = sprites.select(spr=> $reSelect.includes(spr.guid));
+    }
+    jump allDone
+}
+
+
+if $selector === true {
+    $selF = $faces[$selt]
+    $has = $selF.includes($a.iso)
+    if $has === true {
+        $r = $reSelect.push($a.guid)
+    }
+    jump getNextSelected
+}
+if $com === "UpdateProjection" {
+    if $a.iso !== "-" {
+        $iso = $a.iso
+        jumpSub setFace
+
+    }
+    jump getNextSelected
+}
+
+
+$hasFace = $faces[$com]
+if $hasFace {
+    $iso = $hasFace
+    jumpSub setFace
+    jump getNextSelected
+}
+
+$hasRot = $rot[$com]
+if $hasRot {
+    $idx = $rot[$com].indexOf($a.iso)
+    if $idx > -1 {
+
+        $iso = $rot[$com][(($idx / 4) | 0) * 4 + (($idx + 1) % 4)]
+        jumpSub setFace
+    }
+    jump getNextSelected
+}
+
+log "Unknown iso command " $arg0 " could not complete modification."
+exit
+
+label setFace
+    $xa = $axis[$iso[0]]
+    $ya = $axis[$iso[2]]
+    $xo = $axis[$iso[1]]
+    $yo = $axis[$iso[3]]
+    $a.rx = Math.normAngle($xa[$xo + 1])
+    $a.ry = Math.normAngle($ya[$yo + 1])
+    $a.iso = $iso
+    $norm = $a.normalisable
+    if $norm === false {
+        $a.sx = $xa[$xo]
+        $a.sy = $ya[$yo]
+
+    }
+    exitSub
+
+label allDone
+    exit
+
+
+
+

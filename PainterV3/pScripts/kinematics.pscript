@@ -1,0 +1,77 @@
+menu title "20 Kinematics"
+menu exit "Exit"
+$options = ""
+$options = $options + "IK arm?Creates single join IK arm,"
+$options = $options + "IK join arm pull?Creates single join IK arm end point not fixed,,"
+$options = $options + "Slide arm IK?Creates IK that pulls sliding end,"
+$options = $options + "Ground IK?Creates IK that keeps attached sprite above current selected,"
+$options = $options + "Connect IK?Creates IK that keeps center sprite between head and tail,,"
+$options = $options + "Slide IK?Creates IK that slides and pull an arm,"
+$options = $options + "Slide lock IK?Creates IK that slides on arm,,"
+//$options = $options + "Verlet IK?Creates multi join IK arm,"
+//$options = $options + "Pendulum?Creates pendulum,,,"
+menu options $options
+menu keep
+label doAgain
+$opt = call menu
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    exit
+}
+
+if $opt === "IK arm" {
+	if selection.length === 1 {
+		kinematics.create("SingleJoinIK");
+		jump doAgain
+	}	
+}
+if $opt === "IK join arm pull" {
+	if selection.length === 1 {
+		kinematics.create("SingleJoinIKPull");
+		jump doAgain
+	}	
+}
+if $opt === "Slide arm IK" {
+	if selection.length === 1 {
+		kinematics.create("SlideArmIK");
+		jump doAgain
+	}	
+}
+if $opt === "Ground IK" {
+	if selection.length === 1 {
+		kinematics.create("GroundIK");
+		jump doAgain
+	}	
+}
+if $opt === "Connect IK" {
+	if selection.length === 1 {
+		kinematics.create("ConnectIK");
+		jump doAgain
+	}	
+}
+if $opt === "Slide IK" {
+	if selection.length === 1 {
+		kinematics.create("SlideIK");
+		jump doAgain
+	}	
+}
+if $opt === "Slide lock IK" {
+	if selection.length === 1 {
+		kinematics.create("SlideLockIK");
+		jump doAgain
+	}	
+}
+//if $opt === "Verlet IK" {
+//	if selection.length === 1 {
+//		kinematics.create("VerletIK");
+//		jump doAgain
+//	}	
+//}
+//if $opt === "Pendulum" {
+//	if selection.length === 1 {
+//		kinematics.create("Pendulum");
+//		jump doAgain
+//	}	
+//}
+
+jump doAgain

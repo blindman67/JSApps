@@ -1,0 +1,90 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2023-09-23T19:58:57.308Z",
+        "id": 444544,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018",
+        "details": "==============================================\nVerlet chain simulation info\n----------------------------------------------\nCount sets number of links. Max 100.\nTrue locks both ends false lock only start\nGravity is direction and strength of gravity\nDragRatio is width over height = 1-drag\n----------------------------------------------\n",
+        "collectionName": "IK_ChainGizmo",
+        "type": "scene"
+    },
+    "scene": {
+        "workspace": {},
+        "sprites": [
+            { "name": "Node", "id": 444521,
+                "x": 30,
+                "y": 44,
+                "w": 8,
+                "h": 8,
+                "locks": {"scale": true, "rotate": true},
+                "hideOutline": true, "gridSpecial": 3,
+                "lookat": [444523, 0, 0],
+                "type": "cutter"
+            },
+            { "name": "Link", "id": 444522,
+                "x": 38,
+                "y": 44,
+                "w": 16,
+                "h": 4,
+                "locks": {"scale": true, "rotate": true, "UI": true},
+                "hideOutline": true, "gridSpecial": 2,
+                "attachedTo": 444521,
+                "attachment": {
+                    "x": 12,
+                    "y": 4,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            },
+            { "name": "Gravity", "id": 444540,
+                "x": 98,
+                "y": -7,
+                "w": 8,
+                "h": 4,
+                "rx": 1.570796,
+                "ry": 3.141593,      
+                "gridSpecial": 7,    
+                "type": "cutter"
+            },
+          
+            { "name": "Gravity Chain", "id": 444542,
+                "x": 79.2,
+                "y": -24.35,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [444540],
+                    "outputs": [],
+                    "linked": [444540, 444521, 444522],
+                    "source": "templates/GravityChainAuto.js",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }               
+            }
+        ],
+        "vectors": [],
+        "groups": [],
+        "collections": [],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            },
+            "timeMarks": []
+        },
+        "animation": {"time": 0, "start": 0, "end": 120, "length": 120, "speed": 1},
+        "kinematics": [],
+        "text": [],
+        "media": [],
+        "images": []
+    }
+}

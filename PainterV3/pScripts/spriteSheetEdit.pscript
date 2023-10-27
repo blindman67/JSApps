@@ -1,0 +1,409 @@
+#callOnOpt if $opt === "%0" {;jumpSub %1;jump doAgain;};
+
+debug off
+$startup = true
+
+menu title "16 Sprite Sheet Edit"
+$point = utils.point
+$sheet = undefined
+$res = storage.file("spriteSheetEditDialog")
+$sheetId = storage.read("sheetId",1);
+$subSpriteId = storage.read("subSpriteId",1);
+$sprCount = 0
+$subSprite = undefined
+$subSpriteSprite = undefined
+$subSpriteName = ""
+$subSprX = 0
+$subSprY = 0
+$subSprW = 0
+$subSprH = 0
+$sPX = 0
+$sPY = 0
+$sPW = 0
+$sPH = 0
+
+menu exit "Exit"
+$options = ""
+$options = $options + "$sheetId, Sheet GUID,,"
+$options = $options + "{,Set sprite sheet?Use current selected sprite to get sprite sheet,"
+$options = $options + "~selSheet,Select sheet?Selected sprite containing sprite sheet,},"
+$options = $options + "$sprCount,Number of sprites,"
+$options = $options + "$subSpriteId,Current sub sprite,"
+$options = $options + "~butNameFromSprite,Name from sprite?Sub sprite name is set to the sprites name,"
+$options = $options + "$subSpriteName,textInput Name test,"
+$options = $options + "{,$anchorSprite,Anchor,Remove anchor,},"
+$options = $options + ",{,$subSprX,X,"
+$options = $options + "$subSprY,Y,"
+$options = $options + "$subSprW,W,"
+$options = $options + "$subSprH,H,},"
+$options = $options + "$sPX,slider X 0 256 1 1 #400 0,"
+$options = $options + "$sPY,slider Y 0 256 1 1 #400 0,"
+$options = $options + "$sPW,slider W 0 256 1 1 #400 0,"
+$options = $options + "$sPH,slider H 0 256 1 1 #400 0,"
+$options = $options + "~butSaveSheetDetails,Save sheet details?Saves current sprite sheet details as text document,"
+
+
+menu options $options
+menu keep
+timeout 100
+label doAgain
+    $busy = false
+    $opt = call menu
+    $busy = true
+    $close = $opt === "exit" || $opt === "cancel"
+    if $close === true {
+        $res = storage.close()
+        exit
+    }
+    jumpSub menuInput
+    jump doAgain
+
+label menuInput
+    log $opt
+    #callOnOpt sPX setSubSprSize
+    #callOnOpt sPY setSubSprSize
+    #callOnOpt sPW setSubSprSize
+    #callOnOpt sPH setSubSprSize
+    #callOnOpt subSpriteName setSubSprName
+    #callOnOpt anchorSprite addAnchorsToSubSprites
+
+    if $opt === "Save sheet details" {
+        jumpSub saveSheetDetails
+        jump updateUI
+    }
+
+    if $opt === "Name from sprite" {
+        jumpSub nameFromSprite
+        jump updateUI
+    }
+
+    if $opt === "Set sprite sheet" {
+        jumpSub setSheet
+        jump updateUI
+    }
+
+    if $opt === "Select sheet" {
+        jumpSub selectSheet
+        jump updateUI
+    }
+    if $opt === "Remove anchor" {
+        jumpSub removeAnchorFromSubSprites
+        jump updateUI
+
+    }
+    if $opt === "subSpriteId" {
+       // jumpSub selectedAsSub
+        //jump updateUI
+    }
+
+
+exitSub
+
+
+label updateUI
+    storage.write("sheetId", $sheetId)
+    storage.write("subSpriteId", $subSpriteId)
+    $anchorSprite = "";
+    if $subSprite !== undefined {
+        $subSpriteName = $subSprite.name ?? null
+        if $subSprite.cx !== undefined {
+            if $subSprite.cy !== undefined {
+                $anchorSprite =  "cx: " + $subSprite.cx + " cy: " + $subSprite.cy;
+            }
+        }
+
+    } else {
+        $subSpriteName = null
+    }
+
+
+    menuUpdate $sheetId $sprCount $subSpriteId $subSpriteName $anchorSprite $subSprX $subSprY $subSprW $subSprH $sPX $sPY $sPW $sPH
+    if $sheet !== undefined {
+        menuButton "selSheet" enable ""
+        menuButton "butSaveSheetDetails" enable ""
+        if selection.length > 0 {
+            menuButton "butNameFromSprite" enable ""
+        } else {
+            menuButton "butNameFromSprite" disable ""
+        }
+        menuEnable $sprCount $subSpriteId $subSpriteName $anchorSprite $subSprX $subSprY $subSprW $subSprH $sPX $sPY $sPW $sPH
+    } else {
+        menuButton "selSheet" disable ""
+        menuButton "butSaveSheetDetails" disable ""
+        menuButton "butNameFromSprite" disable ""
+        menuDisable $sprCount $subSpriteId $subSpriteName $anchorSprite $subSprX $subSprY $subSprW $subSprH $sPX $sPY $sPW $sPH
+    }
+
+exitSub
+
+label updateAllSubSprites
+    $all = sprites.asArray()
+    label loopA
+    if $all.length > 0 {
+        $s = $all.pop()
+        if $s.type.subSprite {
+            $ssIdx = ($s.subSpriteIdx % $ssl + $ssl) % $ssl
+            if $subSpriteId === $ssIdx {
+                if $s.image === $sheet.image {
+                    $res = $s.updateSubSprite($sPX, $sPY, $sPW, $sPH)
+                }
+            }
+        }
+        jump loopA
+    }
+exitSub
+label setSubSprName
+    if $subSprite !== undefined {
+        $subSprite.name = $subSpriteName
+        exitSub
+    }
+exitSub
+
+label hasSubSpriteGotAnchor
+    if $wSpr.attachers !== undefined {
+        $res = $wSpr.attachers.values()].some(a => a.gridSpecial === spriteRender.gridSpecialNames.subSpriteAnchor)
+    } else {
+        $res = false
+    }
+exitSub
+
+label anchorSprite
+    if $wSpr !== undefined {
+        if $wSpr.type.subSprite === true {
+            jumpSub hasSubSpriteGotAnchor
+            if $res === false {
+                $s = $wSpr
+                $ss = $s.subSprite
+
+                selection.save()
+                com edSprCreateCutter
+                $as = selection[0]
+                selection.restore()
+                $as.x = $s.x
+                $as.y = $s.y
+                $as.w = 8
+                $as.h = 8
+                $as.cx = 4
+                $as.cy = 4
+                $as.locks.scale = true
+                $as.locks.rotate = true
+                $res = $as.key.update()
+                $res = $as.attachSprite($s)
+                $res = $as.setGridSpecial("subSpriteAnchor")
+                $res = $s.key.update()
+            }
+            if ($ss.cx !== undefined) {
+                $res = $s.updateSubSprite(undefined, undefined, undefined, undefined, true)
+            } else {
+                $res = $s.updateSubSprite()
+            }
+        }
+    }
+exitSub
+
+
+label addAnchorsToSubSprites
+    $all = selection.asArrayOfType("subSprite")
+    label loopA1
+    if $all.length > 0 {
+        $wSpr = $all.pop()
+        jumpSub anchorSprite
+        jump loopA1
+    }
+exitSub
+label removeAnchorFromSubSprites
+    $all = selection.asArrayOfType("subSprite")
+    label loopA2
+    if $all.length > 0 {
+        $wSpr = $all.pop()
+        $ss = $wSpr.subSprite
+        if $ss.cx !== undefined {
+            $ss.cx = undefined
+            $ss.cy = undefined
+        }
+        if $wSpr.attachers !== undefined {
+            $as = [...$wSpr.attachers.values()].find(a => a.gridSpecial === spriteRender.gridSpecialNames.subSpriteAnchor)
+
+            if $as !== undefined {
+                $res = selection.save()
+                $res = selection.clear()
+                $res = selection.add($as);
+                com edSprDelete
+                $res = selection.restore()
+            }
+        }
+
+        jump loopA2
+    }
+exitSub
+
+label setSubSprSize
+    if $sheet !== undefined {
+        if $subSprite !== undefined {
+            jumpSub updateAllSubSprites
+        }
+    }
+exitSub
+
+label selectedAsSub
+    if $sheet !== undefined {
+        if selection.length === 1 {
+            $s = selection[0]
+            if $s.type.subSprite {
+
+                if $s.image === $sheet.image {
+                    $subSpriteSprite = $s
+                    jumpSub updateSubSpr
+                    exitSub
+                }
+            }
+        }
+    }
+exitSub
+
+label setSubSprVals
+    $subSprite.x = $sPX
+    $subSprite.y = $sPY
+    $subSprite.w = $sPW
+    $subSprite.h = $sPH
+    $subSprX = $sPX
+    $subSprY = $sPY
+    $subSprW = $sPW
+    $subSprH = $sPH
+exitSub
+
+label getSubSprVals
+    $subSprX = $subSprite.x
+    $subSprY = $subSprite.y
+    $subSprW = $subSprite.w
+    $subSprH = $subSprite.h
+    $sPX = $subSprX
+    $sPY = $subSprY
+    $sPW = $subSprW
+    $sPH = $subSprH
+exitSub
+
+label updateSubSpr
+    if $sheet !== undefined {
+        if $subSpriteSprite !== undefined {
+            $ssl = $sheet.image.desc.sprites.length
+            $subSpriteId = ($subSpriteSprite.subSpriteIdx % $ssl + $ssl) % $ssl
+            $subSpriteId = $subSpriteId + $sheet.image.desc.sprites.length
+            $subSpriteId = $subSpriteId % $sheet.image.desc.sprites.length
+
+        }
+
+        $subSprite = $sheet.image.desc.sprites[$subSpriteId];
+        if $subSprite !== undefined {
+            jumpSub getSubSprVals
+            exitSub
+        }
+    }
+    $subSprX = 0
+    $subSprY = 0
+    $subSprW = 0
+    $subSprH = 0
+    $sPX = 0
+    $sPY = 0
+    $sPW = 0
+    $sPH = 0
+
+exitSub
+
+label updateSelected
+    jumpSub selectedAsSub
+    jumpSub updateUI
+exitSub
+
+label setSheet
+    if selection.length !== 1 {
+        warn Select one sprite containing sprite sheet
+        exitSub
+    }
+    $s = selection[0]
+    if $s.type.image === true {
+
+        if $s.image.desc.sprites !== undefined {
+            $sheetId = $s.guid
+            jump getSpriteSheetById
+        }
+    }
+    warn Selected sprite does not contain a sprite sheet
+
+exitSub
+label selectSheet
+    $s = sprites.getById($sheetId)
+    if $s !== undefined {
+        $res = selection.clear()
+        $res = selection.add($s)
+    }
+exitSub
+label saveSheetDetails
+    $s = sprites.getById($sheetId)
+    if $s !== undefined {
+        $res = $s.image.saveSpriteSheet()
+    }
+exitSub
+
+label nameFromSprite
+    $all = sprites.asArray()
+    label loopAnameFromSprite
+    if $all.length > 0 {
+        $s = $all.pop()
+        if $s.type.subSprite {
+            if $s.image === $sheet.image {
+                $s.subSprite.name = $s.name
+            }
+        }
+        jump loopAnameFromSprite
+    }
+exitSub
+
+label getSpriteSheetById
+    $sheet = sprites.getById($sheetId)
+    if $sheet === undefined {
+        $sheetId = 0
+        $sprCount = 0
+        $subSpriteId = -1
+    } else {
+        $sprCount = $sheet.image.desc.sprites.length
+        if $subSpriteId < 0 {
+            $subSpriteId = 0
+        }
+        if $subSpriteId >= $sprCount {
+            $subSpriteId = $sprCount - 1
+        }
+
+    }
+
+    jumpSub updateSubSpr
+
+exitSub
+
+
+//===========================================================================================================================
+// Events
+
+event onspritesupdated {
+    if $subSpriteSprite !== undefined {
+        if $subSpriteSprite.selected === true {
+            jumpSub updateSubSpr
+            jumpSub updateUI
+        }
+    }
+    if $sheet !== undefined {
+        $res = sprites.updateSubSprites()
+        jumpSub updateUI
+    }
+}
+event onselectionchanged {
+    jumpSub updateSelected
+}
+event ontimeout {
+    if $startup === true {
+        $startup = false
+        jumpSub getSpriteSheetById
+        jumpSub selectedAsSub
+        jumpSub updateUI
+    }
+}

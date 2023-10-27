@@ -1,0 +1,82 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2023-09-21T12:28:15.061Z",
+        "id": 443398,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018",
+        "collectionName": "AngleGizmo",
+        "type": "scene"
+    },
+    "scene": {
+        "sprites": [
+            { "name": "CircleCenter", "id": 443385,
+                "x": 0, "y": 0, "w": 8, "h": 8,
+                "rx": -0.679504,
+                "ry": 0.891293,
+                "locks": { "scale": true, "rotate": true },
+                "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "circle", "id": 443386 }
+            },
+            { "name": "AngleShape", "id": 443387,
+                "x": 0, "y": 0, "w": 130, "h": 130,
+                "rx": 6.345749,
+                "ry": 7.916545,
+                "locks": { "scale": true, "rotate": true, "UI": true },
+                "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "angleArrow", "id": 443388, "inner": 10, "sides": 4, "valA": -10.948390946415975 }
+            },
+            { "name": "ArrowLeft", "id": 443389,
+                "x": 59, "y": 4, "w": 110, "h": 8,
+                "locks": { "UI": true },
+                "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "arrow", "id": 443390, "inner": 10 }
+            },
+            { "name": "ArrowRight", "id": 443391,
+                "x": 4, "y": 59, "w": 110, "h": 8,
+                "locks": { "UI": true },
+                "hideOutline": true,
+                "type": "shape",
+                "shape": { "name": "arrow", "id": 443392, "inner": 10 }
+            },
+            { "name": "HandleLeft", "id": 443393,
+                "x": 126, "y": 0, "w": 16, "h": 16, "a": 0.25,
+                "locks": { "scale": true, "rotate": true },
+                "type": "cutter"
+            },
+            { "name": "HandleRight", "id": 443394,
+                "x": 0, "y": 126, "w": 16, "h": 16, "a": 0.25,
+                "locks": { "scale": true, "rotate": true },
+                "type": "cutter"
+            }, 
+            { "name": "Label", "id": 443381,
+                "x": 50, "y": 30, "w": 82, "h": 38,
+                "sx": 0.5,
+                "sy": 0.5,
+                "locks": { "scale": true, "rotate": true },
+                "hideOutline": true,
+                "type": "text",
+                "textId": 443395
+            }, {
+                "name": "Angle",
+                "id": 443399,
+                "x": 239.94, "y": 6.68, "w": 96, "h": 16,
+                "locks": { "scale": true, "rotate": true },
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [],
+                    "outputs": [],
+                    "linked": [443385, 443387, 443389, 443391, 443393, 443394, 443381],
+                    "source": "templates/AngleGizmo.js",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "text": [{"text": "Angle", "id": 443395,"local": true}]
+    }
+}

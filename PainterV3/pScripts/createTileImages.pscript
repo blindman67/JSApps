@@ -1,0 +1,12 @@
+
+$size = $arg0      // in pixels
+$names = $arg1    // eg "abcdefghijkl"
+label loop
+    $imgName = $names[0]
+    $names = $names.substr(1)
+    create image $imgName $size
+    
+    $tileLen = $names.length
+    if $tileLen > 0 loop
+    
+exit

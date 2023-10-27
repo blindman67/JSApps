@@ -1,0 +1,644 @@
+#callOnOpt if $opt === "%0" {;jumpSub %1;jump doAgain;};
+#callOnSubOpts $subOp = $opt.includes("%0");if $subOp === true {;jumpSub %1;jump doAgain;};
+
+
+
+$res = storage.file("funcLinkDialog")
+
+$scaleUnit = storage.read("scaleUnit",0.1)
+
+$spr = undefined
+$startup = true
+$sprName = ""
+
+$valuesArray = []
+
+$spritesSelected = 0
+$sprArr = []
+$inputTypeValues = functionLinkBuilder.names.inputType
+$inputTypeNamesWithHelp = functionLinkBuilder.names.inputTypeLong
+$inputTypeNames = functionLinkBuilder.names.inputTypeLong.map(name => name.split("?")[0])
+$outputTypeValues = functionLinkBuilder.names.outputType
+$outputTypeNamesWithHelp = functionLinkBuilder.names.outputTypeLong
+$outputTypeNames = functionLinkBuilder.names.outputTypeLong.map(name => name.split("?")[0])
+$functionTypeValues = functionLinkBuilder.names.functionType
+$functionTypeNamesWithHelp = functionLinkBuilder.names.functionTypeLong
+$functionTypeNames = functionLinkBuilder.names.functionTypeLong.map(name => name.split("?")[0])
+$UnitScales = [0.001,0.01,0.1,1,10,100,1000]
+
+$linksActive  = sprites.functionLinksOn ? "Active" : "Inactive"
+$linksAnimate = sprites.functionLinksAnimated ? "Animation Sync ON" : "Animation Sync OFF"
+
+$inputType = "Position X"
+$outputType = "Position X"
+$functionType = "Mean"
+
+menu title "16 Function linker"
+menu exit "Exit"
+menu exit "Update"
+$options = ""
+$options = $options + "$sprName,Name ,,,,"
+$options = $options + "$inputType,Input%" + $inputTypeNamesWithHelp.join("%") + ","
+$options = $options + "$outputType,Output%" + $outputTypeNamesWithHelp.join("%") + ","
+$options = $options + "$functionType,Function%" + $functionTypeNamesWithHelp.join("%") + ",,,"
+$options = $options + "{,!Bind inputs,"
+$options = $options + "!Bind outputs,},,"
+$options = $options + "{,Reset selected,Reset All,},"
+$options = $options + "{,Reset Scale,Reset Offset,Reset both,},,"
+$options = $options + "$scale,sliderwrap scale 0 0.001 1 1 #000,"
+$options = $options + "{,$U_0,0.001,$U_1,0.01,$U_2,0.1,$U_3,1,$U_4,10,$U_5,100,},"
+$options = $options + "$offset,sliderwrap offset 0 0.001 1 1 #000,,"
+$options = $options + ",{,Values to comline,Reset values,},"
+$options = $options + ",{,Name in,Name out,Name type,Name num,},"
+$options = $options + ",{,Name input,Name output,Clear named,},"
+$options = $options + ",,$linksActive,Toggle active,"
+$options = $options + "$linksAnimate,Toggle Animation Sync,"
+$options = $options + "Sort function links,"
+$options = $options + "{,Compile,Compile noopt?Compile and use without optimisation,},"
+$options = $options + "{,Compile save only?Compiles and save result only,Compile save only noopt?Compiles and saves without post compile optimise pass,}," //Compile optimize,},"
+//$options = $options + "{,Compile save only, Compile optimize save only,},"
+
+
+
+menu options $options
+menu keep
+timeout 100
+label doAgain
+$opt = call menu
+
+
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    $res = storage.close()
+    if $spr !== undefined {
+
+    }
+    exit
+}
+$comp = $opt.includes("Compile")
+if $comp === true {
+    if sprites.hasFunctionLinks === true {
+        $save = $opt.includes("save")
+        functionLinkCompiler.options.save = $save
+        $only = $opt.includes("only")
+        functionLinkCompiler.options.doNotMount = $only
+        $noopt = $opt.includes("noopt")
+        functionLinkCompiler.options.optimisePostCompile = !$noopt
+        $ordered = $opt.includes("ordered")
+        functionLinkCompiler.options.orderByInput = $ordered
+        $zero = $opt.includes("zero unknowns")
+        functionLinkCompiler.options.zeroUninit = $zero
+        $opt = $opt.includes("optimize")
+        functionLinkCompiler.options.optimiseVars = $opt
+
+
+        $res = functionLinkCompiler.compileSelected()
+        if functionLinkCompiler.compiledOK === true {
+            if $only === false {
+                com edSprCreateFunctionLink
+                $res = functionLinkCompiler.applyTo(selection[0])
+            }
+            if $only === true {
+                log Compiled and saved
+            }
+            jump doAgain
+
+        }
+        error There where errors compiling the function links
+        jump doAgain
+    }
+
+    warn There is nothing to compile
+    jump doAgain
+}
+
+if $opt === "Reset values" {
+    $valuesArray.length = 0
+    log Values array emptied
+    jump doAgain
+}
+if $opt === "Values to comline" {
+    $ss = selection.asArray()
+log strt
+    label VTCLLoop
+        if $ss.length > 0 {
+            $sp = $ss.pop()
+            if $sp.type.functionLink === true {
+                if Array.isArray($sp.fLink.value) {
+                    $xyz = $valuesArray.push(...$sp.fLink.value.map(v=>v.toFixed(4)))
+                }
+                if !Array.isArray($sp.fLink.value) {
+                    $xyz = $valuesArray.push($sp.fLink.value.toFixed(4))
+                }
+            }
+            jump VTCLLoop
+        }
+
+    $vstr = $valuesArray.join(", ")
+    log  values: $vstr
+    jump doAgain
+
+}
+if $opt === "Sort function links" {
+    com edSprOrderFunctionLinks
+    jump doAgain
+}
+if $opt === "Bind inputs" {
+    com edSpriteAttachFuncInput
+    jump doAgain
+}
+if $opt === "Bind outputs" {
+    com edSpriteAttachFuncOutput
+    jump doAgain
+}
+if $opt === "Reset selected" {
+    com edSpriteResetFunctionLinks
+    jump doAgain
+}
+if $opt === "Reset All" {
+    com edSpriteResetAllFunctionLinks
+    jump doAgain
+}
+
+if $opt === "linksActive" {
+    if sprites.functionLinksOn === true {
+        com edSpriteDeActivateFunctionLinks
+        jumpSub setMenuOptions
+        jump doAgain
+    }
+    if sprites.functionLinksOn === false {
+        com edSpriteActivateFunctionLinks
+        jumpSub setMenuOptions
+        jump doAgain
+    }
+
+
+}
+
+if $opt === "linksAnimate" {
+    if sprites.functionLinksAnimated === true {
+        com edSpriteFreeSyncFunctionLinks
+        jumpSub setMenuOptions
+        jump doAgain
+    }
+    if sprites.functionLinksAnimated === false {
+        com edSpriteSyncFunctionLinks
+        jumpSub setMenuOptions
+        jump doAgain
+    }
+
+}
+
+$reset = $opt.includes("Reset")
+if $reset === true {
+    $sprName = ""
+    $reset = $opt.includes("Scale") || $opt.includes("both")
+    if $reset === true {
+        $spr.fLink.scale =  1
+        $propName = "scale"
+        jumpSub setFLinkProp
+
+    }
+    $reset = $opt.includes("Offset") || $opt.includes("both")
+    if $reset === true {
+        $spr.fLink.offset = 0
+        $propName = "offset"
+        jumpSub setFLinkProp
+    }
+    jumpSub updateSprite
+    jump doAgain
+}
+#callOnSubOpts inputType inputSelect
+#callOnSubOpts outputType outputSelect
+#callOnSubOpts functionType functionSelect
+#callOnSubOpts U_ scaleSelect
+#callOnSubOpts OffsetUnit offsetSelect
+
+#callOnOpt offset offsetSlide
+#callOnOpt scale scaleSlide
+
+if $opt === "Name input" {
+    $ss = selection.asArray()
+    label namedInLinkLoop
+        if $ss.length > 0 {
+            $sp = $ss.pop()
+            $sp.isNamedInLink = true
+            jump namedInLinkLoop
+        }
+
+    jump doAgain
+}
+if $opt === "Name output" {
+    $ss = selection.asArray()
+    label namedOutLinkLoop
+        if $ss.length > 0 {
+            $sp = $ss.pop()
+            $sp.isNamedOutLink = true
+            jump namedOutLinkLoop
+        }
+
+    jump doAgain
+}
+if $opt === "Clear named" {
+    $ss = selection.asArray()
+    label namedLinkLoopA
+        if $ss.length > 0 {
+            $sp = $ss.pop()
+            $sp.isNamedOutLink = undefined
+            $sp.isNamedInLink = undefined
+            jump namedLinkLoopA
+        }
+
+    jump doAgain
+}
+
+if $opt === "Name in" {
+    jumpSub setSelectInName
+    jump doAgain
+}
+if $opt === "Name out" {
+    jumpSub setSelectOutName
+    jump doAgain
+}
+if $opt === "Name type" {
+    jumpSub setSelectTypeName
+    jump doAgain
+}
+if $opt === "Name num" {
+    $ss = selection.asArray()
+    label nameLinkNumLoopA
+        if $ss.length > 0 {
+            $sp = $ss.pop()
+            if $sp.type.functionLink === true {
+                $sp.name = $sp.name + ($sp.name[$sp.name.length - 1] !== "#"  ? "#" : "")
+            }
+
+            jump nameLinkNumLoopA
+        }
+
+    jump doAgain
+}
+
+jump doAgain
+
+
+//============================================================================================================================
+// functions
+
+label setMenuOptions
+    $linksActive  = sprites.functionLinksOn ? "Active" : "Inactive"
+    $linksAnimate = sprites.functionLinksAnimated ? "Animation Sync ON" : "Animation Sync OFF"
+
+    menuUpdate $linksActive $linksAnimate
+
+    if $spr !== undefined {
+        if $spr.fLink !== undefined {
+            if $spr.fLink.funcObj !== undefined {
+                $sprName = $spr.fLink.type
+               // $functionType = $sprName
+                menuUpdate $sprName
+                //$functionType
+                exitSub
+            }
+        }
+
+        menuUpdate $sprName $scale $offset $inputType $outputType $functionType
+
+    }
+    if $spr === undefined {
+        menuUpdate $sprName
+    }
+exitSub
+
+
+label updateUI
+    if $spr !== undefined {
+        if $spr.fLink !== undefined {
+            if $spr.fLink.funcObj !== undefined {
+                exitSub
+            }
+        }
+    }
+    $rMax = $scaleUnit * 100
+    menuButton $scale slider.max $rMax
+    menuButton $scale slider.step $scaleUnit
+    menuButton $scale slider.wStep $scaleUnit
+
+    $rMax = $scaleUnit * 100
+    menuButton $offset slider.max $rMax
+    menuButton $offset slider.step $scaleUnit
+    menuButton $offset slider.wStep $scaleUnit
+    $ref = "U_" + $UnitScales.indexOf($scaleUnit)
+    $high = "buttons textButtonHighlightSelectedRowItem"
+    $low = "buttons textButtonRowItem"
+
+    $showClass = $ref === "U_0" ?  ($high) : ($low)
+    menuButton $U_0 element.className $showClass
+    $showClass = $ref === "U_1" ?  ($high) : ($low)
+    menuButton $U_1 element.className $showClass
+    $showClass = $ref === "U_2" ?   $high : $low
+    menuButton $U_2 element.className $showClass
+    $showClass = $ref === "U_3" ?  $high : $low
+    menuButton $U_3 element.className $showClass
+    $showClass = $ref === "U_4" ?  $high : $low
+    menuButton $U_4 element.className $showClass
+    $showClass = $ref === "U_5" ?   $high : $low
+    menuButton $U_5 element.className $showClass
+exitSub
+
+label setInName
+    if $sp.type.functionLink === true {
+        $res = $sp.rename($sp.fLink.inFrom)
+        $sp.name = $sp.name + ($sp.name[$sp.name.length - 1] !== "#"  ? "#" : "")
+    }
+exitSub
+label setOutName
+    if $sp.type.functionLink === true {
+        $res = $sp.rename($sp.fLink.outTo)
+        $sp.name = $sp.name + ($sp.name[$sp.name.length - 1] !== "#"  ? "#" : "")
+    }
+exitSub
+label setTypeName
+    if $sp.type.functionLink === true {
+        $res = $sp.rename($sp.fLink.type)
+        $sp.name = $sp.name + ($sp.name[$sp.name.length - 1] !== "#"  ? "#" : "")
+    }
+exitSub
+label setSelectInName
+    $ss = selection.asArray()
+    label nameInLinkLoop
+        if $ss.length > 0 {
+            $sp = $ss.pop()
+            jumpSub setInName
+            jump nameInLinkLoop
+        }
+exitSub
+label setSelectOutName
+    $ss = selection.asArray()
+    label nameOutLinkLoop
+        if $ss.length > 0 {
+            $sp = $ss.pop()
+            jumpSub setOutName
+            jump nameOutLinkLoop
+        }
+exitSub
+label setSelectTypeName
+    $ss = selection.asArray()
+    label nameLinkTypeLoopA
+        if $ss.length > 0 {
+            $sp = $ss.pop()
+            jumpSub setTypeName
+            jump nameLinkTypeLoopA
+        }
+exitSub
+
+label offsetSlide
+    if $spr !== undefined {
+        if $spr.fLink.funcObj !== undefined {
+            exitSub
+        }
+        $spr.fLink.offset =  $offset
+        if $spr.fLink.IK !== undefined {
+            $spr.fLink.IK.update = true
+        }        
+        $propName = "offset"
+        $sprName = ""
+        jumpSub setFLinkProp
+        jumpSub updateSprite
+    }
+
+exitSub
+label scaleSlide
+    if $spr !== undefined {
+        if $spr.fLink.funcObj !== undefined {
+            exitSub
+        }
+        $spr.fLink.scale =  $scale
+        if $spr.fLink.IK !== undefined {
+            $spr.fLink.IK.update = true
+        }          
+        $propName = "scale"
+        $sprName = ""
+        jumpSub setFLinkProp
+        jumpSub updateSprite
+    }
+exitSub
+
+label updateSprite
+    if $spr !== undefined {
+        if $spr.fLink.funcObj !== undefined {
+            menuEnable Button_Reset_selected
+            menuDisable $inputType $outputType $functionType $scale $offset Button_Bind_inputs Button_Bind_outputs Button_Reset_Scale Button_Reset_Offset Button_Reset_both Button_Name_in Button_Name_out Button_Name_type Button_Name_num Button_Name_input Button_Name_output Button_Clear_named Button_Sort_function_links Button_Compile Button_Compile_noopt Button_Compile_save_only Button_Compile_save_only_noopt Button_Values_to_comline Button_Reset_values
+            jumpSub setMenuOptions
+            exitSub
+        }
+        // menuEnable $inputType $outputType $functionType $scale $offset Button_Bind_inputs Button_Bind_outputs Button_Reset_selected Button_Reset_Scale Button_Reset_Offset Button_Reset_both Button_Name_in Button_Name_out Button_Name_type Button_Name_num Button_Name_input Button_Name_output Button_Clear_named Button_Sort_function_links Button_Compile Button_Compile_noopt Button_Compile_save_only Button_Compile_save_only_noopt Button_Values_to_comline Button_Reset_values
+        menuDisable Button_Name_input Button_Name_output Button_Clear_named Button_Compile Button_Compile_noopt Button_Compile_save_only Button_Compile_save_only_noopt
+        menuEnable $inputType $outputType $functionType $scale $offset Button_Bind_inputs Button_Bind_outputs Button_Reset_selected Button_Reset_Scale Button_Reset_Offset Button_Reset_both Button_Name_in Button_Name_out Button_Name_type Button_Name_num Button_Sort_function_links Button_Values_to_comline Button_Reset_values
+
+        $sprName = $spr.name + " "
+        if $spritesSelected > 1 {
+            $sprName = "Sel(" + $spritesSelected +") "
+        }
+
+        $vv = $spr.fLink.value !== undefined && $spr.fLink.value.toFixed !== undefined ? $spr.fLink.value.toFixed(3) : "!"
+        $sprName = $sprName + $spr.fLink.type + "(" + $spr.fLink.inFrom + ") >> " + $vv + " >> " + $spr.fLink.outTo + " * " + $spr.fLink.scale.toFixed(3) + " + " + $spr.fLink.offset.toFixed(3)
+        $scale = $spr.fLink.scale
+        $offset = $spr.fLink.offset
+
+        $idx = $inputTypeValues.indexOf($spr.fLink.inFrom)
+        $inputType = $inputTypeNames[$idx]
+        $idx = $outputTypeValues.indexOf($spr.fLink.outTo)
+        $outputType = $outputTypeNames[$idx]
+
+        $idx = $functionTypeValues.indexOf($spr.fLink.type)
+        $functionType = $functionTypeNames[$idx]
+    }
+    if $spr === undefined {
+        menuDisable $inputType $outputType $functionType $scale $offset Button_Bind_inputs Button_Bind_outputs Button_Reset_selected Button_Reset_Scale Button_Reset_Offset Button_Reset_both Button_Name_in Button_Name_out Button_Name_type Button_Name_num Button_Name_input Button_Name_output Button_Clear_named Button_Sort_function_links Button_Compile Button_Compile_noopt Button_Compile_save_only Button_Compile_save_only_noopt Button_Values_to_comline Button_Reset_values
+        $sprName = "No function link selected"
+        $scale = 0
+        $offset = 0
+    }
+    jumpSub setMenuOptions
+exitSub
+label refreshSprite
+    if $spr !== undefined {
+        $res = $spr.key.update()
+    }
+exitSub
+
+label setFLinkProp
+    if $spritesSelected > 0 {
+        $sp = $sprArr[0]
+        if $sp.fLink.resetOnChange === true {
+            $sp.fLink.reset = true;
+        }
+        if $propName === "inFrom" {
+            jumpSub setInName
+        }
+        if $propName === "outTo" {
+            jumpSub setOutName
+        }
+        if $propName === "type" {
+            jumpSub setTypeName
+        }
+        if $spritesSelected > 1 {
+            $idx = 1
+            label inputSetLoop
+                $sp = $sprArr[$idx]
+                $res = $sp.fLink[$propName] = $spr.fLink[$propName]
+                if $sp.fLink.resetOnChange === true {
+                    $sp.fLink.reset = true;
+                }
+                if $propName === "inFrom" {
+                    jumpSub setInName
+                }
+                if $propName === "outTo" {
+                    jumpSub setOutName
+                }
+                if $propName === "type" {
+                    jumpSub setTypeName
+                }
+
+                $idx = $idx + 1
+                if $idx < $spritesSelected {
+                    jump inputSetLoop
+                }
+
+        }
+    }
+exitSub
+label inputSelect
+    if $spr !== undefined {
+        if $spr.fLink.funcObj !== undefined {
+            exitSub
+        }
+
+        $opt = $inputType.replace("Input ","")
+        $idx = $inputTypeNames.indexOf($opt)
+        if $idx > -1 {
+            $spr.fLink.inFrom = $inputTypeValues[$idx]
+            $propName = "inFrom"
+            jumpSub setFLinkProp
+            jump continueInputSelect
+        }
+        exitSub
+        label continueInputSelect
+        jumpSub updateSprite
+    }
+exitSub
+label outputSelect
+    if $spr !== undefined {
+        if $spr.fLink.funcObj !== undefined {
+            exitSub
+        }
+
+        $opt = $outputType.replace("Output ","")
+        $idx = $outputTypeNames.indexOf($opt)
+        if $idx > -1 {
+            $spr.fLink.outTo = $outputTypeValues[$idx]
+            $propName = "outTo"
+            jumpSub setFLinkProp
+
+            jump continueOutputSelect
+        }
+        exitSub
+
+        label continueOutputSelect
+        jumpSub updateSprite
+    }
+exitSub
+label functionSelect
+    if $spr !== undefined {
+        if $spr.fLink.funcObj !== undefined {
+            exitSub
+        }
+
+        $opt = $functionType.replace("Function ","")
+        $idx = $functionTypeNames.indexOf($opt)
+        if $idx > -1 {
+            $spr.fLink.type = $functionTypeValues[$idx]
+            $propName = "type"
+            jumpSub setFLinkProp
+            jump continueFunctionSelect
+        }
+        exitSub
+
+        label continueFunctionSelect
+        jumpSub updateSprite
+    }
+exitSub
+label scaleSelect
+        //if $spr !== undefined {
+        //    if $spr.fLink.funcObj !== undefined {
+        //        exitSub
+        //    }
+        //}
+        $scaleUnit = $UnitScales[Number($opt.replace("U_",""))];
+        $res = storage.write("scaleUnit", $scaleUnit)
+        jumpSub updateUI
+        jumpSub updateSprite
+
+exitSub
+
+
+
+
+
+label selectActiveSprite
+    if $spr !== undefined {
+
+
+    }
+    if selection.length > 0 {
+        $sprArr.length = 0
+        $spritesSelected = 0
+        $sel = undefined
+        $idx = 0
+        label loopSelecter
+            if selection[$idx].type.functionLink === true {
+                if $sel === undefined {
+                    $sel = selection[$idx]
+                }
+                $res = $sprArr.push(selection[$idx])
+                $spritesSelected = $spritesSelected + 1
+            }
+            $idx = $idx + 1
+            if $idx < selection.length {
+                jump loopSelecter
+            }
+        if $spritesSelected > 0 {
+            $spr = $sel
+        }
+
+    }
+    if selection.length === 0 {
+        $spr = undefined
+    }
+exitSub
+
+
+//============================================================================================================================
+// Events
+
+event onspriteupdate {
+    jumpSub updateSprite
+}
+event onselectionchanged {
+    jumpSub selectActiveSprite
+    jumpSub updateSprite
+}
+event ontimeout {
+    if $startup === true {
+        $startup = false
+        jumpSub selectActiveSprite
+        jumpSub updateUI
+        jumpSub updateSprite
+        $opt = "U_" + $UnitScales.indexOf($scaleUnit)
+        jumpSub scaleSelect
+
+    }
+}
+
+

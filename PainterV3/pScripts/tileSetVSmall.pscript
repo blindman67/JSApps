@@ -1,0 +1,30 @@
+create image a 32
+create image b 32
+create image c 32
+create image d 32
+create image e 32
+create image f 32
+create image g 32
+create image h 32
+create image i 32
+// inside
+create image j 32
+create image k 32
+create image l 32
+create image m 32
+create image n 32
+
+setSize 32
+
+create row 0 a b c  a c  a c   n n a b b b c
+create row 1 h i d  g e  h d   n n g k j k d
+create row 2 g f e  n n  h d   n n n h m l d
+create row 3 n n n  a b  l m   b c n h i i m c
+create row 4 n n n  g f  k j   f e n h j f k d
+create row 5 n n n  n n  h d   n n n h d n h d
+create row 6 n n n  n n  g e   n n n h m b l d
+create row 7 n n n  n n  n n   n n n g f f f e
+
+
+com spritesSelectAll
+

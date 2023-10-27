@@ -1,0 +1,27 @@
+$size = $arg0
+$map = $arg1 // eg "abcd*abcd*abcd" // * is new line spaces are skipped
+$x = 0
+$y = 0
+$sx = 0
+label mapLoop
+    $name = $map[0]
+    $map = $map.substr(1)
+    if $name === "*" {
+       $x = $sx
+       $y = $y + $size
+       jump nextChar
+    }
+    if $name !== " " {
+        create sprite $name $size $size
+        select
+        selected as a
+        $a.x = $x
+        $a.y = $y
+        $x = $x + $size
+    }
+
+    label nextChar
+        $mapLen = $map.length
+        if $mapLen > 0 mapLoop
+    
+exit

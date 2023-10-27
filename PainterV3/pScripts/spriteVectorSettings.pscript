@@ -1,0 +1,161 @@
+
+jumpSub getFirstVecSpr
+
+if $vecA !== undefined {
+    $detail = (($spr.detail ** (1/1.2))-0.5) * 2
+    $segments = $vecA.segs
+    $tolerance = $vecA.tolerance
+    $corner = Math.asin($vecA.cornerAngle)* (180 /3.1415)
+    $vecSmoothing = $vecA.smooth
+    $vecSmoothingUI = $vecSmoothing ? "On" : "Off"
+}
+if $spr === undefined {
+    $detail = 1
+    $segments = 6
+    $tolerance = 1
+    $corner = 1
+    $vecSmoothing = false
+    $vecSmoothingUI = "No vec sprite selected"
+
+}
+
+$title = "16 Vector sprite settings"
+menu title $title
+
+
+menu exit "Exit"
+$options = ""
+$options = $options + "$vecSmoothingUI,Smooth lines,,"
+$options = $options + "$detail,slider Detail 1 64 1 1 #000,"
+$options = $options + "$segments,slider Segments 1 16 1 1 #000,"
+$options = $options + "$tolerance,slider Tolerance 1 255 1 32 #000,"
+$options = $options + "$corner,slider Corner  0 90 1 80 #000,"
+
+
+menu options $options
+menu keep
+label doAgain
+$opt = call menu
+
+if $opt === "cancel" {  // cancel is issued when dialoh close icon (top left red X ) is clicked, or another source forced formal close
+    exit
+}
+if $opt === "exit" {
+    exit
+}
+
+assert selected
+if $assertion === false doAgain
+ 
+$selCount = selection.length
+$count = 0
+$vecA = undefined
+label getNextSelected
+    if $count < $selCount {
+        $spr = selection[$count]
+        if $spr.type.vector === true {
+            $vec = $spr.vector.desc.pathStr
+            if $vecA === undefined {
+                $vecA = $vec
+            }
+            if $opt === "vecSmoothingUI" {
+                if $vecSmoothing === true {
+                    $vecSmoothing = false
+                    $vecSmoothingUI = "Off"
+                    $vec.smooth = false
+                    menuUpdate $vecSmoothingUI       
+                    $spr.vector.desc.dirtyLines = true 
+                    jump continueFind        
+                }
+                if $vecSmoothing === false {
+                    $vecSmoothing = true
+                    $vecSmoothingUI = "On"
+                    $vec.smooth = true
+                    menuUpdate $vecSmoothingUI        
+                    $spr.vector.desc.dirtyLines = true       
+                    jump continueFind                       
+                }
+            }
+
+            
+            if $opt === "detail" {
+                $vec.detail = ($detail * 0.5+ 0.5) ** 1.2     
+                $spr.vector.desc.dirtyLines = true 
+                
+            }
+            if $opt === "segments" {
+                $vec.segs = $segments
+                $spr.vector.desc.dirtyLines = true 
+                
+            }
+            if $opt === "tolerance" {  
+                $vec.tolerance = $tolerance
+                $spr.vector.desc.dirtyLines = true 
+                
+            }
+            if $opt === "corner" { 
+                $vec.cornerAngle = Math.sin($corner * (3.1415 / 180))
+                $spr.vector.desc.dirtyLines = true 
+            }
+        }
+        label continueFind
+        $count = $count + 1
+        jump getNextSelected
+    }
+jumpSub updateMenu    
+jump doAgain
+
+label updateMenu
+    if $vecA !== undefined {
+        $vecSmoothing = $vecA.smooth
+        $vecSmoothingUI = $vecSmoothing ? "On" : "Off"
+        $detail = (($vecA.detail ** (1/1.2))-0.5) * 2
+        $segments = $vecA.segs
+        $tolerance = $vecA.tolerance
+        $corner = Math.asin($vecA.cornerAngle)* (180 /3.1415)
+        menuUpdate $detail $segments $tolerance $corner $vecSmoothingUI
+    }
+    if $vecA === undefined {
+        $vecSmoothingUI = "No vect sprite selected"
+        menuUpdate $vecSmoothingUI
+    }
+    exitSub
+
+label getFirstVecSpr
+    $selCount = selection.length
+    $count = 0
+    label getNextSelectedA
+    if $count < $selCount {
+        $spr = selection[$count]
+        if $spr.type.vector === true {
+            $vecA = $spr.vector.desc.pathStr        
+            exitSub
+        }
+        $count = $count + 1
+        jump getNextSelectedA
+    }
+    $spr = undefined
+    exitSub
+
+    
+// Fires when the sprite selection has changed    
+event onselectionchanged {
+    $selCount = selection.length
+    $count = 0
+    label getNextSelectedE
+    if $count < $selCount {
+        $spr = selection[$count]
+        if $spr.type.vector === true {
+            $vecA = $spr.vector.desc.pathStr
+            jumpSub updateMenu
+            $vecA = undefined
+            jump allDone
+        }
+        $count = $count + 1
+        jump getNextSelectedE
+    }
+    $vecA = undefined    
+    jumpSub updateMenu
+    label allDone
+    
+}    

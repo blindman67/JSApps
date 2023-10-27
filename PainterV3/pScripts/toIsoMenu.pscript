@@ -1,0 +1,206 @@
+#menuRes $res = call menu;if $res === "done" {;log "Batch canceled by user";exit;}
+
+menu title "select iso type"
+menu exit "OK"
+menu exit "Cancel"
+menu options "1 0 by 0 1,0 1 by 1 0,,,1 1 by 1 1,,2 1 by 2 1,2 1 by 1 1,1 1 by 2 1,2 1 by 1 2,1 2 by 2 1,2 1 by 1 2,1 2 by 1 2,,3 1 by 3 1,3 1 by 1 3,1 3 by 3 1,,custom"
+$res = call menu
+
+// if custom option
+if $res !== "custom" checkCancel
+
+    // get custom y and x axis slopes
+    menu title "Select y axis slope"
+    menu exit "OK"
+    menu exit "Cancel"
+    menu options "0 1,1 0,,1 1,,1 2,2 1,,1 3,3 1,,1 4,4 1"
+    $res = call menu
+    if $res === "cancel" exit
+    $yAxisX = ($res).split(" ")[0]
+    $yAxisY = ($res).split(" ")[1]
+    $tit = "Y: " + $res + " select X:"
+    menu title $tit
+    menu exit "OK"
+    menu exit "Cancel"
+    menu options "0 1,1 0,,1 1,,1 2,2 1,,1 3,3 1,,1 4,4 1"
+    $res = call menu
+    if $res === "cancel" exit
+    $xAxisX = ($res).split(" ")[0]
+    $xAxisY = ($res).split(" ")[1]
+
+    // Ok have all info needed create the menu
+    jump createMenu
+
+label checkCancel
+    if $res === "cancel" exit
+
+
+    // get the axis options
+    $yAxisX = ($res).split(" ")[0]
+    $yAxisY = ($res).split(" ")[1]
+    $xAxisX = ($res).split(" ")[3]
+    $xAxisY = ($res).split(" ")[4]
+
+    $Proj = "ISO Modify (" + $xAxisX + "/" +  $xAxisY + ") by (" + $yAxisX + "/" +  $yAxisY + ")";
+
+
+
+
+label createMenu
+$angleStep = 16
+$menuOpts = "^,textCenter Convert to face type,^,^,^,{,Top,Front,Right,},"
+$menuOpts = $menuOpts + "{,Bottom,Back,Left,},,"
+$menuOpts = $menuOpts + "Update Projection,,"
+$menuOpts = $menuOpts + "{,Rotate X,Rotate Y,Rotate Z,},,"
+// $menuOpts = $menuOpts + "$angleStep,slider Angle step 0 16 1 15,,"
+
+$menuOpts = $menuOpts + "{ISOInfo.png 144 146},,,,,,,,^,"
+$menuOpts = $menuOpts + "textCenter Filter by face,^,^,^,"
+$menuOpts = $menuOpts + "{,Top ,Front ,Right ,},"
+$menuOpts = $menuOpts + "{,T+B ?Top and bottom,F+B ?Front and back,R+L ?Right and left,},"
+$menuOpts = $menuOpts + "{,Bottom ,Back ,Left ,}"
+
+menu title $Proj
+menu exit "Done"
+menu options $menuOpts
+menu keep
+label showMenu
+    #menuRes
+
+    if $res === "cancel" exit
+    if $res === "angleStep" {
+         jump showMenu
+    }
+    if $res.endsWith(" ") === true {
+        $res = $res.replace(" ","Sel")
+    }
+    //call toIso $res $yAxisX $yAxisY $xAxisX $xAxisY
+    $arg0 = $res
+    $arg1 = $yAxisX
+    $arg2 = $yAxisY
+    $arg3 = $xAxisX
+    $arg4 = $xAxisY
+    jumpSub toIso
+    jump showMenu
+
+
+
+label toIso
+    $com = $arg0.replace(" ","")
+    $selector = $com.includes("Sel")
+    $selt = $com.replace("Sel","").replace("+","")
+
+    $axis = new Object()
+    $axis.p = 0
+    $axis.n = 2
+
+    $faces = new Object()
+    $faces.Top = "xpyp"
+    $faces.Bottom = "xpyn"
+    $faces.Front = "xpzp"
+    $faces.Back = "xpzn"
+    $faces.Right = "ynzp"
+    $faces.Left = "ynzn"
+    $faces.TB = "xpyp,xpyn"
+    $faces.FB = "xpzp,xpzn"
+    $faces.RL = "ynzp,ynzn"
+
+    $rot = new Object()
+    $rot.RotateX = "xpzp,xpyp,xpzn,xpyn,xnzp,xnyp,xnzn,xnyn,ynzp,zpyp,ypzn,znyn,ynzn,zpyn,ypzp,znyp,zpxp,ypxp,znxp,ynxp,zpxn,ypxn,znxn,ynxn".split(",")
+    $rot.RotateZ = "ynxp,xpyp,ypxn,xnyn,ynxn,xpyn,ypxp,xnyp,ynzp,xpzp,ypzp,xnzp,ynzn,xpzn,ypzn,xnzn,znyp,znxn,znyn,znxp,zpyp,zpxn,zpyn,zpxp".split(",")
+    $rot.RotateY = "zpxn,xnzn,znxp,xpzp,zpxp,xnzp,znxn,xpzn,zpyn,xnyn,znyn,xpyn,zpyp,xnyp,znyp,xpyp,ypzn,ypxp,ypzp,ypxn,ynzn,ynxp,ynzp,ynxn".split(",")
+
+    $PI = Math.PI
+    $PI2 = Math.PI2
+    $PI90 = Math.PI90
+
+    $xAxisX = $arg3 === undefined ? 2 : $arg3
+    $xAxisY = $arg4 === undefined ? 1 : $arg4
+    $yAxisX = $arg1 === undefined ? 2 : $arg1
+    $yAxisY = $arg2 === undefined ? 1 : $arg2
+
+    $hyp = (($xAxisX * $xAxisX  + $xAxisY * $xAxisY) ** 0.5)
+    $angX = Math.asin($xAxisY / $hyp)
+    $scaleX = $hyp / Math.max($xAxisX, $xAxisY)
+
+    $hyp = (($yAxisX * $yAxisX  + $yAxisY * $yAxisY) ** 0.5)
+    $angY = Math.asin($yAxisY / $hyp)
+    $scaleY = $hyp / Math.max($yAxisX, $yAxisY)
+
+    // Not working. I realy need to use a 3D matrix for this
+    //$aStepX = ((-$angY + $PI) - $angX)
+    //$aStepY = ($PI - $aStepX) / 16
+    //$aStepX = $aStepX / 16
+
+    $axis.x = [$scaleX, $angX, $scaleX, $angX + $PI]
+    $axis.y = [$scaleY, -$angY + $PI, $scaleY, -$angY + $PI2]
+    $axis.z = [1, $PI90, 1, $PI90 + $PI]
+
+    $reSelect = []
+    label getNextSelected
+    selected next a
+    if $a === undefined {
+        if $reSelect.length > 0 {
+            $r = sprites.select(spr=> $reSelect.includes(spr.guid));
+        }
+        jump allDone
+    }
+    $aa = $a.iso
+    $aiso = $aa.split(",")[0]
+    $aisoAng = $aa.split(",")[1]
+    $aisoAng = $aisoAng ? Number($aisoAng) : 0
+    $aAng = ($aisoAng + $angleStep) % 16
+    if $selector === true {
+        $selF = $faces[$selt]
+        $has = $selF.includes($aiso)
+        if $has === true {
+            $r = $reSelect.push($a.guid)
+        }
+        jump getNextSelected
+    }
+    if $com === "UpdateProjection" {
+        if $aiso !== "-" {
+            $iso = $aiso
+            jumpSub setFace
+        }
+        jump getNextSelected
+    }
+    $hasFace = $faces[$com]
+    if $hasFace {
+        $aAng = 0
+        $iso = $hasFace
+        jumpSub setFace
+        jump getNextSelected
+    }
+    $hasRot = $rot[$com]
+    if $hasRot {
+        $idx = $rot[$com].indexOf($aiso)
+        if $idx > -1 {
+
+            $iso = $rot[$com][(($idx / 4) | 0) * 4 + (($idx + ($aisoAng + $angleStep) / 16 | 0) % 4)]
+
+            jumpSub setFace
+        }
+        jump getNextSelected
+    }
+    log "Unknown iso command " $arg0 " could not complete modification."
+    exitSub
+    label setFace
+        $xa = $axis[$iso[0]]
+        $ya = $axis[$iso[2]]
+        $xo = $axis[$iso[1]]
+        $yo = $axis[$iso[3]]
+        $sxa = 0 //$aStepX * $aAng
+        $sya = 0 //$aStepY * $aAng
+        $a.rx = Math.normAngle($xa[$xo + 1] + $sxa)
+        $a.ry = Math.normAngle($ya[$yo + 1] + $sya)
+        $a.iso = $iso + "," + $aAng
+        $norm = $a.normalisable
+        if $norm === false {
+            $a.sx = $xa[$xo]
+            $a.sy = $ya[$yo]
+        }
+        exitSub
+    label allDone
+        exitSub
+

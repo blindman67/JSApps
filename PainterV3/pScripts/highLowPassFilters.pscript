@@ -1,0 +1,123 @@
+#menuOpts menu exit "OK";menu exit "Cancel";menu options $opts;$res = call menu;if $res === "cancel" exit
+
+
+assert selected
+if $assertion === false {
+    log "No sprites are selected"
+    exit
+}
+
+assert drawable
+if $assertion === false {
+    log "No drawable image selected"
+    exit
+}
+
+
+$imgSpr = undefined
+$iw = 128
+$ih = 128
+selected as spr
+label nextspr
+    if $spr === undefined {
+        jump process
+    }
+
+    if $spr.image !== undefined {
+        if $imgSpr === undefined {
+            $imgSpr = $spr
+            $iw = $imgSpr.image.w
+            $ih = $imgSpr.image.h
+        }
+    }    
+    selected next spr
+    jump nextspr
+    
+label process
+
+if $iw !== $ih {
+   log "Can not process images that are not square"
+   exit
+}
+
+$i = $imgSpr.image
+
+
+menu title "Filter type?"
+$opts = "*Low pass filter,High pass filter,Range pass filter,Show frequency map?Transforms image with low frequency center to high outer"
+#menuOpts    
+
+if $res === "Show frequency map" {
+    menu title "Low wavelength in percent of image?"
+    $opts = "1,2,3,5,8,12,15,20,30,40,50,55,60,62,65,67,70,72,75,77,80,82,84,86,87,88,89,90,100"
+    #menuOpts    
+    $waveLen = Number($res) / 100 * $iw * 0.8
+    $logMessage =  "Frequencies below " + $waveLen + " " + $res + "%"
+    log $logMessage
+    menu title "High wavelength in percent of image?"
+    $opts = "2,3,5,8,12,15,20,30,40,50,55,60,62,65,67,70,72,75,77,80,82,84,86,87,88,89,90,100"
+    #menuOpts    
+    $waveLenH = Number($res) / 100 * $iw * 0.8
+    $logMessage =  "Frequencies below " + $waveLenH + " " + $res + "%"
+    log $logMessage
+    $res = localProcessImage.createJob("showFreq", $i, $waveLen, $waveLenH);
+    exit
+}
+$resA = $res
+$alpha = false
+$RGB = true
+menu title "Filter type?"
+$opts = "*RGB,Alpha,RGB and Alpha"
+#menuOpts    
+if $res === "Alpha" {
+    $alpha = true
+    $RGB = false
+}
+if $res === "RGB and Alpha" {
+    $alpha = true
+    $RGB = true
+}
+
+
+if $resA === "Low pass filter" {
+    menu title "Cuttoff wavelength in percent of image?"
+    $opts = "1,2,3,5,8,12,15,20,30,40,50,55,60,62,65,67,70,72,75,77,80,82,84,86,87,87.2,87.4,87.6,88,89,90,100"
+    #menuOpts    
+    $waveLen = Number($res) / 100 * $iw * 0.8
+    $logMessage =  "Frequencies below " + $waveLen + " " + $res + "%"
+    log $logMessage
+    $res = localProcessImage.createJob("lowPass", $i,$waveLen, $RGB, $Alpha);
+    exit
+}
+
+if $resA === "High pass filter" {
+    menu title "Cuttoff wavelength in percent of image?"
+    $opts = "1,2,3,5,8,12,15,20,30,40,50,55,60,62,65,67,70,72,75,77,80,82,84,86,87,88,89,90,100"
+    #menuOpts    
+    $waveLen = Number($res) / 100 * $iw * 0.8
+    $logMessage =  "Frequencies above " + $waveLen + " " + $res + "%"
+    log $logMessage
+    $res = localProcessImage.createJob("highPass", $i,$waveLen, $RGB, $Alpha);
+    exit
+}
+if $resA === "Range pass filter" {
+    menu title "Low wavelength in percent of image?"
+    $opts = "1,2,3,5,8,12,15,20,30,40,50,55,60,62,65,67,70,72,75,77,80,82,84,86,87,88,89,90,100"
+    #menuOpts    
+    $waveLen = Number($res) / 100 * $iw * 0.8
+    $logMessage =  "Frequencies below " + $waveLen + " " + $res + "%"
+    log $logMessage
+    menu title "High wavelength in percent of image?"
+    $opts = "2,3,5,8,12,15,20,30,40,50,55,60,62,65,67,70,72,75,77,80,82,84,86,87,88,89,90,100"
+    #menuOpts    
+    $waveLenH = Number($res) / 100 * $iw * 0.8
+    $logMessage =  "Frequencies below " + $waveLenH + " " + $res + "%"
+    log $logMessage
+    $res = localProcessImage.createJob("rangePass", $i,$waveLen,$waveLenH, $RGB, $Alpha);
+    exit
+}
+
+log "Sorry these filters still need work."
+
+
+

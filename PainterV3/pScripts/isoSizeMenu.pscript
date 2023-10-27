@@ -1,0 +1,9 @@
+// iso menu
+menu title $arg0
+menu exit "OK"
+menu exit "Cancel"
+menu options "8,16,24,*32,48,64,80,96,128,196,256"
+$res = call menu
+exit $res
+
+

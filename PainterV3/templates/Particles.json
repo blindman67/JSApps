@@ -1,0 +1,179 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2019-07-28T04:31:02.380Z",
+        "id": 339307,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018 - 2020",
+        "details": "\n##R#========================================================\n##RGB#Help for Particles.json\n##RGB#Procedural Particles.\n##RG#Sprite ##G#'render'##RG# must be a drawable images. Particles are render on it\n##RG#Sprites named ##G#`Emiter`##RG# are location direction and strength of emiters\n##RG#Prefix sprite name with ##G#'Particle'##RG# to add to particle\n##RG#Sprite ##G#'Gravity'##RG# is direction and strength of gravity\n##RG#Sprite ##G#'rate Life'##RG# (green text) hold emiter setting\n##RG#First number is particle rate per frame\n##RG#second number is life in frame of particle\n##RG#Set Animation Sync on i function link dialog (right click function link in sprite menu)\n##RG#When on particles will animate with time being the particles age in frames\n##RG#For particle animation to take effect edit the \"Rate Life\" text\n##R#========================================================\n",
+        "type": "scene"
+    },
+    "scene": {
+        "sprites": [{
+                "name": "Gravity",
+                "id": 348723,
+                "x": -215.97,
+                "y": 173,
+                "w": 68.06,
+                "gridSpecial": "gravity",
+                "type": "cutter"
+            }, {
+                "name": "Render",
+                "id": 348724,
+                "x": 13.84,
+                "y": -80.35,
+                "rx": 0.014203,
+                "ry": 1.584999,
+                "type": "capture",
+                "capFB": false,
+                "capSrc": "capture348727",
+                "capturing": false
+            }, {
+                "name": "Particle",
+                "id": 348730,
+                "x": 16,
+                "y": -256,
+                "w": 32,
+                "h": 32,
+                "rgb": "#ffff00",
+                "type": "shape",
+                "shape": {
+                    "name": "star",
+                    "id": 348731,
+                    "radius": 2,
+                    "inner": 12,
+                    "sides": 3
+                }
+            }, {
+                "name": "Particle",
+                "id": 348732,
+                "x": 48,
+                "y": -256,
+                "w": 32,
+                "h": 32,
+                "rgb": "#ff8800",
+                "type": "shape",
+                "shape": {
+                    "name": "star",
+                    "id": 348731,
+                    "radius": 2,
+                    "inner": 12,
+                    "sides": 4
+                }
+            }, {
+                "name": "Particle",
+                "id": 348733,
+                "x": 80,
+                "y": -256,
+                "w": 32,
+                "h": 32,
+                "rgb": "#88ff00",
+                "type": "shape",
+                "shape": {
+                    "name": "star",
+                    "id": 348734,
+                    "radius": 2,
+                    "inner": 12,
+                    "sides": 5
+                }
+            }, {
+                "name": "Particle",
+                "id": 348735,
+                "x": 112,
+                "y": -256,
+                "w": 32,
+                "h": 32,
+                "rgb": "#ff0000",
+                "type": "shape",
+                "shape": {
+                    "name": "star",
+                    "id": 348734,
+                    "radius": 2,
+                    "inner": 12,
+                    "sides": 6
+                }
+            }, {
+                "name": "Emiter",
+                "id": 348736,
+                "x": -6.54,
+                "y": 254.93,
+                "w": 32,
+                "h": 32,
+                "rx": 0.195993,
+                "ry": 1.766789,
+                "gridX": 0,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff00",
+                "type": "marker",
+                "marker": "E"
+            }, {
+                "name": "Emiter",
+                "id": 348738,
+                "x": -42.25,
+                "y": 252.61,
+                "w": 32,
+                "h": 32,
+                "rx": -0.165401,
+                "ry": 1.405396,
+                "gridX": 0,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff00",
+                "type": "marker",
+                "marker": "E"
+            }, {
+                "name": "Rate Life",
+                "id": 251289,
+                "x": 64,
+                "y": -300,
+                "w": 28.45,
+                "h": 38.4,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00ff00",
+                "namedInLink": true,
+                "type": "text",
+                "text": "2,100",
+                "font": "arial",
+                "size": 32,
+                "lineWidth": 1
+            }, {
+                "name": "Particles",
+                "id": 339306,
+                "x": 64,
+                "y": -340,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [348723, 348724, 348730, 348736, 251289],
+                    "outputs": [],
+                    "linked": [348723, 348724, 348730, 348736, 251289],
+                    "source": "templates/Particles.js",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "groups": [],
+        "collections": [],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            }
+        }
+    }
+}

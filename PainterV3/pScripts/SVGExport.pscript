@@ -1,0 +1,125 @@
+#callOnOpt if $opt === "%0" {;jumpSub %1;jump waitForUI;};
+#callOnSubOpts $subOp = $opt.includes("%0");if $subOp === true {;jumpSub %1;jump waitForUI;};
+
+/* SVG export PainterV3 exporter */
+$startup = true
+$store = storage.file("SVGExportDialog")
+$Animation = "No animation"
+$includeIds = false
+//============================================================================================================================
+// Menu
+menu title "20 SVG export"
+menu exit "Exit"
+menu exit "Export"
+
+$options = ""
+$options = $options + ",,!ViewBox?Select sprite that defines the view box"
+$options = $options + ",$includeIds,Use sprite names as ID?If true SVG elements will create unique ID for each node based on the Sprites name."
+$options = $options + ",,$Animation,Animation type?Selects type of animation if any to export%No animation%Use keyframes%Flatten keys,"
+$options = $options + ",,SelectVisible?Selects shape sprite visible to view,"
+
+menu options $options
+menu keep
+timeout 100
+label waitForUI
+$opt = call menu
+
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    $store = storage.close()
+    exit
+}
+
+jump doMenuOpts
+jump waitForUI
+//============================================================================================================================
+
+
+label doMenuOpts
+    #callOnSubOpts ViewBox selectViewBox
+    #callOnOpt includeIds toggleIncludeIds
+    #callOnOpt export startExport
+    #callOnOpt Animation animationOption
+    #callOnOpt SelectVisible selectVis
+jump waitForUI
+
+
+
+
+
+//============================================================================================================================
+// subs
+label updateUI
+    $Animation = spriteSVGRender.animationType
+    $includeIds = spriteSVGRender.includeIds === true
+    menuUpdate $Animation $includeIds
+exitSub
+label startExport
+    if spriteSVGRender.viewBox === undefined {
+        warn Can not export SVG. Select a view box first
+        exitSub
+    }
+    jumpSub selectVis
+
+    $res = spriteSVGRender.export($includeAnimation)
+exitSub
+
+label toggleIncludeIds
+    $includeIds = !spriteSVGRender.includeIds
+    spriteSVGRender.includeIds = $includeIds === true
+    jump updateUI
+exitSub  // this is not needed but here only to shw end of sub. This sub calls updataUI with a jump in affect making it a tail call
+
+label animationOption
+    $Animation = $Animation.replace("Animation type ","");
+    spriteSVGRender.animationType = $Animation
+    jumpSub updateUI
+exitSub
+
+label selectViewBox
+    if selection[0] !== undefined {
+        $s = selection[0];
+        if $s.type.cutter === true {
+            $res = spriteSVGRender.setViewBox($s)
+            info View box selected
+            exitSub
+        }
+        warn View box sprite must be a Cutter
+        exitSub
+    }
+    warn First select sprite to become view box
+
+exitSub
+
+label selectVis
+    if spriteSVGRender.viewBox !== undefined {
+        $res = sprites.selectTypeUnder(spriteSVGRender.viewBox,"shape");
+        $count = selection.length
+        info Found $count visible shapes
+        exitSub
+    }
+    warn No view defined
+
+
+exitSub
+
+
+
+
+label updateSettings
+    if spriteSVGRender.viewBox !== undefined {
+        info Using previous view box
+    }
+
+
+exitSub
+
+//============================================================================================================================
+// Events
+event ontimeout {
+    if $startup === true {
+        $startup = false
+        jumpSub updateSettings
+        jumpSub updateUI
+    }
+}

@@ -1,0 +1,243 @@
+#hide com edSprHide
+#show com edSprShow
+#invert com spritesSelectInvert
+#imageOfSelected com edSprCreateCutter right;com edSprCreateDraw right
+#deleteComplete com edSprDelete right
+#CompDestOut com edSprComp21
+#CompSrcOver com edSprComp0
+#snap com edSprHide;com edSprLiveCapture right;com edSprShow
+#menuRes $res = call menu;if $res === "done" {;log "Batch canceled by user";exit;}
+#assertSelected assert selected;if $assertion === false {;log "No sprites are selected";exit;}
+
+
+#assertSelected
+
+
+
+menu title "Select render FX"
+menu exit "Done"
+menu options "Outline only,Outline,Invert,Inline,Inline Trim"
+menu keep
+label doAgain
+#menuRes
+
+
+$inlineOn = "off"
+if $res === "Outline" outline
+if $res === "Outline only" outline
+if $res === "Invert" invert
+if $res === "Inline" inline
+if $res === "Inline Trim" trimLine
+
+
+exit
+label invert
+    #invert
+    #hide
+    #invert
+    selected > sel
+    #imageOfSelected
+    selected > copyA
+    com edSprCopy
+    com setImageBGColor
+    com edSprDown
+    selected > copyB
+    select < copyA
+    #CompDestOut
+    select < copyB
+    #snap
+    select < copyA
+    #deleteComplete
+    select < sel
+    #show
+    #invert
+    #show
+    select < copyB   
+    jump doAgain
+
+
+label inline
+    #invert
+    #hide
+    #invert
+    selected > selA
+    #imageOfSelected
+    com edSprPad
+    selected > copyAA
+    com edSprCopy
+    com setImageBGColor
+    com edSprDown
+    selected > copyBB
+    select < copyAA
+    #CompDestOut
+    select < copyBB
+    #snap
+    select < copyAA
+    #deleteComplete
+    select < copyBB   
+    $res = "Outline only"
+    $inlineOn = "on"
+    
+    jump outline
+    
+    label inlineComplete 
+    selected > copyAA    
+    select < copyBB
+    #deleteComplete    
+    select < selA    
+    #imageOfSelected
+    select < copyAA
+    #deleteComplete    
+    jump doAgain
+    
+label trimLine
+    #invert
+    #hide
+    #invert
+    selected > selA
+    #imageOfSelected
+    com edSprPad
+    selected > copyAA
+    com edSprCopy
+    com setImageBGColor
+    com edSprDown
+    selected > copyBB
+    select < copyAA
+    #CompDestOut
+    select < copyBB
+    #snap
+    select < copyAA
+    #deleteComplete
+    select < copyBB   
+    $res = "Outline only"
+    $inlineOn = "trim"
+    
+    jump outline
+    
+    label trimComplete 
+    selected > copyAA    
+    #CompDestOut
+    select < copyBB
+    #deleteComplete    
+    select < selA    
+    #imageOfSelected
+    select < copyAA
+    #deleteComplete    
+    jump doAgain
+
+    
+label outline
+    // Hide unselected
+    #invert
+    #hide
+    #invert
+
+    // Name selected
+    selected > sel
+
+    // create image copy of selected and pad
+    #imageOfSelected
+    com edSprPad right
+
+label outlineA
+    // Name copy as imgCopy
+    selected > imgCopy
+
+    // Copy imgCopy
+    com edSprCopy
+    selected > copyA
+
+    // Hide imgCopy and selection
+    select < imgCopy
+    #hide
+    select < sel 
+    #hide
+
+    // Get copyA 
+    select < copyA
+    
+    // Create copyB 
+    com edSprCopy
+    selected > copyB
+    // As $a
+    selected as a
+    
+    // Create copies to make outline
+    $a.x = $a.x + 1
+    com edSprClone
+    selected > outline
+    select < copyB
+    
+    $a.x = $a.x - 2
+    com edSprClone
+    selected + outline
+    select < copyB
+    $a.x = $a.x + 1    
+    $a.y = $a.y + 1   
+    
+    com edSprClone
+    selected + outline
+    select < copyB
+    $a.y = $a.y - 2   
+
+    com edSprClone
+    selected + outline    
+    
+    // Capture
+    select < copyA
+    #hide
+    com edSprTop
+    #snap
+    #show
+
+    
+    // remove outline sprites
+    select < outline
+    #deleteComplete
+    select < copyB
+    #deleteComplete
+
+
+
+    if $res === "Outline only" {
+        select < imgCopy
+        com edSprTop
+        #CompDestOut
+        #show
+        select < copyA
+        #snap
+        com setImageBGColor right
+        
+    }
+  
+
+
+    if $res === "Outline" {
+        //select imgCopy move to top and show
+        select < imgCopy
+        com edSprTop
+        #show
+
+        // get copy of outline
+        select < copyA
+        #snap
+        // Colour it
+        com setImageBGColor right
+
+        select < imgCopy
+        com edSprTop
+        select < copyA
+        #snap
+    }
+    select < imgCopy
+    #deleteComplete
+    select < sel
+    #show
+    #invert
+    #show
+    select < copyA
+    
+    if $inlineOn === "on" inlineComplete
+    if $inlineOn === "trim" trimComplete
+    
+    jump doAgain

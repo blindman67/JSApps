@@ -1,0 +1,92 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2019-07-10T18:54:18.103Z",
+        "id": 301465,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018 - 2020",
+        "type": "scene",
+        "loadedCommands": ["edSprResetView","edSpriteActivateFunctionLinks"]
+    },
+    "scene": {
+        "sprites": [{
+                "name": "Top",
+                "id": 301460,
+                "y": -512,
+                "w": 64,
+                "h": 64,
+                "ry": 1.570796,
+                "lookat": [301461, -1.5707963267948966, 0],
+                "type": "cutter"
+            }, {
+                "name": "Bottom",
+                "id": 301461,
+                "w": 64,
+                "h": 64,
+                "ry": 1.570796,
+                "lookat": [301460, 1.5707963267948966, 0],
+                "type": "cutter"
+            }, {
+                "name": "Rod",
+                "id": 301462,
+                "y": -128,
+                "w": 32,
+                "ry": 1.571,
+                "locks": {
+                    "UI": true
+                },
+                "gridY": 0,
+                "attachedTo": 301461,
+                "attachment": {
+                    "x": 32,
+                    "y": -96,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter"
+            }, {
+                "name": "Sleave",
+                "id": 301463,
+                "y": -380,
+                "w": 48,
+                "h": 264,
+                "ry": 1.571,
+                "locks": {
+                    "UI": true
+                },
+                "gridY": 0,
+                "attachedTo": 301460,
+                "attachment": {
+                    "x": 32,
+                    "y": 164,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter"
+            }
+        ],
+        "groups": [],
+        "collections": [{
+                "name": "Piston",
+                "guid": 301464,
+                "children": [301460, 301461, 301462, 301463]
+            }
+        ],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            }
+        }
+    }
+}

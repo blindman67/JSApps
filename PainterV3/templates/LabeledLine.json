@@ -1,0 +1,417 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2020-01-20T11:09:39.407Z",
+        "id": 4568,
+        "author": "Blindman67",
+        "copyright": "All content copyright Mark Spronck. All rights reserved. 2018",
+        "collectionName": "LabeledLineGizmo",
+        "type": "scene"
+    },
+    "scene": {
+        "sprites": [{
+                "name": "RightBarGuide",
+                "id": 4546,
+                "x": 199.67,
+                "y": 13.64,
+                "w": 2,
+                "h": 32,
+                "rx": 6.288806,
+                "ry": 7.859806,
+                "a": 0,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "attachedTo": 4551,
+                "attachment": {
+                    "x": 4,
+                    "y": 18.13,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter"
+            }, {
+                "name": "leftDot",
+                "id": 4547,
+                "x": -2.51,
+                "y": -1.63,
+                "w": 8,
+                "h": 8,
+                "rx": 6.288806,
+                "ry": 7.859602,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "lookat": [4551, 0, 0],
+                "type": "shape",
+                "shape": {
+                    "name": "circle",
+                    "id": 4548
+                }
+            }, {
+                "name": "RightBar",
+                "id": 4549,
+                "x": 199.58,
+                "y": 28.68,
+                "w": 1,
+                "h": 62.34,
+                "rx": 6.288806,
+                "ry": 7.859806,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "attachedTo": 4551,
+                "attachment": {
+                    "x": 4,
+                    "y": 33.17,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "shape",
+                "shape": {
+                    "name": "rectangle",
+                    "id": 4550
+                }
+            }, {
+                "name": "RightDot",
+                "id": 4551,
+                "x": 199.75,
+                "y": -0.49,
+                "w": 8,
+                "h": 8,
+                "rx": 6.288806,
+                "ry": 7.859602,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "lookat": [4547, 3.141592653589793, 0],
+                "type": "shape",
+                "shape": {
+                    "name": "circle",
+                    "id": 4552
+                }
+            }, {
+                "name": "leftOffsetGuide",
+                "id": 4553,
+                "x": -2.83,
+                "y": 54.71,
+                "w": 8,
+                "h": 8,
+                "rx": 6.288806,
+                "ry": 7.86001,
+                "a": 0,
+                "locks": {
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "attachedTo": 4564,
+                "attachment": {
+                    "x": 0.5,
+                    "y": 58.34,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter"
+            }, {
+                "name": "LabelOffsetHandle",
+                "id": 4554,
+                "x": 198.92,
+                "y": 55.97,
+                "w": 8,
+                "h": 8,
+                "rx": 6.288806,
+                "ry": 7.86001,
+                "a": 0.31,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "attachedTo": 4546,
+                "attachment": {
+                    "x": 0.5,
+                    "y": 58.34,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "cutter"
+            }, {
+                "name": "RightArrow",
+                "id": 4555,
+                "x": 196.42,
+                "y": 56.75,
+                "w": 18.69,
+                "h": 38.4,
+                "sx": 0.458,
+                "sy": 0.458,
+                "rx": 6.288806,
+                "ry": 7.860213,
+                "locks": {
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "attachedTo": 4554,
+                "attachment": {
+                    "x": 1.5,
+                    "y": 4.79,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "sx": 0.5,
+                    "sy": 0.5,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "text",
+                "text": ">",
+                "font": "arial",
+                "size": 32,
+                "lineWidth": 1
+            }, {
+                "name": "LeftArrow",
+                "id": 4556,
+                "x": 0.27,
+                "y": 55.52,
+                "w": 18.69,
+                "h": 38.4,
+                "sx": 0.458,
+                "sy": 0.458,
+                "rx": 6.288806,
+                "ry": 7.860213,
+                "locks": {
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "attachedTo": 4553,
+                "attachment": {
+                    "x": 7.11,
+                    "y": 4.79,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "sx": 0.5,
+                    "sy": 0.5,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "text",
+                "text": "<",
+                "font": "arial",
+                "size": 32,
+                "lineWidth": 1
+            }, {
+                "name": "LeftLine",
+                "id": 4557,
+                "x": 32.93,
+                "y": 54.91,
+                "w": 71.53,
+                "h": 1,
+                "rx": 6.288806,
+                "ry": 7.859602,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "type": "shape",
+                "shape": {
+                    "name": "rectangle",
+                    "id": 4558
+                }
+            }, {
+                "name": "Label",
+                "id": 4559,
+                "x": 98.04,
+                "y": 55.34,
+                "w": 117.39,
+                "h": 38.4,
+                "sx": 0.5,
+                "sy": 0.5,
+                "rx": 6.288806,
+                "ry": 7.859602,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "type": "text",
+                "text": "Test line",
+                "font": "arial",
+                "size": 32,
+                "lineWidth": 1
+            }, {
+                "name": "RightLine",
+                "id": 4560,
+                "x": 163.16,
+                "y": 55.77,
+                "w": 71.53,
+                "h": 1,
+                "rx": 6.288806,
+                "ry": 7.859602,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "type": "shape",
+                "shape": {
+                    "name": "rectangle",
+                    "id": 4561
+                }
+            }, {
+                "name": "MainLine",
+                "id": 4562,
+                "x": 98.62,
+                "y": -1.06,
+                "w": 202.26,
+                "h": 2,
+                "rx": 6.288806,
+                "ry": 7.859602,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "type": "shape",
+                "shape": {
+                    "name": "rectangle",
+                    "id": 4563
+                }
+            }, {
+                "name": "LeftBar",
+                "id": 4564,
+                "x": -2.67,
+                "y": 27.54,
+                "w": 1,
+                "h": 62.34,
+                "rx": 6.288806,
+                "ry": 7.859806,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "namedInLink": true,
+                "namedOutLink": true,
+                "attachedTo": 4547,
+                "attachment": {
+                    "x": 4,
+                    "y": 33.17,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true,
+                    "isx": false,
+                    "isy": false,
+                    "iax": false,
+                    "comp": false
+                },
+                "type": "shape",
+                "shape": {
+                    "name": "rectangle",
+                    "id": 4565
+                }
+            }, {
+                "name": "LabeledLine",
+                "id": 4566,
+                "x": 283.92,
+                "y": 29.12,
+                "w": 96,
+                "h": 16,
+                "ry": 1.570796,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [4554, 4553, 4559, 4551, 4547, 4549],
+                    "outputs": [4559, 4557, 4560, 4562, 4554, 4564, 4549, 4553],
+                    "linked": [4546, 4547, 4549, 4551, 4553, 4554, 4557, 4559, 4560, 4562, 4564],
+                    "source": "const spriteIDS = [4554, 4553, 4559, 4557, 4560, 4562, 4551, 4547, 4549, 4564, 4546];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nvar Va, labelOffsetHandleInOut, Vc, Vd, leftOffsetGuideInOut, Vf, Vg, labelInOut, Vi, Vj, Vk, spr4557, spr4560, spr4562, Vo, Vp, Vq, rightDotInOut, leftDotInOut, Vt, Vu, rightBarInOut, Vw, Vx, spr4564, Vz, spr4546, VB, VC;\nfunction update() {\n    if (!API.active) { return }\n    Va = labelOffsetHandleInOut.x;\n    Vc = labelOffsetHandleInOut.y;\n    Vd = leftOffsetGuideInOut.x;\n    Vf = leftOffsetGuideInOut.y;\n    Vg = Math.hypot((Va - Vd), (Vc - Vf));\n    labelInOut.x = ((Va + Vd) * 0.5);\n    labelInOut.y = ((Vc + Vf) * 0.5);\n    Vi = Vg - Math.abs((labelInOut.type.normalisable ? labelInOut.w : labelInOut.w * labelInOut.sx));\n    Vj = leftOffsetGuideInOut.rx;\n    Vk = spr4557.ry - spr4557.rx;\n    spr4557.ry = Vj + Vk;\n    spr4557.rx = Vj;\n    Vk = labelInOut.ry - labelInOut.rx;\n    labelInOut.ry = Vj + Vk;\n    labelInOut.rx = Vj;\n    labelInOut.key.update();\n    Vk = spr4560.ry - spr4560.rx;\n    spr4560.ry = Vj + Vk;\n    spr4560.rx = Vj;\n    Vk = spr4562.ry - spr4562.rx;\n    spr4562.ry = Vj + Vk;\n    spr4562.rx = Vj;\n    Vo = Vi * 0.5;\n    spr4557.setScale(Vo / spr4557.w, spr4557.sy);\n    spr4560.setScale(Vo / spr4560.w, spr4560.sy);\n    Vp = (Vo * Math.cos(Vj)) * 0.5;\n    Vq = (Vo * Math.sin(Vj)) * 0.5;\n    spr4557.x = (Vp + Vd);\n    spr4557.y = (Vq + Vf);\n    spr4557.key.update();\n    spr4560.x = (Va - Vp);\n    spr4560.y = (Vc - Vq);\n    spr4560.key.update();\n    Vt = Math.hypot((rightDotInOut.x - leftDotInOut.x), (rightDotInOut.y - leftDotInOut.y));\n    spr4562.setScale(Vt / spr4562.w, spr4562.sy);\n    spr4562.x = ((rightDotInOut.x + leftDotInOut.x) * 0.5);\n    spr4562.y = ((rightDotInOut.y + leftDotInOut.y) * 0.5);\n    spr4562.key.update();\n    Vu = ((rightBarInOut.type.normalisable ? rightBarInOut.w : rightBarInOut.w * rightBarInOut.sx)) * 0.5;\n    labelOffsetHandleInOut.type.attached && (labelOffsetHandleInOut.attachment.x = Vu, labelOffsetHandleInOut.attachment.position());\n    labelOffsetHandleInOut.key.update();\n    leftOffsetGuideInOut.type.attached && (leftOffsetGuideInOut.attachment.x = Vu, leftOffsetGuideInOut.attachment.position());\n    Vw = ((labelOffsetHandleInOut.type.normalisable ? labelOffsetHandleInOut.h : labelOffsetHandleInOut.h * labelOffsetHandleInOut.sy)) * 0.5;\n    Vx = VC * 0.5 + 4;\n    spr4564.type.attached && (spr4564.attachment.y = Vx, spr4564.attachment.position());\n    rightBarInOut.type.attached && (rightBarInOut.attachment.y = Vx, rightBarInOut.attachment.position());\n    Vz = ((rightDotInOut.type.normalisable ? rightDotInOut.w : rightDotInOut.w * rightDotInOut.sx)) * 0.5;\n    rightBarInOut.type.attached && (rightBarInOut.attachment.x = Vz, rightBarInOut.attachment.position());\n    rightBarInOut.key.update();\n    spr4564.type.attached && (spr4564.attachment.x = Vz, spr4564.attachment.position());\n    spr4564.key.update();\n    spr4546.type.attached && (spr4546.attachment.x = Vz, spr4546.attachment.position());\n    spr4546.key.update();\n    VB = VC + 4;\n    spr4564.setScale(spr4564.sx, VB / spr4564.h);\n    rightBarInOut.setScale(rightBarInOut.sx, VB / rightBarInOut.h);\n    VC = labelOffsetHandleInOut.attachment.y;\n    leftOffsetGuideInOut.type.attached && (leftOffsetGuideInOut.attachment.y = VC, leftOffsetGuideInOut.attachment.position());\n    leftOffsetGuideInOut.key.update();\n    API.updateWidget = labelOffsetHandleInOut.selected || leftOffsetGuideInOut.selected || labelInOut.selected || spr4557.selected || spr4560.selected || spr4562.selected || rightBarInOut.selected || spr4564.selected || spr4546.selected;\n}\nvar linkCount = 0;\nvar linksCount = 0;\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if(spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    labelOffsetHandleInOut = getSprite(4554);\n    leftOffsetGuideInOut = getSprite(4553);\n    labelInOut = getSprite(4559);\n    spr4557 = getSprite(4557);\n    spr4560 = getSprite(4560);\n    spr4562 = getSprite(4562);\n    rightDotInOut = getSprite(4551);\n    leftDotInOut = getSprite(4547);\n    rightBarInOut = getSprite(4549);\n    spr4564 = getSprite(4564);\n    spr4546 = getSprite(4546);\n    API.active = linksCount === linkCount;\n    reset();\n}\nfunction reset() {\n    VC = 0;\n}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset,\n    spriteIDS,\n    spriteList,\n    inputs: [/*['LabelOffsetHandle',4554], ['leftOffsetGuide',4553], ['Label',4559], ['RightDot',4551], ['leftDot',4547], ['RightBar',4549]*/],\n    outputs: [/*['Label',4559], ['LeftLine',4557], ['RightLine',4560], */['MainLine',4562]/*, ['LabelOffsetHandle',4554], ['leftOffsetGuide',4553], ['LeftBar',4564], ['RightBar',4549], ['RightBarGuide',4546]*/],\n    bind(spr, id) {\n        if(spriteList.has(id)) {\n            spriteList.set(id,spr);\n            setSprites();\n        }\n    },\n    getById(id) { return spriteList.get(id) },\n    update,\n};\nsetSprites();\n\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "groups": [],
+        "collections": [],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            }
+        },
+        "animation": {
+            "time": 0,
+            "start": 0,
+            "end": 120,
+            "length": 120,
+            "speed": 1
+        },
+        "kinematics": []
+    }
+}

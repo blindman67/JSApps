@@ -1,0 +1,237 @@
+#callOnOpt if $opt === "%0" {;jumpSub %1;jump waitForUI;};
+#callOnSubOpts $subOp = $opt.includes("%0");if $subOp === true {;jumpSub %1;jump waitForUI;};
+
+// HTML export PainterV3 exporter
+$startup = true
+$store = storage.file("HTMLExportDialog")
+$Animation = "No animation"
+$includeIds = false
+$lockAspect = storage.read("lockAspect",true)
+$LockAspect = true
+$width = storage.read("width",1024)
+$height = storage.read("height",1024)
+$frameStep = storage.read("frameStep",1)
+$timeScale = storage.read("timeScale",1)
+$timingFunction = storage.read("timingFunction","Linear")
+$dataType
+$selectedViewBox = ""
+$aspect = 1
+//============================================================================================================================
+// Menu
+menu title "24 HTML Animation export"
+menu exit "Exit"
+menu exit "Export"
+
+$options = ""
+$options = $options + ",,!ViewBox?Select sprite that defines the view box"
+$options = $options + ",$selectedViewBox,Active view box,"
+$options = $options + "$animationType,Anim Type%JavaScript%CSS,"
+$options = $options + ",,!SelectExportable?Selects all exportable sprites,"
+$options = $options + ",,$LockAspect,Lock aspect,"
+$options = $options + "$width,slider Size width 1 2048 1 128  #040 4,"
+$options = $options + "$height,slider Height 1 2048 1 128  #040 4,,"
+$options = $options + "$frameStep,slider Step 1 60 1 60  #0D0 3,"
+$options = $options + "$timeScale,slider TimeScale 0.1 20 0.1 1 #0DD 0.1,"
+$options = $options + "$timingFunction,timing%Linear%Step,"
+$options = $options + "$info,Info:,"
+
+menu options $options
+menu keep
+timeout 100
+label waitForUI
+$opt = call menu
+
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    $store = storage.close()
+    exit
+}
+
+jump doMenuOpts
+jump waitForUI
+//============================================================================================================================
+// subs
+//============================================================================================================================
+label doMenuOpts
+    #callOnSubOpts ViewBox selectViewBox
+    #callOnOpt export startExport
+    #callOnOpt SelectExportable selectExportable
+    #callOnOpt LockAspect toggleAspect
+    #callOnOpt width updateWidth
+    #callOnOpt height updateHeight
+    #callOnOpt frameStep setFrameStep
+    #callOnOpt timeScale setTimeScale
+    #callOnOpt timingFunction setTimingFunction
+    #callOnOpt animationType animTypeSelect
+jump waitForUI
+//============================================================================================================================
+label updateUI
+    if $viewBox === undefined {
+        $selectedViewBox = "NOT SELECTED"
+    }
+    if $viewBox !== undefined {
+        $selectedViewBox = "'" + $viewBox.name + "'"
+    }
+    $LockAspect = $lockAspect
+    menuUpdate $width $height $frameStep $LockAspect $timeScale $selectedViewBox $animationType
+
+
+    storage.write("width",$width)
+    storage.write("height",$height)
+    storage.write("lockAspect",$lockAspect)
+    storage.write("frameStep",$frameStep)
+    storage.write("timeScale",$timeScale)
+
+    $frameCount = ((animation.endTime - animation.startTime) / $frameStep | 0) + 1
+    $totalTime = ((((animation.endTime - animation.startTime) + 1) * $timeScale) / 60).toFixed(2)
+    $info = "Frames: " + $frameCount + " over " + $totalTime + "seconds";
+    menuUpdate $info
+exitSub
+
+label startExport
+    if HTMLAnimationExport.viewBox === undefined {
+        warn Can not export HTML. Select a view box first
+        exitSub
+    }
+    $res = selection.remove(HTMLAnimationExport.viewBox)
+    if selection.length === 0 {
+        warn No items selected for export
+        exitSub
+    }
+    $res = HTMLAnimationExport.select()
+    $res = HTMLAnimationExport.export("HTMLTestAnimation" + getGUID());
+exitSub
+
+label selectExportable
+    $res = sprites.selectByType("text")
+    $res = sprites.selectAddByType("image")
+    $res = sprites.selectAdd(function(spr){ return spr.type.shape && spr.shape.name === "vectorCommited"})
+    
+    info All exportable sprites selected
+exitSub
+label animTypeSelect
+    $animationType = $animationType.replace("Anim Type ","");
+    HTMLAnimationExport.animationType = $animationType
+    jumpSub updateSettings
+    jump updateUI
+
+exitSub
+label selectViewBox
+    if selection[0] !== undefined {
+        $s = selection[0];
+        if $s.type.cutter === true {
+            $res = (HTMLAnimationExport.viewBox = $s)
+            if $lockAspect === true {
+                $width = $s.w
+                $height = $s.h
+                $aspect = $height / $width
+                HTMLAnimationExport.width = $width
+
+            }
+            if $lockAspect === false {
+                $width = $s.w
+                $height = $s.h
+                HTMLAnimationExport.width = $width
+                HTMLAnimationExport.height = $height
+
+
+            }
+            $s.gridSpecial = 1;
+            info View box selected
+            jumpSub updateSettings
+            jump updateUI
+        }
+        warn View box sprite must be a Cutter
+        exitSub
+    }
+    warn First select sprite to become view box
+
+exitSub
+
+label updateSettings
+    if HTMLAnimationExport.viewBox !== undefined {
+        $viewBox = HTMLAnimationExport.viewBox
+
+
+    }
+    $animationType = HTMLAnimationExport.animationType
+    $width = HTMLAnimationExport.width
+    if $lockAspect === true {
+        $height = $width * $aspect
+        HTMLAnimationExport.height = $height
+    }
+    $height = HTMLAnimationExport.height
+    $frameStep = HTMLAnimationExport.frameStep
+    $timeScale = HTMLAnimationExport.timeScale
+    $timingFunction = HTMLAnimationExport.timingFunction === "linear" ? "Linear" : "Step"
+    if $timingFunction === "linear" {
+        $timingFunction = "Linear"
+        exitSub
+    }
+    if $timingFunction !== "linear" {
+        $timingFunction = "Step"
+        exitSub
+    }
+
+
+
+
+exitSub
+label updateWidth
+    HTMLAnimationExport.width = $width
+    if $lockAspect === true {
+        $height = $width * $aspect
+        HTMLAnimationExport.height = $height
+    }
+    jumpSub updateSettings
+    jump updateUI
+exitSub
+label updateHeight
+    HTMLAnimationExport.height = $height
+    if $lockAspect === true {
+        $width = $height * (1/$aspect)
+        HTMLAnimationExport.width = $width
+    }
+    jumpSub updateSettings
+    jump updateUI
+exitSub
+label setFrameStep
+    HTMLAnimationExport.frameStep = $frameStep
+    jumpSub updateSettings
+    jump updateUI
+exitSub
+label setTimeScale
+    HTMLAnimationExport.timeScale = $timeScale
+    jumpSub updateSettings
+    jump updateUI
+exitSub
+label setTimingFunction
+    HTMLAnimationExport.timingFunction = $timingFunction
+    jumpSub updateSettings
+    jump updateUI
+exitSub
+
+label toggleAspect
+
+    if $lockAspect === false {
+        $aspect = $height / $width
+        $lockAspect = true
+        jumpSub updateSettings
+        jump updateUI
+    }
+    $lockAspect = false
+    jumpSub updateSettings
+    jump updateUI
+
+exitSub
+
+//============================================================================================================================
+// Events
+//============================================================================================================================
+event ontimeout {
+    if $startup === true {
+        $startup = false
+        jumpSub updateSettings
+        jumpSub updateUI
+    }
+}

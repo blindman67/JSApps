@@ -1,0 +1,747 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2020-10-09T16:29:38.390Z",
+        "id": 233113,
+        "author": "Blindman67 blindmanmag4@gmail.com",
+        "copyright": "All content copyright Blindman67, All rights reserved. 2018-2020",
+        "type": "scene"
+    },
+    "scene": {
+        "sprites": [{
+                "name": "Right Hand",
+                "id": 233071,
+                "x": 131.03,
+                "y": 126.01,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ff0000",
+                "gridSpecial": 4,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Right Sholder01",
+                "id": 233072,
+                "x": 110.43,
+                "y": 16.71,
+                "w": 32,
+                "h": 32,
+                "rx": 0.331425,
+                "ry": 1.902222,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ff0000",
+                "gridSpecial": 6,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Look To Foot",
+                "id": 233073,
+                "x": 110.43,
+                "y": 16.71,
+                "w": 16,
+                "h": 16,
+                "rx": 2.955238,
+                "ry": 4.526034,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ff0000",
+                "gridSpecial": 5,
+                "lookat": [233071, 1.5707963267948966, 0],
+                "attachedTo": 233072,
+                "attachment": {
+                    "x": 16,
+                    "y": 16,
+                    "rx": 0,
+                    "ry": 1.571
+                },
+                "type": "cutter"
+            }, {
+                "name": "Right Arm",
+                "id": 233074,
+                "x": 100.01,
+                "y": 46.97,
+                "w": 16,
+                "h": 64,
+                "rx": 0.331425,
+                "ry": 1.902425,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ff0000",
+                "gridSpecial": 2,
+                "attachedTo": 233072,
+                "attachment": {
+                    "x": 16,
+                    "y": 48,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            }, {
+                "name": "Right Elbo",
+                "id": 233075,
+                "x": 89.59,
+                "y": 77.23,
+                "w": 8,
+                "h": 8,
+                "rx": -0.704135,
+                "ry": 0.866661,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ff0000",
+                "gridSpecial": 3,
+                "attachedTo": 233074,
+                "attachment": {
+                    "x": 8,
+                    "y": 64,
+                    "rx": 0,
+                    "ry": 1.571
+                },
+                "type": "cutter"
+            }, {
+                "name": "Right Fore Arm",
+                "id": 233076,
+                "x": 110.31,
+                "y": 101.62,
+                "w": 16,
+                "h": 64,
+                "rx": -0.704135,
+                "ry": 0.866865,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ff0000",
+                "gridSpecial": 2,
+                "attachedTo": 233075,
+                "attachment": {
+                    "x": 4,
+                    "y": 36,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            }, {
+                "name": "Bend Direction",
+                "id": 233077,
+                "x": 750,
+                "y": -511,
+                "w": 17.8,
+                "h": 38.4,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ff0000",
+                "namedInLink": true,
+                "type": "text",
+                "textId": 233078
+            }, {
+                "name": "IK Arm function link",
+                "id": 233079,
+                "x": 586,
+                "y": -501,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ff0000",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [233074, 233076, 233071, 233072, 233075, 233077, 233073],
+                    "outputs": [233075, 233074, 233076, 233072],
+                    "linked": [233071, 233072, 233073, 233074, 233075, 233076, 233077],
+                    "source": "var spr233074, spr233075, spr233076, spr233071, spr233072, spr233073, spr233077;\nvar linkCount = 0, linksCount = 0;\nconst spriteIDS = [233074, 233075, 233076, 233071, 233072, 233077, 233073];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nconst vals = [];\nfunction update() {\n    var x,y, roff,angle;\n    if (!API.active) { return }\n    const dir = -(spr233077.type.text ? (isNaN(spr233077.textInfo.text) ? 0 : Number(spr233077.textInfo.text)) : 0);\n    const h1 = (spr233074.type.normalisable ? spr233074.h : spr233074.h * spr233074.sy);\n    const h2 = (spr233076.type.normalisable ? spr233076.h : spr233076.h * spr233076.sy);\n    x = spr233071.x - spr233072.x;\n    y = spr233071.y - spr233072.y;\n    const h22 = h2 * h2;\n    const h11 = h1 * h1;\n    const h33 = x * x + y * y;\n    const ab21 = (h1 * Math.sqrt(h33)) * 2;\n    const ab22 = (h1 * h2) * 2;\n    spr233075.type.attached && (spr233075.attachment.y = h1, spr233075.attachment.position());\n    x = ((spr233072.type.normalisable ? spr233072.w : spr233072.w * spr233072.sx)) * 0.5;\n    y = ((spr233072.type.normalisable ? spr233072.h : spr233072.h * spr233072.sy) + h1) * 0.5;\n    spr233074.type.attached && (spr233074.attachment.x = x, spr233074.attachment.y = y, spr233074.attachment.position());\n    spr233074.key.update();\n    x = ((spr233075.type.normalisable ? spr233075.w : spr233075.w * spr233075.sx)) * 0.5;\n    y = ((spr233075.type.normalisable ? spr233075.h : spr233075.h * spr233075.sy) + h2) * 0.5;\n    spr233076.type.attached && (spr233076.attachment.x = x, spr233076.attachment.y = y, spr233076.attachment.position());\n    spr233076.key.update();\n    angle = spr233073.rx + dir * Math.acosc((h22 - (h11 + h33)) / (ab21 ? ab21 : 1));\n    roff = spr233072.ry - spr233072.rx;\n    spr233072.rx = angle;\n    spr233072.ry = angle + roff;\n    spr233072.key.update();\n    angle += dir * Math.acosc((h33 - (h11 + h22)) / (ab22 ? ab22 : 1));\n    roff = spr233075.ry - spr233075.rx;\n    spr233075.rx = angle;\n    spr233075.ry = angle + roff;\n    spr233075.key.update();\n    API.updateWidget = spr233074.selected || spr233075.selected || spr233076.selected || spr233072.selected;\n}\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if(spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    spr233074 = getSprite(233074);\n    spr233075 = getSprite(233075);\n    spr233076 = getSprite(233076);\n    spr233071 = getSprite(233071);\n    spr233072 = getSprite(233072);\n    spr233077 = getSprite(233077);\n    spr233073 = getSprite(233073);\n    API.active = linksCount === linkCount;\n    reset();\n}\nfunction reset() {}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset, spriteIDS, spriteList, update,\n    inputs: [['Foot',233071], ['Top',233072], ['Direction',233077]],\n    outputs: [],\n    bind(spr, id) {\n        if(spriteList.has(id)) {\n            spriteList.set(id,spr);\n            setSprites();\n        }\n    },\n    getById(id) { return spriteList.get(id) },\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }, {
+                "name": "Left Hand",
+                "id": 233081,
+                "x": 66.67,
+                "y": 125.51,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00ff00",
+                "gridSpecial": 4,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Left Sholder",
+                "id": 233082,
+                "x": 60.09,
+                "y": 19.48,
+                "w": 32,
+                "h": 32,
+                "rx": 0.529866,
+                "ry": 2.100663,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00ff00",
+                "gridSpecial": 6,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Look To Foot",
+                "id": 233083,
+                "x": 60.09,
+                "y": 19.48,
+                "w": 16,
+                "h": 16,
+                "rx": 3.079672,
+                "ry": 4.650468,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#00ff00",
+                "gridSpecial": 5,
+                "lookat": [233081, 1.5707963267948966, 0],
+                "attachedTo": 233082,
+                "attachment": {
+                    "x": 16,
+                    "y": 16,
+                    "rx": 0,
+                    "ry": 1.571
+                },
+                "type": "cutter"
+            }, {
+                "name": "Left Arm",
+                "id": 233084,
+                "x": 43.92,
+                "y": 47.09,
+                "w": 16,
+                "h": 64,
+                "rx": 0.529866,
+                "ry": 2.100866,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#00ff00",
+                "gridSpecial": 2,
+                "attachedTo": 233082,
+                "attachment": {
+                    "x": 16,
+                    "y": 48,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            }, {
+                "name": "Left Elbo",
+                "id": 233085,
+                "x": 27.74,
+                "y": 74.7,
+                "w": 8,
+                "h": 8,
+                "rx": -0.653708,
+                "ry": 0.917088,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#00ff00",
+                "gridSpecial": 3,
+                "attachedTo": 233084,
+                "attachment": {
+                    "x": 8,
+                    "y": 64,
+                    "rx": 0,
+                    "ry": 1.571
+                },
+                "type": "cutter"
+            }, {
+                "name": "Left Fore Arm",
+                "id": 233086,
+                "x": 47.2,
+                "y": 100.1,
+                "w": 16,
+                "h": 64,
+                "rx": -0.653708,
+                "ry": 0.917292,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#00ff00",
+                "gridSpecial": 2,
+                "attachedTo": 233085,
+                "attachment": {
+                    "x": 4,
+                    "y": 36,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            }, {
+                "name": "Bend Direction",
+                "id": 233087,
+                "x": 750,
+                "y": -472.6,
+                "w": 17.8,
+                "h": 38.4,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00ff00",
+                "namedInLink": true,
+                "type": "text",
+                "textId": 233088
+            }, {
+                "name": "IK Arm function link",
+                "id": 233089,
+                "x": 586,
+                "y": -475,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00ff00",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [233084, 233086, 233081, 233082, 233085, 233087, 233083],
+                    "outputs": [233085, 233084, 233086, 233082],
+                    "linked": [233081, 233082, 233083, 233084, 233085, 233086, 233087],
+                    "source": "var spr233084, spr233085, spr233086, spr233081, spr233082, spr233083, spr233087;\nvar linkCount = 0, linksCount = 0;\nconst spriteIDS = [233084, 233085, 233086, 233081, 233082, 233087, 233083];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nconst vals = [];\nfunction update() {\n    var x,y, roff,angle;\n    if (!API.active) { return }\n    const dir = -(spr233087.type.text ? (isNaN(spr233087.textInfo.text) ? 0 : Number(spr233087.textInfo.text)) : 0);\n    const h1 = (spr233084.type.normalisable ? spr233084.h : spr233084.h * spr233084.sy);\n    const h2 = (spr233086.type.normalisable ? spr233086.h : spr233086.h * spr233086.sy);\n    x = spr233081.x - spr233082.x;\n    y = spr233081.y - spr233082.y;\n    const h22 = h2 * h2;\n    const h11 = h1 * h1;\n    const h33 = x * x + y * y;\n    const ab21 = (h1 * Math.sqrt(h33)) * 2;\n    const ab22 = (h1 * h2) * 2;\n    spr233085.type.attached && (spr233085.attachment.y = h1, spr233085.attachment.position());\n    x = ((spr233082.type.normalisable ? spr233082.w : spr233082.w * spr233082.sx)) * 0.5;\n    y = ((spr233082.type.normalisable ? spr233082.h : spr233082.h * spr233082.sy) + h1) * 0.5;\n    spr233084.type.attached && (spr233084.attachment.x = x, spr233084.attachment.y = y, spr233084.attachment.position());\n    spr233084.key.update();\n    x = ((spr233085.type.normalisable ? spr233085.w : spr233085.w * spr233085.sx)) * 0.5;\n    y = ((spr233085.type.normalisable ? spr233085.h : spr233085.h * spr233085.sy) + h2) * 0.5;\n    spr233086.type.attached && (spr233086.attachment.x = x, spr233086.attachment.y = y, spr233086.attachment.position());\n    spr233086.key.update();\n    angle = spr233083.rx + dir * Math.acosc((h22 - (h11 + h33)) / (ab21 ? ab21 : 1));\n    roff = spr233082.ry - spr233082.rx;\n    spr233082.rx = angle;\n    spr233082.ry = angle + roff;\n    spr233082.key.update();\n    angle += dir * Math.acosc((h33 - (h11 + h22)) / (ab22 ? ab22 : 1));\n    roff = spr233085.ry - spr233085.rx;\n    spr233085.rx = angle;\n    spr233085.ry = angle + roff;\n    spr233085.key.update();\n    API.updateWidget = spr233084.selected || spr233085.selected || spr233086.selected || spr233082.selected;\n}\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if(spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    spr233084 = getSprite(233084);\n    spr233085 = getSprite(233085);\n    spr233086 = getSprite(233086);\n    spr233081 = getSprite(233081);\n    spr233082 = getSprite(233082);\n    spr233087 = getSprite(233087);\n    spr233083 = getSprite(233083);\n    API.active = linksCount === linkCount;\n    reset();\n}\nfunction reset() {}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset, spriteIDS, spriteList, update,\n    inputs: [['Foot',233081], ['Top',233082], ['Direction',233087]],\n    outputs: [],\n    bind(spr, id) {\n        if(spriteList.has(id)) {\n            spriteList.set(id,spr);\n            setSprites();\n        }\n    },\n    getById(id) { return spriteList.get(id) },\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }, {
+                "name": "Right Foot",
+                "id": 233091,
+                "x": 101.29,
+                "y": 302.34,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ffff00",
+                "gridSpecial": 4,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Right Hip",
+                "id": 233092,
+                "x": 101.58,
+                "y": 177.75,
+                "w": 32,
+                "h": 32,
+                "rx": 6.054366,
+                "ry": 7.625163,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ffff00",
+                "gridSpecial": 6,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Look To Foot",
+                "id": 233093,
+                "x": 101.58,
+                "y": 177.75,
+                "w": 16,
+                "h": 16,
+                "rx": 3.143963,
+                "ry": 4.714759,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffff00",
+                "gridSpecial": 5,
+                "lookat": [233091, 1.5707963267948966, 0],
+                "attachedTo": 233092,
+                "attachment": {
+                    "x": 16,
+                    "y": 16,
+                    "rx": 0,
+                    "ry": 1.571
+                },
+                "type": "cutter"
+            }, {
+                "name": "Right Leg",
+                "id": 233094,
+                "x": 108.84,
+                "y": 208.92,
+                "w": 16,
+                "h": 64,
+                "rx": 6.054366,
+                "ry": 7.625366,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffff00",
+                "gridSpecial": 2,
+                "attachedTo": 233092,
+                "attachment": {
+                    "x": 16,
+                    "y": 48,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            }, {
+                "name": "Right Knee",
+                "id": 233095,
+                "x": 116.09,
+                "y": 240.08,
+                "w": 8,
+                "h": 8,
+                "rx": 6.516744,
+                "ry": 8.087541,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffff00",
+                "gridSpecial": 3,
+                "attachedTo": 233094,
+                "attachment": {
+                    "x": 8,
+                    "y": 64,
+                    "rx": 0,
+                    "ry": 1.571
+                },
+                "type": "cutter"
+            }, {
+                "name": "Right Low Leg",
+                "id": 233096,
+                "x": 108.69,
+                "y": 271.21,
+                "w": 16,
+                "h": 64,
+                "rx": 6.516744,
+                "ry": 8.087744,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#ffff00",
+                "gridSpecial": 2,
+                "attachedTo": 233095,
+                "attachment": {
+                    "x": 4,
+                    "y": 36,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            }, {
+                "name": "Bend Direction",
+                "id": 233097,
+                "x": 750,
+                "y": -434.2,
+                "w": 28.45,
+                "h": 38.4,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ffff00",
+                "namedInLink": true,
+                "type": "text",
+                "textId": 233098
+            }, {
+                "name": "IK Arm function link",
+                "id": 233099,
+                "x": 586,
+                "y": -434,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#ffff00",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [233094, 233096, 233091, 233092, 233095, 233097, 233093],
+                    "outputs": [233095, 233094, 233096, 233092],
+                    "linked": [233091, 233092, 233093, 233094, 233095, 233096, 233097],
+                    "source": "var spr233094, spr233095, spr233096, spr233091, spr233092, spr233093, spr233097;\nvar linkCount = 0, linksCount = 0;\nconst spriteIDS = [233094, 233095, 233096, 233091, 233092, 233097, 233093];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nconst vals = [];\nfunction update() {\n    var x,y, roff,angle;\n    if (!API.active) { return }\n    const dir = -(spr233097.type.text ? (isNaN(spr233097.textInfo.text) ? 0 : Number(spr233097.textInfo.text)) : 0);\n    const h1 = (spr233094.type.normalisable ? spr233094.h : spr233094.h * spr233094.sy);\n    const h2 = (spr233096.type.normalisable ? spr233096.h : spr233096.h * spr233096.sy);\n    x = spr233091.x - spr233092.x;\n    y = spr233091.y - spr233092.y;\n    const h22 = h2 * h2;\n    const h11 = h1 * h1;\n    const h33 = x * x + y * y;\n    const ab21 = (h1 * Math.sqrt(h33)) * 2;\n    const ab22 = (h1 * h2) * 2;\n    spr233095.type.attached && (spr233095.attachment.y = h1, spr233095.attachment.position());\n    x = ((spr233092.type.normalisable ? spr233092.w : spr233092.w * spr233092.sx)) * 0.5;\n    y = ((spr233092.type.normalisable ? spr233092.h : spr233092.h * spr233092.sy) + h1) * 0.5;\n    spr233094.type.attached && (spr233094.attachment.x = x, spr233094.attachment.y = y, spr233094.attachment.position());\n    spr233094.key.update();\n    x = ((spr233095.type.normalisable ? spr233095.w : spr233095.w * spr233095.sx)) * 0.5;\n    y = ((spr233095.type.normalisable ? spr233095.h : spr233095.h * spr233095.sy) + h2) * 0.5;\n    spr233096.type.attached && (spr233096.attachment.x = x, spr233096.attachment.y = y, spr233096.attachment.position());\n    spr233096.key.update();\n    angle = spr233093.rx + dir * Math.acosc((h22 - (h11 + h33)) / (ab21 ? ab21 : 1));\n    roff = spr233092.ry - spr233092.rx;\n    spr233092.rx = angle;\n    spr233092.ry = angle + roff;\n    spr233092.key.update();\n    angle += dir * Math.acosc((h33 - (h11 + h22)) / (ab22 ? ab22 : 1));\n    roff = spr233095.ry - spr233095.rx;\n    spr233095.rx = angle;\n    spr233095.ry = angle + roff;\n    spr233095.key.update();\n    API.updateWidget = spr233094.selected || spr233095.selected || spr233096.selected || spr233092.selected;\n}\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if(spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    spr233094 = getSprite(233094);\n    spr233095 = getSprite(233095);\n    spr233096 = getSprite(233096);\n    spr233091 = getSprite(233091);\n    spr233092 = getSprite(233092);\n    spr233097 = getSprite(233097);\n    spr233093 = getSprite(233093);\n    API.active = linksCount === linkCount;\n    reset();\n}\nfunction reset() {}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset, spriteIDS, spriteList, update,\n    inputs: [['Foot',233091], ['Top',233092], ['Direction',233097]],\n    outputs: [],\n    bind(spr, id) {\n        if(spriteList.has(id)) {\n            spriteList.set(id,spr);\n            setSprites();\n        }\n    },\n    getById(id) { return spriteList.get(id) },\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }, {
+                "name": "Left Foot",
+                "id": 233101,
+                "x": 64.27,
+                "y": 302.23,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00f0f0",
+                "gridSpecial": 4,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Left Hip",
+                "id": 233102,
+                "x": 64.27,
+                "y": 175.71,
+                "w": 32,
+                "h": 32,
+                "rx": 6.131149,
+                "ry": 7.701945,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00f0f0",
+                "gridSpecial": 6,
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Look To Foot",
+                "id": 233103,
+                "x": 64.27,
+                "y": 175.71,
+                "w": 16,
+                "h": 16,
+                "rx": 3.141593,
+                "ry": 4.712389,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#00f0f0",
+                "gridSpecial": 5,
+                "lookat": [233101, 1.5707963267948966, 0],
+                "attachedTo": 233102,
+                "attachment": {
+                    "x": 16,
+                    "y": 16,
+                    "rx": 0,
+                    "ry": 1.571
+                },
+                "type": "cutter"
+            }, {
+                "name": "Left Leg",
+                "id": 233104,
+                "x": 69.12,
+                "y": 207.34,
+                "w": 16,
+                "h": 64,
+                "rx": 6.131149,
+                "ry": 7.702149,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#00f0f0",
+                "gridSpecial": 2,
+                "attachedTo": 233102,
+                "attachment": {
+                    "x": 16,
+                    "y": 48,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            }, {
+                "name": "Left Knee",
+                "id": 233105,
+                "x": 73.96,
+                "y": 238.97,
+                "w": 8,
+                "h": 8,
+                "rx": 6.435222,
+                "ry": 8.006018,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#00f0f0",
+                "gridSpecial": 3,
+                "attachedTo": 233104,
+                "attachment": {
+                    "x": 8,
+                    "y": 64,
+                    "rx": 0,
+                    "ry": 1.571
+                },
+                "type": "cutter"
+            }, {
+                "name": "Left Low Leg",
+                "id": 233106,
+                "x": 69.11,
+                "y": 270.6,
+                "w": 16,
+                "h": 64,
+                "rx": 6.435222,
+                "ry": 8.006222,
+                "locks": {
+                    "scale": true,
+                    "rotate": true,
+                    "UI": true
+                },
+                "hideOutline": true,
+                "rgb": "#00f0f0",
+                "gridSpecial": 2,
+                "attachedTo": 233105,
+                "attachment": {
+                    "x": 4,
+                    "y": 36,
+                    "rx": 0,
+                    "ry": 1.571,
+                    "ir": true
+                },
+                "type": "cutter"
+            }, {
+                "name": "Bend Direction",
+                "id": 233107,
+                "x": 750,
+                "y": -395.8,
+                "w": 28.45,
+                "h": 38.4,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00f0f0",
+                "namedInLink": true,
+                "type": "text",
+                "textId": 233108
+            }, {
+                "name": "IK Arm function link",
+                "id": 233109,
+                "x": 586,
+                "y": -409,
+                "w": 96,
+                "h": 16,
+                "locks": {
+                    "scale": true,
+                    "rotate": true
+                },
+                "rgb": "#00f0f0",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [233104, 233106, 233101, 233102, 233105, 233107, 233103],
+                    "outputs": [233105, 233104, 233106, 233102],
+                    "linked": [233101, 233102, 233103, 233104, 233105, 233106, 233107],
+                    "source": "var spr233104, spr233105, spr233106, spr233101, spr233102, spr233103, spr233107;\nvar linkCount = 0, linksCount = 0;\nconst spriteIDS = [233104, 233105, 233106, 233101, 233102, 233107, 233103];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nconst vals = [];\nfunction update() {\n    var x,y, roff,angle;\n    if (!API.active) { return }\n    const dir = -(spr233107.type.text ? (isNaN(spr233107.textInfo.text) ? 0 : Number(spr233107.textInfo.text)) : 0);\n    const h1 = (spr233104.type.normalisable ? spr233104.h : spr233104.h * spr233104.sy);\n    const h2 = (spr233106.type.normalisable ? spr233106.h : spr233106.h * spr233106.sy);\n    x = spr233101.x - spr233102.x;\n    y = spr233101.y - spr233102.y;\n    const h22 = h2 * h2;\n    const h11 = h1 * h1;\n    const h33 = x * x + y * y;\n    const ab21 = (h1 * Math.sqrt(h33)) * 2;\n    const ab22 = (h1 * h2) * 2;\n    spr233105.type.attached && (spr233105.attachment.y = h1, spr233105.attachment.position());\n    x = ((spr233102.type.normalisable ? spr233102.w : spr233102.w * spr233102.sx)) * 0.5;\n    y = ((spr233102.type.normalisable ? spr233102.h : spr233102.h * spr233102.sy) + h1) * 0.5;\n    spr233104.type.attached && (spr233104.attachment.x = x, spr233104.attachment.y = y, spr233104.attachment.position());\n    spr233104.key.update();\n    x = ((spr233105.type.normalisable ? spr233105.w : spr233105.w * spr233105.sx)) * 0.5;\n    y = ((spr233105.type.normalisable ? spr233105.h : spr233105.h * spr233105.sy) + h2) * 0.5;\n    spr233106.type.attached && (spr233106.attachment.x = x, spr233106.attachment.y = y, spr233106.attachment.position());\n    spr233106.key.update();\n    angle = spr233103.rx + dir * Math.acosc((h22 - (h11 + h33)) / (ab21 ? ab21 : 1));\n    roff = spr233102.ry - spr233102.rx;\n    spr233102.rx = angle;\n    spr233102.ry = angle + roff;\n    spr233102.key.update();\n    angle += dir * Math.acosc((h33 - (h11 + h22)) / (ab22 ? ab22 : 1));\n    roff = spr233105.ry - spr233105.rx;\n    spr233105.rx = angle;\n    spr233105.ry = angle + roff;\n    spr233105.key.update();\n    API.updateWidget = spr233104.selected || spr233105.selected || spr233106.selected || spr233102.selected;\n}\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if(spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    spr233104 = getSprite(233104);\n    spr233105 = getSprite(233105);\n    spr233106 = getSprite(233106);\n    spr233101 = getSprite(233101);\n    spr233102 = getSprite(233102);\n    spr233107 = getSprite(233107);\n    spr233103 = getSprite(233103);\n    API.active = linksCount === linkCount;\n    reset();\n}\nfunction reset() {}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset, spriteIDS, spriteList, update,\n    inputs: [['Foot',233101], ['Top',233102], ['Direction',233107]],\n    outputs: [],\n    bind(spr, id) {\n        if(spriteList.has(id)) {\n            spriteList.set(id,spr);\n            setSprites();\n        }\n    },\n    getById(id) { return spriteList.get(id) },\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "vectors": [],
+        "groups": [],
+        "collections": [{
+                "name": "Right Arm",
+                "guid": 233080,
+                "children": [233071, 233072, 233073, 233074, 233075, 233076, 233077, 233079]
+            }, {
+                "name": "Left Arm",
+                "guid": 233090,
+                "children": [233081, 233082, 233083, 233084, 233085, 233086, 233087, 233089]
+            }, {
+                "name": "Right Leg",
+                "guid": 233100,
+                "children": [233091, 233092, 233093, 233094, 233095, 233096, 233097, 233099]
+            }, {
+                "name": "Left Leg",
+                "guid": 233110,
+                "children": [233101, 233102, 233103, 233104, 233105, 233106, 233107, 233109]
+            }
+        ],
+        "timeline": {
+            "keyStore": {
+                "names": [],
+                "keyIds": []
+            }
+        },
+        "animation": {
+            "time": 0,
+            "start": 0,
+            "end": 120,
+            "length": 120,
+            "speed": 1
+        },
+        "kinematics": [],
+        "text": [{
+                "text": "1",
+                "id": 233078
+            }, {
+                "text": "1",
+                "id": 233088
+            }, {
+                "text": "-1",
+                "id": 233098
+            }, {
+                "text": "-1",
+                "id": 233108
+            }
+        ],
+        "media": []
+    }
+}

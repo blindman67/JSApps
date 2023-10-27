@@ -1,0 +1,433 @@
+
+
+#callOnOpt if $opt === "%0" {;jumpSub %1;$res = widget.update();jump doAgain;};
+#callOnSubOpts $subOp = $opt.includes("%0");if $subOp === true {;jumpSub %1;jump doAgain;};
+
+
+
+
+
+
+
+menu title "20 Func link Helper"
+menu exit "Exit"
+menu exit "Update"
+$options = ""
+$options = $options + "{,Bind inputs,Bind outputs,},"
+$options = $options + "Sort function links,"
+$options = $options + ",{,Position,Attached Position,},"
+$options = $options + ",{,Width,Height,Width Height,},"
+$options = $options + "Distance,"
+$options = $options + "Angle Between Vectors,"
+$options = $options + "Normalised Vector,"
+$options = $options + "Mid Point,"
+$options = $options + ",{,Sum,Sub,Mult,Div,},"
+$options = $options + ",{,Min,Max,},"
+menu options $options
+menu keep
+label doAgain
+$opt = call menu
+$close = $opt === "exit" || $opt === "cancel"
+if $close === true {
+    $res = storage.close()
+    exit
+}
+
+if $opt === "Bind inputs" {
+    com edSpriteAttachFuncInput
+    jump doAgain
+}
+if $opt === "Bind outputs" {
+    com edSpriteAttachFuncOutput
+    jump doAgain
+}
+if $opt === "Sort function links" {
+    com edSprOrderFunctionLinks
+    jump doAgain
+}
+
+$opt = $opt.replace(/ /g,"")
+#callOnOpt Position createPosition
+#callOnOpt AttachedPosition createAPosition
+#callOnOpt Distance createDistance
+#callOnOpt MidPoint createMidPoint
+#callOnOpt AngleBetweenVectors createAngBetween
+#callOnOpt NormalisedVector createNorm
+#callOnOpt Sum createSum
+#callOnOpt Sub createDif
+#callOnOpt Mult createMult
+#callOnOpt Div createDiv
+#callOnOpt Min createMin
+#callOnOpt Max createMax
+#callOnOpt Width createWidth
+#callOnOpt Height createHeight
+#callOnOpt WidthHeight createWidthHeight
+
+
+jump doAgain
+label createFLink // $fType is type
+    com edSprCreateFunctionLink
+    $link = selection[0]
+    $link.fLink.type = $fType
+exitSub
+
+label getSelectedFLinks
+    $in = selection.asArrayOfType("functionLink")
+exitSub
+
+label setInputs   // $in to hold input $link to spr
+    if $in.length > 0 {
+        label eachInput
+            $spr = $in.shift()
+            $res = $link.attachFunc($spr, "input")
+            if $in.length > 0 {
+                jump eachInput
+            }
+    }
+exitSub
+
+label createSum
+    $funcType = "sum"
+    jump createFromSelected
+label createDif
+    $funcType = "dif"
+    jump createFromSelected
+label createMult
+    $funcType = "mult"
+    jump createFromSelected
+label createDiv
+    $funcType = "div"
+    jump createFromSelected 
+label createMin
+    $funcType = "min"
+    jump createFromSelected  
+label createMax
+    $funcType = "max"
+    jump createFromSelected
+
+
+label createFromSelected
+    if selection.length > 0 {
+        jumpSub getSelectedFLinks
+        $fType = $funcType
+        jumpSub createFLink
+        jumpSub setInputs
+        exitSub
+    }
+    log Select some inputs
+exitSub
+
+label createDistance
+    $s1 = selection[0]
+    $s2 = selection[1]
+    if $s1 !== undefined {
+        if $s2 !== undefined {
+            com edSprCreateFunctionLink
+            $X = selection[0];
+            com edSprCreateFunctionLink
+            $Y = selection[0];
+            com edSprCreateFunctionLink
+            $H = selection[0];
+            $Y.y = $Y.y + 20
+            $H.y = $H.y + 40
+            $res = $Y.key.update()
+            $res = $H.key.update()
+            
+            $X.fLink.inFrom = "x"
+            $Y.fLink.inFrom = "y"
+            $X.fLink.type = "dif"
+            $Y.fLink.type = "dif"
+            $res = $X.attachFunc($s2, "input")
+            $res = $X.attachFunc($s1, "input")
+            $res = $Y.attachFunc($s2, "input")
+            $res = $Y.attachFunc($s1, "input")
+            
+            $H.fLink.type = "hypot"
+            $res = $H.attachFunc($X, "input")
+            $res = $H.attachFunc($Y, "input")
+            
+            $res = selection.clear()
+            $res = selection.add($X)
+            $res = selection.add($Y)
+            $res = selection.add($H)
+            exitSub
+        }
+        log Two sprite need to be selected
+    }
+    log select two sprites
+ exitSub
+ 
+ label createNorm
+    $s1 = selection[0]
+    $s2 = selection[1]
+    if $s1 !== undefined {
+        if $s2 !== undefined {
+            com edSprCreateFunctionLink
+            $X = selection[0];
+            com edSprCreateFunctionLink
+            $Y = selection[0];
+            com edSprCreateFunctionLink
+            $H = selection[0];
+            $Y.y = $Y.y + 20
+            $H.y = $H.y + 40
+            $res = $Y.key.update()
+            $res = $H.key.update()
+            
+            $X.fLink.inFrom = "x"
+            $Y.fLink.inFrom = "y"
+            $X.fLink.type = "dif"
+            $Y.fLink.type = "dif"
+            $res = $X.attachFunc($s2, "input")
+            $res = $X.attachFunc($s1, "input")
+            $res = $Y.attachFunc($s2, "input")
+            $res = $Y.attachFunc($s1, "input")
+            
+            $H.fLink.type = "hypot"
+            $res = $H.attachFunc($X, "input")
+            $res = $H.attachFunc($Y, "input")
+            
+            
+            com edSprCreateFunctionLink
+            $X1 = selection[0];
+            com edSprCreateFunctionLink
+            $Y1 = selection[0];
+            $X1.y = $X1.y + 60
+            $Y1.y = $Y1.y + 80
+            $res = $X1.key.update()
+            $res = $Y1.key.update()
+            
+
+            $X1.fLink.type = "div"
+            $Y1.fLink.type = "div"   
+            $res = $X1.attachFunc($X, "input")
+            $res = $Y1.attachFunc($Y, "input")
+            $res = $X1.attachFunc($H, "input")
+            $res = $Y1.attachFunc($H, "input")
+            
+            
+            $res = selection.clear()
+            $res = selection.add($X)
+            $res = selection.add($Y)
+            $res = selection.add($H)
+            $res = selection.add($X1)
+            $res = selection.add($Y1)          
+            exitSub
+        }
+        log Two sprite need to be selected
+    }
+    log select two sprites
+ exitSub
+ 
+ 
+label createMidPoint
+    $s1 = selection[0]
+    $s2 = selection[1]
+    if $s1 !== undefined {
+        if $s2 !== undefined {
+            com edSprCreateFunctionLink
+            $X = selection[0];
+            com edSprCreateFunctionLink
+            $Y = selection[0];
+
+            $Y.y = $Y.y + 20
+            $res = $Y.key.update()
+            
+            $X.fLink.inFrom = "x"
+            $Y.fLink.inFrom = "y"
+            $X.fLink.outTo = "x"
+            $Y.fLink.outTo = "y"
+            $X.fLink.type = "mean"
+            $Y.fLink.type = "mean"
+            $res = $X.attachFunc($s2, "input")
+            $res = $X.attachFunc($s1, "input")
+            $res = $Y.attachFunc($s2, "input")
+            $res = $Y.attachFunc($s1, "input")
+            
+            
+            $res = selection.clear()
+            $res = selection.add($X)
+            $res = selection.add($Y)
+            exitSub
+        }
+        log Two sprite need to be selected
+    }
+    log select two sprites
+ exitSub      
+label createAngBetween
+    $s1 = selection[0]
+    $s2 = selection[1]
+    $s3 = selection[2]
+    if $s1 !== undefined {
+        if $s2 !== undefined {
+            if $s3 !== undefined {
+                com edSprCreateFunctionLink
+                $X = selection[0];
+                com edSprCreateFunctionLink
+                $Y = selection[0];
+                com edSprCreateFunctionLink
+                $X1 = selection[0];
+                com edSprCreateFunctionLink
+                $Y1 = selection[0];
+                
+                $Y.y = $Y.y + 20
+                $X1.y = $X1.y + 40
+                $Y1.y = $Y1.y + 60
+                $res = $Y.key.update()
+                $res = $X1.key.update()
+                $res = $Y1.key.update()
+                
+                $X.fLink.inFrom = "x"
+                $Y.fLink.inFrom = "y"                
+                $X1.fLink.inFrom = "x"
+                $Y1.fLink.inFrom = "y"
+
+                $X.fLink.type = "dif"
+                $Y.fLink.type = "dif"
+                $X1.fLink.type = "dif"
+                $Y1.fLink.type = "dif"     
+
+                
+                $res = $X.attachFunc($s2, "input")
+                $res = $Y.attachFunc($s2, "input")
+                $res = $X1.attachFunc($s3, "input")
+                $res = $Y1.attachFunc($s3, "input")
+                
+                $res = $X.attachFunc($s1, "input")
+                $res = $Y.attachFunc($s1, "input")
+                $res = $X1.attachFunc($s1, "input")
+                $res = $Y1.attachFunc($s1, "input")      
+
+                com edSprCreateFunctionLink
+                $A = selection[0];     
+                $A.y = $A.y + 80
+                $res = $A.key.update()          
+                $A.fLink.type = "vAng"      
+                
+                $res = $A.attachFunc($X, "input")
+                $res = $A.attachFunc($Y, "input")
+                $res = $A.attachFunc($X1, "input")
+                $res = $A.attachFunc($Y1, "input")
+                                
+                
+                $res = selection.clear()
+                $res = selection.add($X)
+                $res = selection.add($Y)
+                $res = selection.add($X1)
+                $res = selection.add($Y1)
+                $res = selection.add($A)
+                exitSub
+            }
+        }
+    }
+    log Select 3 sprites
+ exitSub   
+label createPosition
+    $s1 = selection[0]
+    if $s1 !== undefined {
+        com edSprCreateFunctionLink
+        $X = selection[0];
+        com edSprCreateFunctionLink
+        $Y = selection[0];
+
+        $Y.y = $Y.y + 20
+        $res = $Y.key.update()
+        
+        $X.fLink.inFrom = "x"
+        $Y.fLink.inFrom = "y"
+        $X.fLink.outTo = "x"
+        $Y.fLink.outTo = "y"
+        $X.fLink.type = "sum"
+        $Y.fLink.type = "sum"
+        $res = $X.attachFunc($s1, "input")
+        $res = $Y.attachFunc($s1, "input")
+        
+        
+        $res = selection.clear()
+        $res = selection.add($X)
+        $res = selection.add($Y)
+        exitSub
+    }
+    log Select a sprite
+ exitSub               
+ label createAPosition
+    $s1 = selection[0]
+    if $s1 !== undefined {
+        com edSprCreateFunctionLink
+        $X = selection[0];
+        com edSprCreateFunctionLink
+        $Y = selection[0];
+
+        $Y.y = $Y.y + 20
+        $res = $Y.key.update()
+        
+        $X.fLink.inFrom = "ax"
+        $Y.fLink.inFrom = "ay"
+        $X.fLink.outTo = "ax"
+        $Y.fLink.outTo = "ay"
+        $X.fLink.type = "sum"
+        $Y.fLink.type = "sum"
+        $res = $X.attachFunc($s1, "input")
+        $res = $Y.attachFunc($s1, "input")
+        
+        
+        $res = selection.clear()
+        $res = selection.add($X)
+        $res = selection.add($Y)
+        exitSub
+    }
+    log Select a sprite
+ exitSub      
+ 
+ 
+label createWidth
+    $addWidth = true
+    $addHeight = false
+    jumpSub createWH
+exitSub
+label createHeight
+    $addWidth = false
+    $addHeight = true
+    jumpSub createWH
+exitSub
+label createWidthHeight
+    $addWidth = true
+    $addHeight = true
+    jumpSub createWH
+exitSub
+label createWH
+    $s1 = selection[0]
+    if $s1 !== undefined {
+        $sel = []
+        if $addWidth === true {
+            com edSprCreateFunctionLink
+            $W = selection[0];
+            $W.fLink.inFrom = "w"
+            $W.fLink.outTo = "w"
+            $W.fLink.type = "sum"
+            $res = $W.attachFunc($s1, "input")         
+            $res = $sel.push($W)
+        }
+        if $addHeight === true {
+            com edSprCreateFunctionLink
+            $H = selection[0];
+            $H.fLink.inFrom = "h"
+            $H.fLink.outTo = "h"
+            $H.fLink.type = "sum"
+            $res = $H.attachFunc($s1, "input")  
+            if $addWidth === true {
+                $H.y = $H.y + 20
+                $res = $H.key.update()
+            }
+            $res = $sel.push($H)
+        }           
+            
+
+        
+        
+        $res = selection.clear()
+        $res = selection.add($sel)
+        $sel = undefined
+        exitSub
+    }
+    log Select a sprite
+ exitSub  

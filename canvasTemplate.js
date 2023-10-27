@@ -1,7 +1,7 @@
 import {$,$$} from "./src/DOM/geeQry.js";
 
-function startApp(event) { location.href = event.target.dataset.url.includes("index.html") ? event.target.dataset.url : (event.target.dataset.url + "/index.html"); }
-for (const link of $("?#root li")) { link.dataset.url && link.addEventListener("click", startApp) }
+function startApp(e) { location.href = e.target.dataset.url?.includes("index.html") ? e.target.dataset.url : e.target.dataset.named !== undefined ? e.target.dataset.named : (e.target.dataset.url + "/index.html"); }
+for (const link of $("?#root li")) { (link.dataset.url || link.dataset.named) && link.addEventListener("click", startApp) }
 
 
 

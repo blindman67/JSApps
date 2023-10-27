@@ -1,0 +1,13 @@
+
+com edSprCreateDraw
+com spritesSelectAll
+$count = 63
+label loop
+    com edSprClone
+    com edSprRotCW ctrl shift
+    $count = $count - 1
+    if $count > 0 {
+       jump loop
+    }
+com spritesSelectAll
+draw on

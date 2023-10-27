@@ -1,0 +1,49 @@
+#menuOpts menu exit "OK";menu exit "Exit";menu options $opts;$res = call menu;if $res === "exit" exit
+
+
+assert selected
+if $assertion === false {
+    log "No sprites are selected"
+    exit
+}
+assert image
+if $assertion === false {
+    log "No selected sprite contain an image"
+    exit
+}
+$hasTransparent = false
+menu title "Number of colors"
+$opts = "With transparent,256,128,64,32,16,8,4,2"
+#menuOpts
+if $res === "With transparent" {
+    $opts = "255,127,63,31,15,7,3"
+    #menuOpts
+}
+$colorCount = Number($res)
+wait 50   // wait for menu to close
+
+$pallets = []
+$selected = selection.asArray()
+$r = selection.clear()
+label getNextSelected
+    if $selected.length === 0 {
+        jump allDone
+    }
+    $a = $selected.pop()
+    $canUse = $a.type.image === true && $a.image.isDrawable === true
+    if $canUse === false {
+        jump getNextSelected
+    }
+    $r = selection.clear()
+    com edSprCreatePallet
+    $pal = selection[0]
+    $r = $pallets.push($pal)
+    selected as pal
+    $res = localProcessImage.imagePallet($a.image, $pal.pallet, $colorCount, 1)
+    $pal.scale = 8
+    $pal.x = $a.x + ($a.w * $a.sx * 0.5) + ($pal.w * $pal.sx * 0.5)
+    $pal.y = $a.y - ($a.h * $a.sy * 0.5) + ($pal.h * $pal.sy * 0.5)
+    jump getNextSelected
+label allDone
+$r = selection.clear()
+$r = selection.add($pallets)

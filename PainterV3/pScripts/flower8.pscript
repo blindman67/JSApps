@@ -1,0 +1,70 @@
+
+menu title "Select number petals"
+menu exit "Exit"
+menu exit "OK"
+
+
+menu options "*4,8,16,32,64"
+
+$opt = call menu
+
+if $opt === "exit" {
+    exit
+}
+
+com edSprCreateDraw
+com spritesSelectAll
+if $opt === 4 || $opt === "ok" {
+    $count = 3
+    label loop4
+        com edSprClone
+        com edSprRotCW 
+        $count = $count - 1
+        if $count > 0 {
+           jump loop4
+        }
+}
+if $opt === 8 {
+    $count = 7
+    label loop8
+        com edSprClone
+        com edSprRotCW ctrl
+        $count = $count - 1
+        if $count > 0 {
+           jump loop8
+        }
+}
+if $opt === 16 {
+    $count = 15
+    label loop16
+        com edSprClone
+        com edSprRotCW shift
+        $count = $count - 1
+        if $count > 0 {
+           jump loop16
+        }
+}
+if $opt === 32 {
+    $count = 31
+    label loop32
+        com edSprClone
+        com edSprRotCW ctrl shift
+        com edSprRotCW ctrl shift
+        $count = $count - 1
+        if $count > 0 {
+           jump loop32
+        }
+}
+if $opt === 64 {
+    $count = 63
+    label loop64
+        com edSprClone
+        com edSprRotCW ctrl shift
+        $count = $count - 1
+        if $count > 0 {
+           jump loop64
+        }
+}
+
+com spritesSelectAll
+draw on

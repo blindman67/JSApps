@@ -1,0 +1,88 @@
+{
+    "info": {
+        "app": "painterv3",
+        "date": "2019-07-07T21:17:18.349Z",
+        "id": 296749,
+        "author": "Blindman67",
+        "copyright": "All content copyright Blindman67. All rights reserved. 2018 - 2020",
+        "useLib": true,
+        "type": "scene",
+        "loadedCommands": ["edSprResetView","edSpriteActivateFunctionLinks"]
+    },
+    "lib" : {
+        "_A": {
+            "scale": true,
+            "rotate": true
+        },
+        "_B": {
+            "w": 32,
+            "h": 32,
+            "locks": "_A",
+            "namedInLink": true,
+            "type": "marker"
+        }
+    },
+    "scene": {
+        "sprites": [{
+                "name": "FootControl",
+                "id": 296717,
+                "x": -512,
+                "y": -256,
+                "w": 64,
+                "h": 64,
+                "locks": "_A",
+                "namedInLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Start",
+                "_B": 0,
+                "id": 296719,
+                "x": -1024,
+                "y": 0,
+                "lookat": [296720, 0, 0],
+                "marker": "A"
+            }, {
+                "name": "End",
+                "_B": 0,
+                "id": 296720,
+                "x": 0,
+                "y": 0,
+                "lookat": [296719, 0, 0],
+                "marker": "B"
+            }, {
+                "name": "Foot",
+                "id": 296742,
+                "x": 0,
+                "y": 0,
+                "w": 32,
+                "h": 32,
+                "locks": {
+                    "_B": 0,
+                    "UI": true
+                },
+                "namedOutLink": true,
+                "type": "cutter"
+            }, {
+                "name": "Foot Stop function",
+                "id": 296748,
+                "x": 32,
+                "y": -64,
+                "w": 96,
+                "h": 16,
+                "locks": "_A",
+                "rgb": "#88ff88",
+                "type": "fLink",
+                "fLink": {
+                    "inputs": [296717, 296719, 296720],
+                    "outputs": [296742],
+                    "linked": [296717, 296719, 296720, 296742],
+                    "source": "const _footControlIn = 296717, _startIn =296719, _endIn = 296720, _footOut = 296742;\nconst spriteIDS = [_footControlIn, _startIn, _endIn, _footOut];\nconst spriteList = sprites.createIdMapOf(spriteIDS);\nvar footControlIn, startIn, endIn, footOut, linkCount, linksCount; \nfunction update() {\n    if (API.active) {\n        const vx1 = footControlIn.x - startIn.x;\n        const vy1 = footControlIn.y - startIn.y;\n        const vx2 = startIn.x - endIn.x;\n        const vy2 = startIn.y - endIn.y;\n        if(Math.floor((Math.uVecCross2d(vx1, vy1, vx2, vy2) + 0.5) * 2) < 1) {\n            footOut.x = footControlIn.x;\n            footOut.y = footControlIn.y;\n        } else {\n            d2 = vx2 * vx2 + vy2 * vy2;\n            dot = Math.vecDot2d(vx2, vy2, vx1, vy1) / (d2 ? d2 : 1);        \n            footOut.x = dot * vx2 + startIn.x;\n            footOut.y = dot * vy2 + startIn.y;\n        }\n        const roff = footOut.ry - footOut.rx;\n        footOut.rx = startIn.rx;\n        footOut.ry = startIn.rx + roff;\n        footOut.key.update();\n        API.updateWidget = footOut.selected;\n    }\n}\nfunction getSprite(id) {\n    const spr = spriteList.get(id);\n    linksCount ++;\n    if (spr) { linkCount ++ }\n    return spr;\n}\nfunction setSprites() {\n    linksCount = linkCount = 0\n    footControlIn = getSprite(_footControlIn);\n    startIn = getSprite(_startIn);\n    endIn = getSprite(_endIn);\n    footOut = getSprite(_footOut);\n    API.active = linksCount === linkCount;\n}\nconst API = {\n    updateWidget:false,\n    active: false,\n    reset() {},\n    spriteIDS,\n    spriteList,\n    inputs: [['FootControl', _footControlIn], ['Start', _startIn], ['End', _endIn]],\n    outputs: [['Foot', _footOut]],\n    bind(spr, id) { spriteList.has(id) && (spriteList.set(id,spr), setSprites()) },\n    getById(id) { return spriteList.get(id) },\n    update,\n};\nsetSprites();\nreturn API;",
+                    "textColor": "#FFF",
+                    "type": "Compiled"
+                }
+            }
+        ],
+        "groups": [],
+        "collections": []
+    }
+}

@@ -1,0 +1,11 @@
+com edSprCreateDraw
+com spritesSelectAll
+com edSprClone
+com edSprRotCW
+com edSprClone
+com edSprRotCW
+com edSprClone
+com edSprRotCW
+
+com spritesSelectAll
+com edSprDrawing

@@ -1,0 +1,10 @@
+debug
+log This will call test.json
+call test $arg0
+log Ignored the call return and call again
+$result = call test $arg0 $arg1
+
+
+log Got the result $result
+
+log Test has run and returned
