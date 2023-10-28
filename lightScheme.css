@@ -29,5 +29,6 @@ body {
 }
 #root > ul > li.ignore.head {
     border-top-color: black;
+    border-top: 2px solid;
 } 
 

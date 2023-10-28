@@ -36,7 +36,6 @@ body {
 }
 #root > ul > li.ignore.head {
     font-size: larger;
-    border-top: 2px solid;
     margin-top: 10px;
 }
 #root > ul > li.ignore.help {
