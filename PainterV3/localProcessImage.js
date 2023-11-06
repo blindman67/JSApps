@@ -9053,7 +9053,7 @@ ${strPM} ];
                     },*/
 					spriteCollisionBounds : {
 						help: "DISABLED: Creates a radial collision map of sprites and downloads it as JavaScript",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
 						call() {
 						    var allGood = false;
 							selection.each(spr => {
@@ -9087,12 +9087,12 @@ ${strPM} ];
 					},
                     spritesBoxed : {
                         help : "DISABLED: Create a packed sprite sheat from selected images\nSprites are marked by bounding box",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){ createSprites("box") }
                     },
                     spritesSideMarked : {
                         help : "DISABLED: Create a packed sprite sheat from selected images\nTop and/or left edge is marked with sprite right and bottom",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){ createSprites("sides") }
                     },
                     spriteSheet : {
@@ -9105,12 +9105,12 @@ ${strPM} ];
                     },
                     spritesSheetBoxed : {
                         help : "Create Sprite sheets from selected images\nSprites are marked by bounding box",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){ createSprites("box") }
                     },                        
                     imageValue : {
                         help : "Logs a metric of image brightness",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){
                             selection.eachOfType(spr => {
                                 if(spr.image.isDrawable){ log("Bright = " + API.calcImageValueMetric(spr.image)); }
@@ -9132,7 +9132,7 @@ ${strPM} ];
 
                     ProfileShader: {
                         help : "Create a shading map from an image representing profile",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call()  {                               
                             selection.eachOfType(spr => {
                                 if(spr.image.isDrawable){
@@ -9144,12 +9144,12 @@ ${strPM} ];
                     },
                     Image_To_JS_Map : {
                         help : "Converts image to Javascript character map object (like tile map)",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){   utils.processSelectedImages(API.imageToCharMap)    }
                     },
                     Image_To_Bin16_file: {
                         help: "Save selected as unsigned 16bit bin file\nRight click to see detailed help!",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call() {
                             if ((mouse.oldButton & 4) === 4) {
                                 callHelp("Image To Bin16 file", API.imageToBin16Help);
@@ -9164,12 +9164,12 @@ ${strPM} ];
                     },
                     Image_To_JS_Binary_Map : {
                         help : "Converts image to Javascript binary map for 1 color images",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){   utils.processSelectedImages(API.imageToBinary)    }
                     },
                     Save_Sprite_Coords : {
                         help : "Saves an array of selected sprite positions",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){
                             if(selection.length > 0){
                                 var str = "const sprites = [\n";
@@ -9186,7 +9186,7 @@ ${strPM} ];
                     },
                     Save_Selected_Sprites : {
                         help : "Basic save of sprites",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){
                             if(selection.length > 0){
                                 const spriteArr = [];
@@ -9223,7 +9223,7 @@ ${strPM} ];
                     },
                     Export_VOX_Stack : {
                         help : "Exports a set of images as a 3d VOX file\nMust include a 256 pallet",
-                        info: {disabled: LOCALS.LOCAL},
+                        info: {disabled: !LOCALS.LOCAL},
                         call(){
                             if(selection.length > 0){
                                 const imageStack = [];
