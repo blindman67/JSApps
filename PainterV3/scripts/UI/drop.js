@@ -1,5 +1,5 @@
 "use strict";
-function DropManager(dropElement, callback, types){
+function DropManager(dropElement) { //, callback, types){
     if (typeof dropElement === "string") {
         var s = dropElement;
         dropElement = document.getElementById(dropElement);
@@ -7,15 +7,15 @@ function DropManager(dropElement, callback, types){
     }
     dropElement.ondragover = this.onDragOver;
     dropElement.ondrop = this.drop.bind(this);
-    this.fileList = [];
-    this.dropFileCallback = callback;
-    this.types = types;
+    //this.fileList = [];
+    //this.dropFileCallback = callback;
+    //this.types = types;
     this.element = dropElement;
 }
 DropManager.prototype.remove = function(){}  // Really not needed just a stub for now
 DropManager.prototype.onDragEnter = function(event) { event.preventDefault() }
 DropManager.prototype.onDragOver = function(event) { event.preventDefault() }
-DropManager.prototype.getit = function(str) {
+/*DropManager.prototype.getit = function(str) {
     var type = ""
     if (str.indexOf("img") > -1) {
         var s = str.split('src="');
@@ -28,8 +28,42 @@ DropManager.prototype.getit = function(str) {
             if (type !== "") { this.fileList.push(s[i].split('"')[0]) }
         }
     }
+}*/
+DropManager.prototype.loadFile = async function(file) {
+    const {name, type} = file;
+    if (type === "application/json") { storage.fromJSONText(await file.text(), name) }
+    else if (type === "image/gif") { 
+        media.GIFByFile(file);
+    } else if (type === "image/svg+xml") {
+        log.warn("SVG images are not support by this version of PainterV3");
+        media.SVGByFile(file);
+    } else if (type === "image/png" || type === "image/jpg" || type === "image/jpeg" || type === "image/webp") {
+        const bitmap = await createImageBitmap(file);
+        const img = await media.createImageAsync(bitmap.width, bitmap.height, name);
+        if (img) {
+            img.ctx.drawImage(bitmap, 0, 0);
+            bitmap.close();
+            img.processed = true;
+            img.lastAction = "Load";
+            img.update();
+        } else { log.warn("Could not load media '" + name + "'") }
+    } else if (type === "video/mp4" || type === "video/mpeg" || type === "video/webm") {        
+        media.create(name, (video) => { if (!video) { log.error("Could not load media '" + name + "'") } });
+    } else if (type === "audio/wav" || type === "audio/ogg" || type === "audio/mp3" || type === "audio/mpeg") {     
+        media.AUDIOByFile(file);  
+    } else { log.error("Unknown file type."); }
 }
-DropManager.prototype.drop = function(event) {
+
+DropManager.prototype.drop = async function(event) {
+    event.preventDefault();
+    for (const item of event.dataTransfer.items) {
+        item.kind === "file" && await this.loadFile(await item.getAsFile());
+    }
+}
+
+/*
+DropManager.prototype.drop1 = function(event) {
+
     event.preventDefault();
     this.droppedItems = [];
     var getData = false;
@@ -65,8 +99,8 @@ DropManager.prototype.drop = function(event) {
         while(this.fileList.length>0){ this.dropFileCallback(this.fileList.shift())}
     }
     this.fileList.length = 0;
-
 }
+
 
 DropManager.prototype.mimeTypes = {
     png: "image/png",
@@ -90,3 +124,4 @@ DropManager.prototype.mimeTypes = {
     js: "application/javascript",
     all: "*",
 }
+*/

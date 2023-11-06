@@ -1,3 +1,9 @@
+menu title "20 Legacy code"
+menu options "textCenter This batch is not supported!"
+menu exit "OK"
+call menu
+exit
+
 $size = $arg0 === undefined ? 32 : $arg0
 call createTileImages $size "abcdefghijkl"
 

@@ -120,7 +120,7 @@ if $opt === "animationToStr" {
 if $opt === "selectedCaptureSprite" {
     assert selected
     if $assertion === false {
-        log "Select a image spritw, then click this button."
+        log "Select a image sprite, then click this button."
         jump doAgain
     }
     assert drawable

@@ -6,7 +6,6 @@ const buttons = (() => {
     }
     function createInput(container, width, height, button) {
         var value, input;
-
         input = button.textInput;
         input.uid = UID++;
         input.defaultValue = input.value;
@@ -20,11 +19,9 @@ const buttons = (() => {
         container.updateValue = function(mouse, event) {
             log("Called " + input.value);
             if ((event === undefined && !container.disabled) || (event !== undefined && !event.target.disabled) || overrideDisabled) {
-
                 container.value = input.value ?? "";
                 if (!input.silent && !overrideDisabled) {
                     issueCommand(button.command, input.value)
-
                 }
             }
         }
@@ -59,8 +56,6 @@ const buttons = (() => {
             input.value = container.value;
             input.updateValue();
         }
-
-
         container.addEventListener("keydown" ,container.keydown);
         container.addEventListener("keyup" ,container.keyup);
         container.addEventListener("focus" ,container.focusInput);
@@ -75,7 +70,6 @@ const buttons = (() => {
         totalWidth = width - (2 * 9 + numExtra) - 3;
         s = button.slider;
         const mAKey = s.mouseAccesKey ?? 0;
-
 		s.setRange = function(min = s.min, max = s.max, step = s.step, wStep = s.wStep) {
 			s.min = Number(min);
 			s.max = Number(max);
@@ -132,7 +126,6 @@ const buttons = (() => {
             if (overState) {
                 if (mouse.captured === 0 || mouse.captured === s.uid) { keyboard.requestCapture(s.uid, keyStep) }
             } else { keyboard.release(s.uid) }
-
         };
         container.onDrag = function(mouse, event) {
             if (!event.target.disabled || mouse.captured === s.uid) {
@@ -240,7 +233,6 @@ const buttons = (() => {
             if (event && event.target.uid === s.uid && mouse.captured === s.uid && mouse.button === 0) {
                 selectItem(event.target.itemIndex)
             }
-
             if (list.classList.contains("selectionListShow")) {
                 if (mouse.captured === 0 || mouse.captured === s.uid) {
                     list.classList.remove("selectionListShow");
@@ -265,7 +257,6 @@ const buttons = (() => {
                         list.style.top = (bottom - (bounds.top + bounds.height)  +14  | 0) + "px";
                         if (bounds.width + bounds.left + 14 < innerWidth) {list.style.left = "15px" }
                         container.style.zIndex = zIndex + 400;
-
                     }
                 }
             }
@@ -353,28 +344,23 @@ const buttons = (() => {
             }
         }
         container.openSelection = function(mouse, event){
-
             if (!event.target.disabled && (mouse.captured === 0 || mouse.captured === s.uid)) {
                 mouse.downOn = null;
                 setTimeout(toggleItemList,0);
             }
         }
         /*container.onButtonClick = function(mouse, event){
-
             if (!event.target.disabled && (mouse.captured === 0 || mouse.captured === s.uid)) {
-
             }
         }*/
         container.updateValue = function(mouse, event) {
             if ((event === undefined && !container.disabled) || (event !== undefined && !event.target.disabled)) {
-
                 if (!silent) { issueCommand(button.command, button, event) }
                 element.textContent = s.items[s.index];
                 container.title = s.itemHelp ? s.itemHelp[s.index] : null;
             }
         }
         s.selectItem = selectItem;
-
         selectItem();
         silent = false;
         return $$(container, [element, dropDownElement, list]);
@@ -438,7 +424,6 @@ const buttons = (() => {
             return item;
         }
         list.remove = function(element) { return  $R(list, element) }
-
         return list;
     }
     const groups = {};
@@ -470,67 +455,71 @@ const buttons = (() => {
     function createSimpleDialog(textDesc, keepOpen, batchScope) {
         /*
             This function is a rather ill thought out hack and is not of release quality. It and the supporting commandLine interface needs a rewrite
-
-
             Text desc format
             ------------------------------
-
             `dialogTitle Width|Dialog But1?button help,Dialog But2?button help|UI`
-
             Width is optional
             Must have at least one dialog button
             UI comma delimited UI commands
-
             example
-
             "Exit 10|Save?Saves befor exit,Exit?Exits without save,Cancel?Do nothing|File not saved select option"
-
-
-
             UI commands
             ------------------------------
-
-            , delimits commands
-            ,, adds spacer
-            ^  move up. reverse of spacer eg ,^,
-            {  begins row. Use Must be single { and } eg  button,{,button,button,},
-            }  ends row
-            !  Big. Makes button text big. eg ,text !Big,
-            $name links to a batch variable by name
-            Text
-                Start with text for left align text or textCenter
+            list of commands
+                ,
+                ,,
+                ^
+                {
+                }
+                !
+                $
+                %
                 text
-
-            Selection list
-                % Seperates selection items
-                    Example a selection list linked to batch variable. Selectable items include help.
-                    ,$color,Selection title%Red?This is red%Blue?This is blue,
-            Slider
-                slider name min max step value color
-                    Example
-                        creates a slider from 1 to 100 steps 1 current value 50 and color green
-                        ,slider SlideTitle 1 100 1 50 #0F0,
-                        To link to batch variable
-                        ,$MyBatchVar,slider SlideTitle 1 100 1 50 #0F0,
-            textInput
-
-                textInput name 'value string'
-
-            Image
-                Inserts image. Image must be in relative directory ./icons/
-                {imagesrc.png 10 10?help}    shows image  width height (**optional) ?help optional
-
-
+                textCenter
+                slider
+                sliderwarp
+                text
+                textCenter
+                textInput
+            Command details
+            
+                , delimits commands
+                ,, adds spacer
+                ^  move up. reverse of spacer eg ,^,
+                {  begins row. Use Must be single { and } eg  button,{,button,button,},
+                }  ends row
+                !  Big. Makes button text big. eg ,text !Big,
+                $name links to a batch variable by name
+                text 
+                textCenter
+                    Start with text for left align text or textCenter
+                    text
+                %
+                    any command containing the seperator command becomes a Selection list
+                    % Seperates selection items
+                    User selection is assigned to the variable befor the selection command
+                        Example a selection list linked to batch variable. Selectable items include help.
+                        ,$color,Choose a color%Red?This is red%Blue?This is blue,
+                slider
+                sliderwarp
+                    slider name min max step value color
+                        Example
+                            creates a slider from 1 to 100 steps 1 current value 50 and color green
+                            ,slider SlideTitle 1 100 1 50 #0F0,
+                            To link to batch variable
+                            ,$MyBatchVar,slider SlideTitle 1 100 1 50 #0F0,
+                textInput
+                    textInput name 'value string'
+                Image [*1]
+                    Inserts image. Image must be in relative directory ./icons/
+                    {imagesrc.png 10 10?help}    shows image  width height ([*2] optional) ?help optional
+                    
+                    
              MOTES
              ----------------------------------
-             ** IMAGE width and height currently must be included
-
-
-
-
+             [*1] Image command no longer used
+             [*2] IMAGE width and height currently must be included
         */
-
-
         var ignoreCommands = false;
         var timeoutHandle;
         var groupName = "simpleDialogGroup";
@@ -541,7 +530,6 @@ const buttons = (() => {
             groupName,
         };
         var width = 0;
-
         var title = textDesc.split("|")[0].split(" ");
         if(!isNaN(title[0])){
             width = Number(title.shift());
@@ -613,7 +601,6 @@ const buttons = (() => {
         var commandBase = commands.quickDialogBase + 1;
         var butList;
         var textLineCount = 1;
-
         buttons.create(butList = [
                 ...optionButtons.reduce((arr, text, index) => {
                     const help = optionButtonHelp[index] !== undefined ? optionButtonHelp[index] : "";
@@ -623,7 +610,6 @@ const buttons = (() => {
                         text = text.slice(1, -1);
                         const [img, help] = text.split("?");
                         const [imgSrc, w1, h1] = img.split(" ");
-
                          arr.push(options[index].image =  {
                             x: x + (width - w1 / 16) / 2,
                             y: y,
@@ -644,7 +630,6 @@ const buttons = (() => {
                         parts.shift();
                         const value = parts.pop();
                         const name = parts.pop();
-
                         var w = 0;
                         if(name !== ""){
                             arr.push({
@@ -655,19 +640,15 @@ const buttons = (() => {
                                 bid,
                             });
                             w = 4;
-
                         }
-
                         arr.push(options[index].textInput =  {
                             x: x + w, y: y++, w: width - w, h: 1, bid,
                             group: groupName,
                             command: commandBase++,
                             textInput: {value},
                         })
-
                         args[options[index].arg.substr(1)] = options[index].textInput;
                         return arr;
-
                     }
                     if(text.indexOf("slider ") === 0 || text.indexOf("sliderwrap ") === 0){
                         const infinite = text.includes("sliderwrap ");
@@ -691,8 +672,7 @@ const buttons = (() => {
                             else if (fract < 0.01) { decimals += 3; valueDisplayExtra += 3 * 8 }
                             else if (fract < 0.1) { decimals += 2; valueDisplayExtra += 2 * 8 }
                             else { decimals += 1; valueDisplayExtra += 1 * 8 }
-                           
-                        }                           
+                        }
                         var value = Number(parts.shift());
                         var color = parts[0] !== undefined ? parts.shift() : "black";
                         if(!isNaN(color) || parts.length)  {
@@ -706,7 +686,6 @@ const buttons = (() => {
                             }
                             color = isNaN(color) ? color : "black";
                         }
-
                         var w = 0, slideLabel;
                         if(name !== ""){
                             arr.push(slideLabel = {
@@ -715,12 +694,9 @@ const buttons = (() => {
                                 className : "buttonDisplayTextOnly textLeft",
                                 text : name.replace(/\_/g," "),
                                 bid,
-
                             });
                             w = 4;
-
                         }
-
                         arr.push(options[index].slide =  {
                             x : x + w, y : y++, w : width - w, h : 1,bid,
                             group : groupName,
@@ -733,13 +709,11 @@ const buttons = (() => {
                     }
                     const row = rows.find(r => r.end != -1 && index >= r.start && index <= r.end);
                     var rw = width;
-
                     var rIdx = 0;
                     if(row) {
                         rw = width / (row.end - row.start + 1);
                         rIdx = index - row.start;
                     }
-
                     if(text.indexOf("text ") === 0 || text.indexOf("textCenter ") === 0){
                         y -= 1;
                         const isCentered = text.indexOf("textCenter ") === 0;
@@ -766,7 +740,6 @@ const buttons = (() => {
                             });
                             args["TextLine_" + textLineCount] = but;
                             y +=  2;
-
                         } else {
                             arr.push(but = {
                                 x, y,
@@ -784,8 +757,6 @@ const buttons = (() => {
                             y += isCentered ? 2.5 : 2;
                             args["TextLine_" + textLineCount] = but;
                         }
-
-
                         return arr;
                     }
                     if(text[0] === "*"){
@@ -804,7 +775,6 @@ const buttons = (() => {
                                 help, subText : "",
                             });
                             if(!row || index === row.end) {y += 1.1}
-
                             args[options[index].arg.substr(1)] = options[index].textButton;
                     }else{
                         if(selectionBox) {
@@ -855,7 +825,6 @@ const buttons = (() => {
                                         help,
                                     });
                                     rowEndExtra = 0.5;
-
                                 }else {
                                     arr.push(but = {
                                         x: x + rw * rIdx, y, w: rw,  h : 1.1,bid,
@@ -905,7 +874,6 @@ const buttons = (() => {
             ],  {pannel: pannel, size: 16});
         var mouseLock = -1;
         var mouseLockedToCId = -1;
-
         const bidMap = new Map();
         for(const but of butList) {
             if(but.bid !== undefined) {
@@ -973,7 +941,6 @@ const buttons = (() => {
                         } else if(options[optionId].textButton && options[optionId].textButton.selFrom){
                             const sel = options[optionId].textButton.selFrom;
                             results.optionClicked = options[optionId].value.split("%").shift() + " "  + sel.items[sel.index];
-
                         } else {
                             results.optionClicked = optionButtons[optionId];
                             if(mouse.downOn && mouse.downOn.but && mouse.downOn.but.subOption) {
@@ -1006,7 +973,6 @@ const buttons = (() => {
                     keepOpen = false;
                     handler.command((commandBase - exitButtons.length) + exitButtons.indexOf(viaExit))
                 } else {
-
                     commandRanges.removeHandler(handler.handle);
                     handler = undefined;
                     results.waiting = false;
@@ -1075,14 +1041,11 @@ const buttons = (() => {
                                 args[argName].textInput.value = str;
                             }
                             args[argName].element.value = str;
-
-
                         }
                     }
                 }
                 ignoreCommands = false;
             },
-
         }
         var radioStarSet = false;
         for(var i = 0; i < optionButtons.length; i ++){
@@ -1095,11 +1058,9 @@ const buttons = (() => {
                     results.optionClicked = text;
                 }
                 radioStarSet = true;
-
             } else if(text[0] === "!") {
                  optionButtons[i] = text.slice(1);
             }
-
         }
         if(batchScope) {
             for(const arg of Object.keys(args)){
@@ -1116,7 +1077,6 @@ const buttons = (() => {
         results.dataset = {};
         return results;
     }
-
     async function dialog(textDesc) {
         return new Promise((onClosed, onCancel) => {
             const dialog = createSimpleDialog(textDesc);
@@ -1164,7 +1124,6 @@ const buttons = (() => {
                     } else {
                         but.element.classList.remove("radioOn");
                     }
-
                 }
             },
             setRadio(group, commandId, strictRadio) {
@@ -1487,17 +1446,12 @@ const buttons = (() => {
                         },
                     }
                     const pannelElement = $("div", { className : "tabPannel", });
-
-
-
-
                     const title = $("div", {
                         className : "tabTitle" + (tab.className ? " " + tab.className : ""),
                         textContent : objNameToHuman(tab.name),
                         commandId : commands.pannelClicked,
                         tabName : tab.name,
                         helpText : tab.help !== undefined ? tab.help : "",
-
                     });
                     title.pannel = pannel;
                     pannel.element = pannelElement;
@@ -1660,7 +1614,6 @@ const buttons = (() => {
                             ]
                         );
                         ui.style.top = but.lines ? style.top : null;
-
                     } else {
                         ui = $("div",{className : "dialogText" + extraClassNames, textContent : but.text, style});
                         ui.style.top = but.lines ? style.top : null;
@@ -1842,7 +1795,6 @@ const buttons = (() => {
                     ui.modCommands._1 = but.command;
                     ui.modEnabled._1 = true;
                 }
-
                 ui.but = but;
                 dir = but.dir ? but.dir : dir;
                 if (but.slider && API.mapSliders) { API.sliders.set(but.command, but) }

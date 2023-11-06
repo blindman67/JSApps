@@ -316,13 +316,25 @@ const mediaList = (()=>{
             [commands.mediaImageToClipboard](e, left, right) {
                 if (mediaSelected.length === 1 && CanDo.clipboard) {
                     if (mediaSelected[0].isDrawable) {
-                        mediaSelected[0].toBlob((blob) => {
-                            const data = [new ClipboardItem({ [blob.type]: blob })];
-                            navigator.clipboard.write(data).then(
-                                () => { log.sys("Media copied to clipboard"); },
-                                () => { log.warn("Could not copy media to clipboard"); },
-                            );
-                        });
+                        if (mediaSelected[0].toBlob) {
+                            mediaSelected[0].toBlob((blob) => {
+                                const data = [new ClipboardItem({ [blob.type]: blob })];
+                                navigator.clipboard.write(data).then(
+                                    () => { log.sys("Media copied to clipboard"); },
+                                    () => { log.warn("Could not copy media to clipboard"); },
+                                );
+                            });
+                        } else if (mediaSelected[0].convertToBlob) {
+                            mediaSelected[0].convertToBlob()
+                                .then(blob => {
+                                    const data = [new ClipboardItem({ [blob.type]: blob })];
+                                    navigator.clipboard.write(data).then(
+                                        () => { log.sys("Media copied to clipboard"); },
+                                        () => { log.warn("Could not copy media to clipboard"); },
+                                    );
+                                })
+                                .catch(() => log.warn("Copy to clipboarded failed!"));
+                        }                            
                     }
                 }
                 return false;
@@ -538,8 +550,11 @@ const mediaList = (()=>{
                     commandLine(m.desc.name, false, true, true);
                     lastIdxClicked = -1;
                 } else {
-                    if(!m.selected){
-                        if(mouse.shift && leftClicked && lastIdxClicked > -1){
+                    if (!m.selected) {
+                        if (mouse.shift && leftClicked && lastIdxClicked === -1 && mediaSelected.length === 1) {
+                            lastIdxClicked = items.findIndex(item => item.media.selected);
+                        }
+                        if (mouse.shift && leftClicked && lastIdxClicked > -1) {
                             const nextIdx = items.findIndex(item => item.media === m);
                             const min = Math.min(lastIdxClicked, nextIdx);
                             const max = Math.max(lastIdxClicked, nextIdx);

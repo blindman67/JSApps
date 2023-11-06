@@ -1,4 +1,4 @@
-#loadTemplate if $opt === %0 {;$res = storage.loadJSON(%1, $loadOptions); jump doAgain;};
+#loadTemplate if $opt === %0 {;$res = storage.loadJSON(%1, $loadOptions, NAMED_DIRECTORIES.templates); jump doAgain;};
 
 menu title "20 Template loader"
 menu exit "Exit"

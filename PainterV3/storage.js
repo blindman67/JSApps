@@ -566,6 +566,7 @@ const storage = (()=>{
             }
             if(loaded) {loaded({status : "Loaded sprites OK"})}
             settings.animateGifOnLoad = gifLoadOption;
+            
             var skipViewSetup = false;
             var isSetup = false;
             function loadedCommands() {
@@ -609,6 +610,27 @@ const storage = (()=>{
                     }, 20);
                 }
             }
+            
+            /*function loadedCommands() {
+                if(data.info && data.info.loadedCommands && data.info.loadedCommands.length) {
+                    const commandId = commands[data.info.loadedCommands.shift()];
+                    setTimeout(()=> {
+                        issueCommand(commandId);
+                        loadedCommands();
+                    } ,18);
+                } else {
+                    setTimeout(()=> {
+                        if (turnOnFunctionLinks && !sprites.functionLinksOn) {
+                            issueCommand(commands.edSpriteActivateFunctionLinks);
+                        }
+                        data.addSceneAsCollection && (collections.create(selection.asArray(), undefined, data.collectionSceneName));
+                        (data.viewLoadedSprites && data.zoomLoadedSprites) && issueCommand(commands.edSprResetViewFit);
+                        (data.viewLoadedSprites && !data.zoomLoadedSprites) && issueCommand(commands.edSprResetView);
+                        !data.selectLoadedSprites && selection.restore();
+                        settings.saveGridState && editSprites.deserialWorkspace(data.workspace);
+                    },18);
+                }
+            }*/
             timeline.deserialize(data.timeline, UIDOffset);
 			computedAttachents.forEach(spr => spr.attachment.computed = false );
 			computedAttachents.length = 0;
@@ -953,8 +975,125 @@ const storage = (()=>{
             }else {
             }
         },
-        loadJSON(name, options){
+        fromJSONText(text, name, options) {
             return new Promise((loaded, error) => {
+                var data;
+                try {
+                    data = JSON.parse(text);
+                } catch(e) {
+                    log.warn("Could not parse file '" + name + "'");
+                    log.warn(e.message);
+                    error({status : "JSON parsing error."});
+                    return;
+                }
+                API.decode(data, loaded, error, name, options);
+            });
+        },
+        decode(data, loaded, error, name, options) {
+            if(data.info && data.info.app && (data.info.app.toLowerCase() === "painter" || data.info.app.toLowerCase() === "painterv3")){
+                log.sys("Parsing painter file.");
+                if(data.info.author) { log.sys("Author: " + data.info.author) }
+                if(data.info.copyright) { log.sys("Copyright: " + data.info.copyright) }
+                if(data.info.details) { log.sysStyle(data.info.details) }
+                if(data.info.type.toLowerCase() === "scene"){
+                    loadSceneDialog(data.info, options).then(loadType => {
+                        if (loadType.includes("Load")) {
+                           // if (!loadingLocal) { localStorage[APPNAME + "_lastLoadedSprites"] = name }
+
+                            //filename && API.addFileHistory(filename);
+                            data.selectLoadedSprites = loadType.includes("select");
+                            data.viewLoadedSprites = loadType.includes("view");
+                            data.zoomLoadedSprites = loadType.includes("zoom");
+                            data.images = data.scene.images;
+                            data.sprites = data.scene.sprites;
+                            data.subSprites = data.scene.media ? data.scene.media : data.scene.subSprites;
+                            data.vectors = data.scene.vectors;
+                            data.groups = data.scene.groups;
+                            data.collections = data.scene.collections;
+                            data.addSceneAsCollection = loadType.includes("collections");
+                            data.collectionSceneName = data.info.scene ?? data.info.collectionName ?? "LoadedCollection";
+                            data.timeline = data.scene.timeline;
+                            data.animation = data.scene.animation;
+                            data.kinematics = data.scene.kinematics;
+                            data.workspace = data.scene.workspace;
+                            data.text = data.scene.text;
+                            data.name = name;
+                            data.scene.sprites = undefined;
+                            data.scene.images = undefined;
+                            data.scene.vectors = undefined;
+                            data.scene.groups = undefined;
+                            data.scene.collections = undefined;
+                            data.scene.timeline = undefined;
+                            data.scene.animation = undefined;
+                            data.scene.kinematics = undefined;
+                            data.scene.subSprites = undefined;
+                            data.scene.media = undefined;
+                            data.scene.text = undefined;
+                            data.scene.workspace = undefined;
+                            data.scene = undefined;
+                            if (data.info.useLib === true && data.lib) {
+                                compileFromDataLib(data.lib, data.sprites, data.groups, data.collections);
+                            }
+                            importSpriteList(loaded, data);
+                            if (data.info.scene) {
+                                log.sys("Setting scene name: '" + data.info.scene + "`");
+                                document.title = "P3" + SUB_VERSION + " '" + data.info.scene + "'";
+                                sprites.sceneName = data.info.scene;
+                            }
+                        }
+                    })
+                    return;
+                }
+                if(data.info.type.toLowerCase() === "sprites"){
+                    //if (!loadingLocal) { localStorage[APPNAME + "_lastLoadedSprites"] = name }
+                    importSpriteList(loaded, data);
+                    if (data.info.scene) {
+                        log.sys("Setting scene name: '" + data.info.scene + "`");
+                        sprites.sceneName = data.info.scene;
+                    }
+                    return;
+                }
+                if(data.info.type.toLowerCase() === "pallet"){
+                    //filename && API.addFileHistory(filename);
+                    issueCommand(commands.edSprCreatePallet);
+                    selection[0].name = name;
+                    selection[0].pallet.fromHexStr(data.pallet);
+                    return
+                }
+                if(data.info.type.toLowerCase() === "palletv2"){
+                    //filename && API.addFileHistory(filename);
+                    issueCommand(commands.edSprCreatePallet);
+                    selection[0].name = name;
+                    selection[0].pallet.sortBy = "*" + data.palletv2.sortBy;  // "*" prevents clean() being called
+                    selection[0].pallet.layout = "*" + data.palletv2.layout;  // "*" prevents clean() being called
+                    selection[0].pallet.fromHexStr(data.palletv2.colors, false); // false prevents clean() being called
+                    selection[0].pallet.clean();
+                    selection[0].resetScale();
+                    issueCommand(commands.edSprUpdateUI);
+                    return;
+                }
+                if(data.info.type.toLowerCase() === "vector"){
+                    error({status: "Vector type files are no longer supported by PainterV3"});
+                    return;
+                }
+                if(data.info.type.toLowerCase() === "settings"){
+                    settingsHandler.fromObj(data.settings);
+                    log.sys("Loaded setting from file");
+                    return;
+                }
+                if(data.info.type.toLowerCase() === "commandbuffer"){
+                    commandLine.addToBuffer(data.commandbuffer, true);
+                    log.sys("Added commands to command buffer");
+                    return;
+                }
+            }
+            error({status : "Unknow JSON content."});
+
+        },
+        
+        loadJSON(name, options, firstTryDir){
+            return new Promise((loaded, error) => {
+                var holdDirCount = false;
                 var dir = 0;
                 var filename;
                 var loadingLocal = false;
@@ -964,15 +1103,11 @@ const storage = (()=>{
                         loadingLocal = true;
                         try {
                             loadComplete(JSON.parse(API.jsonString));
-                            API.jsonString = undefined;
-                            
+                            API.jsonString = undefined;                            
                         } catch(e) {
                             log.warn("There was an error pasting data from the clipboard.");
                             return;
                         }
-                            
-                        
-                        
                     } else if (localNames.includes(name)) {
                         loadingLocal = true;
                         jsonReadWriter.loadLocal(name, loadComplete);
@@ -981,8 +1116,15 @@ const storage = (()=>{
                             filename = name;
                             jsonReadWriter.load(name, loadComplete);
                         } else {
-                            filename = directories[dir] + name;
-                            jsonReadWriter.load(directories[dir] + name, loadComplete);
+                            if (firstTryDir !== undefined) {
+                                holdDirCount = true;
+                                filename = firstTryDir + name;
+                                jsonReadWriter.load(firstTryDir + name, loadComplete);
+                                firstTryDir = undefined;
+                            } else {
+                                filename = directories[dir] + name;
+                                jsonReadWriter.load(directories[dir] + name, loadComplete);
+                            }
                         }
                     }
                     function loadComplete(data) {
@@ -992,7 +1134,8 @@ const storage = (()=>{
                             return;
                         }
                         if(data.status && data.status !== "loaded") {
-                            dir ++;
+                            if (holdDirCount) { holdDirCount = false; }
+                            else { dir ++; }
                             if(dir ===  directories.length){
                                 data.info = "Could not load JSON"
                                 error(data);
@@ -1001,104 +1144,7 @@ const storage = (()=>{
                             tryFile();
                             return;
                         }
-                        if(data.info && data.info.app && (data.info.app.toLowerCase() === "painter" || data.info.app.toLowerCase() === "painterv3")){
-                            log.sys("Parsing painter file.");
-                            if(data.info.author) { log.sys("Author: " + data.info.author) }
-                            if(data.info.copyright) { log.sys("Copyright: " + data.info.copyright) }
-                            if(data.info.details) { log.sysStyle(data.info.details) }
-                            if(data.info.type.toLowerCase() === "scene"){
-                                loadSceneDialog(data.info, options).then(loadType => {
-                                    if (loadType.includes("Load")) {
-                                        if (!loadingLocal) { localStorage[APPNAME + "_lastLoadedSprites"] = name }
-
-                                        filename && API.addFileHistory(filename);
-                                        data.selectLoadedSprites = loadType.includes("select");
-                                        data.viewLoadedSprites = loadType.includes("view");
-                                        data.zoomLoadedSprites = loadType.includes("zoom");
-                                        data.images = data.scene.images;
-                                        data.sprites = data.scene.sprites;
-                                        data.subSprites = data.scene.media ? data.scene.media : data.scene.subSprites;
-                                        data.vectors = data.scene.vectors;
-                                        data.groups = data.scene.groups;
-                                        data.collections = data.scene.collections;
-                                        data.addSceneAsCollection = loadType.includes("collections");
-                                        data.collectionSceneName = data.info.scene ?? data.info.collectionName ?? "LoadedCollection";
-                                        data.timeline = data.scene.timeline;
-                                        data.animation = data.scene.animation;
-                                        data.kinematics = data.scene.kinematics;
-                                        data.workspace = data.scene.workspace;
-                                        data.text = data.scene.text;
-                                        data.name = name;
-                                        data.scene.sprites = undefined;
-                                        data.scene.images = undefined;
-                                        data.scene.vectors = undefined;
-                                        data.scene.groups = undefined;
-                                        data.scene.collections = undefined;
-                                        data.scene.timeline = undefined;
-                                        data.scene.animation = undefined;
-                                        data.scene.kinematics = undefined;
-                                        data.scene.subSprites = undefined;
-                                        data.scene.media = undefined;
-                                        data.scene.text = undefined;
-                                        data.scene.workspace = undefined;
-                                        data.scene = undefined;
-                                        if (data.info.useLib === true && data.lib) {
-                                            compileFromDataLib(data.lib, data.sprites, data.groups, data.collections);
-                                        }
-                                        importSpriteList(loaded, data);
-                                        if (data.info.scene) {
-                                            log.sys("Setting scene name: '" + data.info.scene + "`");
-                                            document.title = "V3 '" + data.info.scene + "'";
-                                            sprites.sceneName = data.info.scene;
-                                        }
-                                    }
-                                })
-                                return;
-                            }
-							if(data.info.type.toLowerCase() === "sprites"){
-                                if (!loadingLocal) { localStorage[APPNAME + "_lastLoadedSprites"] = name }
-                                importSpriteList(loaded, data);
-                                if (data.info.scene) {
-                                    log.sys("Setting scene name: '" + data.info.scene + "`");
-                                    sprites.sceneName = data.info.scene;
-                                }
-                                return;
-                            }
-                            if(data.info.type.toLowerCase() === "pallet"){
-                                filename && API.addFileHistory(filename);
-                                issueCommand(commands.edSprCreatePallet);
-                                selection[0].name = name;
-                                selection[0].pallet.fromHexStr(data.pallet);
-                                return
-                            }
-                            if(data.info.type.toLowerCase() === "palletv2"){
-                                filename && API.addFileHistory(filename);
-                                issueCommand(commands.edSprCreatePallet);
-                                selection[0].name = name;
-                                selection[0].pallet.sortBy = "*" + data.palletv2.sortBy;  // "*" prevents clean() being called
-                                selection[0].pallet.layout = "*" + data.palletv2.layout;  // "*" prevents clean() being called
-                                selection[0].pallet.fromHexStr(data.palletv2.colors, false); // false prevents clean() being called
-                                selection[0].pallet.clean();
-                                selection[0].resetScale();
-                                issueCommand(commands.edSprUpdateUI);
-                                return;
-                            }
-                            if(data.info.type.toLowerCase() === "vector"){
-								error({status: "Vector type files are no longer supported by PainterV3"});
-								return;
-							}
-                            if(data.info.type.toLowerCase() === "settings"){
-                                settingsHandler.fromObj(data.settings);
-                                log.sys("Loaded setting from file");
-                                return;
-                            }
-                            if(data.info.type.toLowerCase() === "commandbuffer"){
-                                commandLine.addToBuffer(data.commandbuffer, true);
-                                log.sys("Added commands to command buffer");
-                                return;
-                            }
-                        }
-                        error({status : "Unknow JSON content."});
+                        API.decode(data, loaded, error, name, options);
                     }
                 }
                 
@@ -1126,7 +1172,7 @@ const storage = (()=>{
                         log.warn("There was an error saving data to clipboard");
                     }          
                 } else {
-                    localStoreJson(json, name);
+                    return localStoreJson(json, name) ? "local" : undefined;
                 }
             } else {
                 if (settings.appendIdOnSave) {

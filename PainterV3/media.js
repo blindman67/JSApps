@@ -3,14 +3,19 @@ const media = (()=>{
     const uOC = settings.useOffscreenCanvas;
     var maxDependencyRate = settings.maxImageDependencyRate;
     var palletFormat = "Compressed";
-    var imageExtraUndos = false;
+    var imageExtraUndos = settings.imageExtraUndos;
+    var imageJITUndo = settings.Image_J_I_T_Undo;
+    var debugUndos = false;
     function getSettings(){
-        if(uOC !== settings.useOffscreenCanvas) {
+        if (uOC !== settings.useOffscreenCanvas) {
             log.warn("UseOffscreenCanvas requieres restart of PainterV3");
         }
         maxDependencyRate = settings.maxImageDependencyRate;
         palletFormat = settings.palletFormat;
-        imageExtraUndos = settings.imageExtraUndos;
+        if (imageExtraUndos !== settings.imageExtraUndos || imageJITUndo !== settings.Image_J_I_T_Undo) {
+            log.warn("Changes to media undo setting will not take effe3ct untill next reload.");
+        }
+        debugUndos = settings.debugUndos;
     }
     getSettings();
     settingsHandler.onchange = getSettings;
@@ -123,32 +128,30 @@ const media = (()=>{
 		can.ctx.imageSmoothingQuality = 'high';
         can._ID = 1;
         mirror._ID = 2;
-        
         mirror.ctx = mirror.getContext("2d");
         mirror.ctx.imageSmoothingEnabled = false;
         mirror.ctx.buffer_Id = 0;;
 		mirror.ctx.imageSmoothingQuality = 'high';
         mirror.ctx.drawImage(can, 0, 0);
         can.update = function(flagsOnly, putInUndoBuff = true){
-            if (can.isLocked) {
-                log.error("Locked drawable can not be updated");
-                return;
+            if (can.isLocked) { log.warn("Locked drawable can not be updated") } 
+            else {
+                if (!flagsOnly){
+                    if (can.processed && can.pushUndo && putInUndoBuff) { can.pushUndo() }
+                    mirror.ctx.imageSmoothingEnabled = false;
+                    mirror.ctx.clearRect(0, 0, can.w, can.h);
+                    mirror.ctx.drawImage(can, 0, 0);
+                    mirror.ctx.buffer_Id = 0;
+                    if(can.onupdated) { can.onupdated("onupdated", can) }
+                    can.changed = frameCount;
+                    can.presentationFrame = 0;
+                } 
+                can.restored = false;
+                if(can.dependent && can.processed) { can.callDependents() }
+                can.desc.dirty = can.processed ? true : can.desc.dirty;
+                can.processed = false;
+                can.saved = !can.desc.dirty ? can.saved === true : false;
             }
-            if (!flagsOnly){
-                if (can.processed && can.pushUndo && putInUndoBuff) { can.pushUndo() }
-                mirror.ctx.imageSmoothingEnabled = false;
-                mirror.ctx.clearRect(0, 0, can.w, can.h);
-                mirror.ctx.drawImage(can, 0, 0);
-                mirror.ctx.buffer_Id = 0;
-                if(can.onupdated) { can.onupdated("onupdated", can) }
-                can.changed = frameCount;
-                can.presentationFrame = 0;
-            } 
-            can.restored = false;
-            if(can.dependent && can.processed) { can.callDependents() }
-            can.desc.dirty = can.processed ? true : can.desc.dirty;
-            can.processed = false;
-            can.saved = !can.desc.dirty ? can.saved === true : false;
         }
         can.callDependents = function() {  // caller must ensure dependents exist if
             if (!can.isLocked && can.dependacyFrame !== frameCount) {
@@ -192,23 +195,23 @@ const media = (()=>{
             can.ctx.drawImage(mirror, 0, 0);
             can.ctx.buffer_Id = 0;
             can.ctx.globalCompositeOperation = "source-over";
-            if(can.undo && (can.w !== can.desc.undoCan.width || can.h !== can.desc.undoCan.height)){
-                 if (can.desc.undoCan1) {
-                    const undo = can.desc.undoCan1;
+            if (!can.desc.JITUndos) {
+                if (can.undo && (can.w !== can.desc.undoCan.width || can.h !== can.desc.undoCan.height)){
+                     if (can.desc.undoCan1) {
+                        const undo = can.desc.undoCan1;
+                        undo.width = undo.w = can.w;
+                        undo.height = undo.h = can.h;
+                        undo.ctx.globalCompositeOperation = "copy";
+                        undo.ctx.drawImage(can.desc.undoCan, 0, 0);
+                        undo.ctx.globalCompositeOperation = "source-over";                    
+                    }              
+                    const undo = can.desc.undoCan;
                     undo.width = undo.w = can.w;
                     undo.height = undo.h = can.h;
                     undo.ctx.globalCompositeOperation = "copy";
-                    undo.ctx.drawImage(can.desc.undoCan, 0, 0);
-                    undo.ctx.globalCompositeOperation = "source-over";                    
-                }              
-                const undo = can.desc.undoCan;
-                undo.width = undo.w = can.w;
-                undo.height = undo.h = can.h;
-                undo.ctx.globalCompositeOperation = "copy";
-                undo.ctx.drawImage(mirror, 0, 0);
-                undo.ctx.globalCompositeOperation = "source-over";
-                 
-
+                    undo.ctx.drawImage(mirror, 0, 0);
+                    undo.ctx.globalCompositeOperation = "source-over";
+                }
             }
             can.changed = frameCount;
             can.restored = markRestored;
@@ -244,7 +247,7 @@ const media = (()=>{
         can.pixels = function(progress, getPix = true){
             if (progress !== undefined) { can.progress = progress  }
             if (getPix) {
-                const imgData = can.ctx.getImageData(0,0, can.w, can.h);
+                const imgData = can.ctx.getImageData(0, 0, can.w, can.h);
                 return imgData;
             }
         }
@@ -271,7 +274,8 @@ const media = (()=>{
             spriteList.updateInfo();
         }
         can.restoreLostContext = function() {
-            var undoOld = can.desc.undoCan;
+            throw new Error("Painter's media call 'restoreLostContext' has been depreciated and should not be used!!!");
+            /*var undoOld = can.desc.undoCan;
             var mirrorOld = can.desc.mirror;
             can.desc.undoCan = undefined;
             can.desc.mirror = undefined;
@@ -293,10 +297,10 @@ const media = (()=>{
                 canNew.desc.mirror.ctx.drawImage(mirrorOld,0,0);
                 canNew.desc.mirror.ctx.buffer_Id = 0;
                 canNew.desc.mirror.ctx.globalCompositeOperation = "source-over";
-            });
+            });*/
         }
-        if(can.desc.undoCan){
-            if (can.desc.undoCan1) {
+        can.initUndoFunctions = function(bufCount) {
+            if (bufCount === 2){
                 can.undo = function() {
                     const t2 = can.desc.undoCan1;
                     const t1 = can.desc.undoCan;
@@ -317,7 +321,7 @@ const media = (()=>{
                     can.changed = frameCount;
                     if (can.dependent) { can.callDependents() }                   
                 }
-            } else {
+            } else if (bufCount === 1) {
                 can.pushUndo = can.redo = can.undo = function() {
                     var temp = can.desc.undoCan;
                     can.desc.undoCan = can.desc.mirror;
@@ -326,7 +330,16 @@ const media = (()=>{
                     if (can.dependent) { can.callDependents() }
                 }
             }
-        }
+        } 
+        if (can.desc.undoCan) { 
+            if (imageJITUndo) {
+                can.pushUndo = EMPTY_FUNCTION; // debug help function() { log("Bad undo push. Media GUID: " + can.guid) } 
+                can.redo = can.undo = EMPTY_FUNCTION;
+            } else {
+                can.initUndoFunctions(2);
+                can.initUndoFunctions = undefined;
+            }
+        }            
         can.isLocked = false;
         can.lockType = 0;
         can.pendingLocks = 0;
@@ -335,7 +348,7 @@ const media = (()=>{
         can.restored = false;
         can.shared = false; // two or more systems can be rendering to this media. This is set true to ensure the systems coordinate their rendering
         can.update();
-    }
+    }       
     function addUndo(can, undoName, id) {
         const undoCan =  createCanvas(can.width, can.height);
         can.desc[undoName] = undoCan;
@@ -345,14 +358,24 @@ const media = (()=>{
 		undoCan.ctx.imageSmoothingQuality = 'high';
         undoCan.ctx.drawImage(can, 0, 0);
         undoCan.ctx.buffer_Id = 0;
-        
-    }
+    } 
     function createDrawableExtras(can) {
-        addUndo(can, "undoCan", 3);
-        if (imageExtraUndos) {
-            addUndo(can, "undoCan1", 4);
+        if (imageJITUndo) {
+            addJITUndo(can, 4);           
+        } else {        
+            addUndo(can, "undoCan", 3);
+            addUndo(can, "undoCan1", 4); 
         }
     }
+    function addJITUndo(can, id) {
+        can.desc.JITUndos = () => {
+            addUndo(can, "undoCan", 3);
+            addUndo(can, "undoCan1", 4); 
+            can.initUndoFunctions(2);
+            can.initUndoFunctions = undefined;
+        };
+        can.desc.undoCan = true;
+    }       
     function createVideoExtras(video){
         const frameHold =  createCanvas(video.width, video.height);//document.createElement("canvas");
         frameHold.w = frameHold.width = video.width;
@@ -498,36 +521,37 @@ const media = (()=>{
         }
         if (!img.desc.vector && !img.desc.video) {
             Object.assign(img.desc, Events(img.desc));
+            img.prepDrawOn = function() {
+                if (img.isDrawable && imageJITUndo && img.desc.JITUndos) {
+                    img.desc.JITUndos();
+                    img.desc.JITUndos = undefined;
+                    img.prepDrawOn = EMPTY_FUNCTION;
+                }
+            }
             img.save = function(name = img.desc.name, type = "png", quality = 1){
                 if(img.desc.videoCap && media.videoCapture) {
 					if (!media.videoCapture.busy && media.videoCapture.hasContent) {
 						if(media.videoCapture.stop()) {
 							let s = media.videoCapture.owner;
-							if(s) { s.type.videoCapture = false }
+							if (s) { s.type.videoCapture = false }
 							media.videoCapture = undefined;
 							img.desc.videoCap = false;
 							img.lastAction = " as video";
 							img.desc.dirty = false;
 							addToString();
-							//editSprites.getButton(commands.edSprBigPlayPause).setSprite(0) ;
 							timeline.getButton(commands.animPlayPause).setSprite(0);
 							timeline.getButton(commands.animGotoPrevFrame).setSprite(0);
 							timeline.getButton(commands.animGotoNextFrame).setSprite(0);
 						}
-                    }else {
-						if(media.videoCapture.busy) {
-							log.info("Video capture is busy!");
-						}else{
-							log.info("Nothing to save from video capture");
-						}
+                    } else {
+						if (media.videoCapture.busy) { log.info("Video capture is busy!"); }
+						else { log.info("Nothing to save from video capture"); }
                     }
                 }else if(img.desc.videoCap && paint.videoCapture) {
                     if(paint.videoCapture.hasContent) {
                         paint.videoCapture.download(name);
                         img.desc.dirty = false;
-                    }else {
-                        log.info("Nothing to save from video capture");
-                    }
+                    } else { log.info("Nothing to save from video capture"); }
                 }else{
                     saveImage(img, name, type ,quality);
                     img.desc.fname = img.src = settings.downloadDir + name + "." + type;
@@ -535,16 +559,14 @@ const media = (()=>{
                     img.lastAction = "as " + type;
                 }
             }
-            img.clear = function(andMirror = true, rect){
+            img.clear = function(andMirror = true, rect) {
+                img.prepDrawOn();
                 img.ctx.setTransform(1,0,0,1,0,0);
                 img.ctx.globalAlpha = 1;
                 img.ctx.globalCompositeOperation = "source-over";
                 img.ctx.buffer_Id = 0;;
-				if (rect) {
-					img.ctx.clearRect(rect.x,rect.y,rect.w,rect.h);
-				} else {
-					img.ctx.clearRect(0,0,img.w,img.h);
-				}
+				if (rect) { img.ctx.clearRect(rect.x,rect.y,rect.w,rect.h); }
+				else { img.ctx.clearRect(0,0,img.w,img.h); }
                 img.processed = true;
                 if (andMirror) { img.update() }
             }
@@ -558,97 +580,27 @@ const media = (()=>{
                             (img.desc.sprites ? img.desc.sprites.length + " " + textIcons.sprite : "") +
                             (img.desc.capturing ? textIcons.captureOn + " " : "") +
                             (img.desc.dirty ? "Dirty " : (img.saved ? "Saved" : "")) +
-                            (img.lastAction ? " '" + img.lastAction + "'" : "");
+                            (img.lastAction ? " '" + img.lastAction + "' " : " ") +
+                            (debugUndos ? (img.initUndoFunctions ? "" : emojiIcons.undoCircle + emojiIcons.undoCircle) : "");
                     }
                 }
 			}
 			addToString();
             img.onremove = function() {
                 if (img.dependentOn) {
-                    for (const dep of img.dependentOn.values()) {
-                        dep.removeDependent(img);
-                    }
+                    for (const dep of img.dependentOn.values()) { dep.removeDependent(img);  }
                 }
-                if(img.dependent) {
-                    img.dependent = undefined;
-                }
+                if (img.dependent) { img.dependent = undefined; }
             }
             img.addSubSprites = function(sprites) {
 				img.desc.sprites = sprites;
 				img.desc.subSprCount = sprites.length;
 				sprites.sort((a,b) => a.id - b.id);
             }
-			img.encodeSubSprites = function(sprites, header = subSpriteHeader) {
-                img.addSubSprites(sprites);
-				if(img.desc.sprites) {
-					const addByteInt = (b,v) => vals.push(0xFF, b, (v >> 8) & 0xFF, v & 0xFF);
-					const addInt = v => vals.push(0xFF, v >> 16, (v >> 8) & 0xFF, v & 0xFF);
-					var len = img.desc.sprites.length * 4 * 4;
-					const vals = [...[...header].map(c => c === "0" ? 0xFF : c.charCodeAt(0))];
-					addInt(len);
-					for(const spr of img.desc.sprites) {
-						addByteInt(spr.id >> 16, spr.x);
-						addByteInt(spr.id & 0xff, spr.y);
-						addInt(spr.w);
-						addInt(spr.h);
-					}
-					if(subSpriteHeader !== header) {
-						img.desc.gridSubSprites = true;
-					}
-					var h = Math.ceil(vals.length / (img.w * 4));
-					const data = img.ctx.getImageData(0,img.h - h, img.w, h);
-					data.data.set(vals.reverse(), data.data.length - vals.length);
-					img.ctx.putImageData(data, 0, img.h - h);
-				}
-			}
-			img.decodeSubSprites = function() {
-				if(!img.desc.sprites) {
-					const readInt = pos => {
-						pos --;
-						return (dat[pos--] << 16) | (dat[pos--] << 8) | dat[pos--];
-					}
-					const readInt16 = pos => (dat[pos-2] << 8) | dat[pos-3];
-					const readId = pos => (dat[pos-1] << 8) | dat[pos-5];
-					const data = img.ctx.getImageData(img.w - (subSpriteHeader.length / 4), img.h - 1, subSpriteHeader.length / 4, 1);
-					const vals = [...[...subSpriteHeader].map(c => c === "0" ? 0xFF : c.charCodeAt(0))].reverse();
-					const valsGrid = [...[...subSpriteGridHeader].map(c => c === "0" ? 0xFF : c.charCodeAt(0))].reverse();
-					delete img.desc.gridSubSprites ;
-					var i = 0, dat;
-					while(i < vals.length && vals[i] === data.data[i]) { i ++ }
-					if(i < vals.length) {
-						i = 0;
-						while(i < valsGrid.length && valsGrid[i] === data.data[i]) { i ++ }
-						if(i === valsGrid.length) {
-							img.desc.gridSubSprites = true;
-						}
-					}
-					if(i === vals.length) {
-						dat = img.ctx.getImageData(img.w - (subSpriteHeader.length / 4) - 1, img.h - 1, 1, 1).data;
-						const subSprCount = readInt(3) / 16;
-						const h = Math.ceil((subSpriteHeader.length + subSprCount * 4 + 1) / img.w);
-						dat = img.ctx.getImageData(0,img.h - h, img.w, h).data;
-						var p = dat.length - (subSpriteHeader.length + 4) - 1;
-						i = 0;
-						const sprArr = [];
-						while(i < subSprCount) {
-							sprArr.push({
-								id : readId(p),
-								x : readInt16(p),
-								y : readInt16(p-4),
-								w : readInt16(p-8),
-								h : readInt16(p-12),
-							});
-							p -= 16;
-							i ++;
-						}
-						img.desc.sprites = sprArr;
-					}
-				}
-			}
             img.desc.clipType = 0;
             img.clipToExtent = function(extent) {
                 if ((img.desc.clipType & clipUsedFlags.extent) === 0) {
-                    img.ctx.setTransform(1,0,0,1,0,0);
+                    img.ctx.setTransform(1, 0, 0, 1, 0, 0);
                     img.ctx.save()
                     img.ctx.beginPath();
                     img.ctx.rect(extent.x, extent.y, extent.w, extent.h);
@@ -678,10 +630,9 @@ const media = (()=>{
                     cc.y1 = subSprite.y + subSprite.h;
 				}
 			}
-            // subSpriteUnclip is legacy will remove when I am sure I got em all
-			img.unclip = img.subSpriteUnclip = function() {
+			img.unclip = function() {
 				if(img.desc.clipType !== 0) {
-                    if (img.desc.clipType === clipUsedFlags.restore2) {  img.ctx.restore() }
+                    if (img.desc.clipType === clipUsedFlags.restore2) { img.ctx.restore() }
                     img.ctx.restore();
 					img.desc.clipType = 0;
 				}
@@ -1010,7 +961,6 @@ const media = (()=>{
             can.ctx.buffer_Id = 0;
             createDrawableExtras(can);
             createImageUtils(can);
-			can.decodeSubSprites();
             createImageMirror(can);
             API.replace(media, can);
             can.desc.dirty = false;
@@ -1538,11 +1488,8 @@ const media = (()=>{
                         frame,
                         frameCount,
                     }
-                    if(lastCall && frame === frameCount - 1) {
-                        API.create(desc, lastCall);
-                    } else {
-                        API.create(desc);
-                    }
+                    if (lastCall && frame === frameCount - 1) { API.create(desc, lastCall); }
+                    else { API.create(desc); }
                 }
                 gif.releaseFrame(frame);
             }
@@ -1554,91 +1501,156 @@ const media = (()=>{
                 },0);
             }
         },
-        create(desc,callback){
-            function showLoaded(i){
-                if(i){
-                    var sprite = new Sprite(0, 0, i.w, i.h);
-                    sprite.changeImage(i);
+        GIFLoading(callback, name, find) {
+            var busyId = busy("loading");
+            let dir = 0;
+            var gImg = GIFGroover();
+            gImg.onprogress = (event) => {
+                if (gImg.frameCount > animation.length) { animation.length = animation.maxLength = gImg.frameCount; }
+                busy.text = ((event.progress) | 0) + "%"
+            }
+            gImg.onload = () => {
+                if (find) {
+                    directortySearch.found(dir - 1);
+                    storage.addFileHistory(gImg.src);                    
+                }
+                gImg.w = gImg.width;
+                gImg.h = gImg.height;
+                gImg.onerror = gImg.onload = undefined;
+                if (gImg.frameCount > animation.length) { animation.length = animation.maxLength = gImg.frameCount; }
+                API.extractGifFrames(gImg, gImg.src.split("/").pop(), callback);
+                gImg = undefined;
+                busy.end(busyId);
+            };
+            gImg.onerror = () => {
+                if (find && gImg && dir < directories.length) {
+                    gImg.src = directories[dir++] + name;
+                    busy.text = "Searching";
+                } else {
+                    log.warn("Could not load " + name);
+                    gImg.onerror = gImg.onload = undefined;
+                    if (callback) { callback({status : "failed" }) }
+                    busy.end(busyId);
+                    gImg = undefined;
+                }
+            }
+            return gImg;
+        },
+        GIFByFile(file, callback) {
+            API.GIFLoading(callback, file.name, false).create(file);
+        },
+        GIFByName(name, callback) {
+            API.GIFLoading(callback, name, true).src = name
+        },     
+        SVGByFile(file, callback) {
+           file.text().then(text => {
+                const img = new Image;
+                img.src = "data:image/svg+xml;base64," + btoa(text);
+                img.addEventListener("load", () => {
+                    log.warn("SVG image has been rasterised");
+                    API.create({
+                        type : "canvas",
+                        width : img.naturalWidth,
+                        height : img.naturalHeight,
+                        name : file.name.split(".")[0],
+                        fname : file.name,
+                        copyImg : img,
+                    }, callback);    
+                },{once: true});
+                img.addEventListener("error", () => { log.warn("Could not load SVG: '" + file.name + "'"); })
+           });
+        },
+        AUDIOByFile(file, callback) {
+            log.warn("Audio content is experimental. Scenes containing Audio content will not save correctly and content will be lost if you try to save.");
+            var busyId = busy("loading");
+            Audio.start();
+            const name = file.name;
+            Audio.loadSoundFile(file, (buffer) => {
+                var can = createCanvas(16, 128);
+                can.guid = getGUID();
+                const desc = can.desc = {fname: name};
+                can.w = can.width;
+                can.h = can.height;
+                can.marked = true;
+                can.ctx = can.getContext("2d");
+                can.ctx.imageSmoothingEnabled = false;
+                can.ctx.buffer_Id = 0;
+                createSoundExtras(can);
+                desc.onLoaded(buffer);
+                items.push(can);
+                API.updateLoadActions(can);
+                if (callback) { callback(can) }
+                mediaList.add(can);
+                addLoadedMedia(name);
+                API.fireEvent("oncreated",{media: can});
+                busy.end(busyId);
+            }).catch((error) => {
+                log.warn("Failed to load: '" + name + "'");
+                log.warn("Error: '" + (error?.mesage ?? error ?? "Unknown") + "'");
+                busy.end(busyId);
+            });
+        },
+        AUDIOByName(name, callback) {
+            log.warn("Audio content is experimental. Scenes containing Audio content will not save correctly and content will be lost if you try to save.");
+            var busyId = busy("loading");
+            Audio.start();
+            const file = name;
+            const src = NAMED_DIRECTORIES.downloads + name;
+            Audio.loadSound(src, (buffer) => {
+                var can = createCanvas(16, 128);
+                can.guid = getGUID();
+                const desc = can.desc = {src, fname: file};
+                can.w = can.width;
+                can.h = can.height;
+                can.marked = true;
+                can.ctx = can.getContext("2d");
+                can.ctx.imageSmoothingEnabled = false;
+                can.ctx.buffer_Id = 0;
+                createSoundExtras(can);
+                desc.onLoaded(buffer);
+                items.push(can);
+                API.updateLoadActions(can);
+                if (callback) { callback(can) }
+                mediaList.add(can);
+                addLoadedMedia(desc.src);
+                API.fireEvent("oncreated",{media: can});
+                busy.end(busyId);
+            }, (error) => {
+                log.warn("Failed to load: '" + file + "'");
+                log.warn("Error: '" + (error?.mesage ?? error ?? "Unknown") + "'");
+                busy.end(busyId);
+            });
+
+        },
+        create(desc, callback){
+            function showLoaded(media) {
+                if (media) {
+                    var sprite = new Sprite(0, 0, media.w, media.h);
+                    sprite.changeImage(media);
                     sprites.add(sprite);
                     view.centerOn(sprite.x, sprite.y);
                     selection.clear(true);
                     selection.add(sprite);
-                }else{
+                } else {
                     log("Did not load");
                 }
             }
-            if(typeof desc === "string"){
+            if (typeof desc === "string"){
                 if(typeof callback ==="string" && callback === "show"){
                     callback = showLoaded;
                 }
                 var busyId = busy("loading");
-                var img,gImg;
-                if(desc.toLowerCase().indexOf(".gif") > 0){
-                    gImg = GIFGroover();
-                    let dir = 0;
-                    gImg.src = desc;
-                    var name = gImg.src.split("/").pop();
-                    gImg.onprogress = (event) => {
-                        if(gImg.frameCount > animation.length) {
-                            animation.length = animation.maxLength = gImg.frameCount;
-                        }
-                        busy.text = ((event.progress) | 0) + "%"
-                    }
-                    gImg.onload = ()=>{
-                        directortySearch.found(dir - 1);
-                        storage.addFileHistory(gImg.src);
-                        gImg.w = gImg.width;
-                        gImg.h = gImg.height;
-                        gImg.onerror = gImg.onload = undefined;
-                        if(gImg.frameCount > animation.length) {
-                            animation.length = animation.maxLength = gImg.frameCount;
-                        }
-                        API.extractGifFrames(gImg,gImg.src.split("/").pop(), callback);
-                        gImg = undefined;
-                        busy.end(busyId);
-                    };
-                    gImg.onerror = ()=>{
-                        if(gImg && dir < directories.length){
-                            gImg.src = directories[dir++] + name;
-                            busy.text = "Searching";
-                        }else{
-                            log.warn("Could not load " + name);
-                            gImg && (gImg.onerror = gImg.onload = undefined);
-                            if(callback) { callback({status : "failed" }) }
-                            busy.end(busyId);
-                        }
-                    }
+                var img, gImg;
+                if (desc.toLowerCase().indexOf(".gif") > 0) {
+                    busy.end(busyId);
+                    API.GIFByName(desc, callback);
                     return;
-				} else if(desc.toLowerCase().indexOf(".wav") > 0 || desc.toLowerCase().indexOf(".ogg") > 0 || desc.toLowerCase().indexOf(".mp3") > 0) {
-					Audio.start();
-					const file = desc;
-					const src = APP_ROOT_DIR + "Downloads/" + desc;
-					Audio.loadSound(src, (buffer) => {
-						var can = createCanvas(16, 128);
-						can.guid = getGUID();
-						desc = can.desc = {src, fname: file};
-						can.w = can.width;
-						can.h = can.height;
-						can.marked = true;
-						can.ctx = can.getContext("2d");
-						can.ctx.imageSmoothingEnabled = false;
-						can.ctx.buffer_Id = 0;
-						createSoundExtras(can);
-						desc.onLoaded(buffer);
-						items.push(can);
-						API.updateLoadActions(can);
-						if(callback) { callback(can) }
-						mediaList.add(can);
-						addLoadedMedia(desc.src);
-						API.fireEvent("oncreated",{media: can});
-						busy.end(busyId);
-					}, (error) => {
-						log.warn("Failed to load: '" + file + "'");
-						log.warn("Error: '" + (error?.mesage ?? error ?? "Unknown") + "'");
-						busy.end(busyId);
-					});
-					return;
-				} else if(desc.toLowerCase().indexOf(".mpg") > 0 ||desc.toLowerCase().indexOf(".mp4") > 0 || desc.toLowerCase().indexOf(".webm") > 0  ) {
+				} else if (desc.toLowerCase().indexOf(".wav") > 0 || desc.toLowerCase().indexOf(".ogg") > 0 || desc.toLowerCase().indexOf(".mp3") > 0) {
+                    busy.end(busyId);
+                    API.AUDIOByName(desc, callback);
+                    return;
+				} else if (desc.toLowerCase().indexOf(".mpg") > 0 ||desc.toLowerCase().indexOf(".mp4") > 0 || desc.toLowerCase().indexOf(".webm") > 0  ) {
+                    log.warn("Video content is experimental. Scenes containing Video content will not save correctly and content will be lost if you try to save.");
                     img = document.createElement('video'),
                     img.guid = getGUID();
                     img.crossOrigin = "use-credentials";//Anonymous";
@@ -1704,7 +1716,6 @@ const media = (()=>{
                 } else { img = new Image() }
                 img.guid = getGUID();
                 const sameDomain = !((desc.includes("http://") || desc.includes("https://")) && !desc.toLowerCase().includes(APP_ROOT_DIR));
-                //sameDomain || (img.crossOrigin = "Anonymous");
                 img.src = desc;
                 name = img.src.split("/").pop();
                 desc = img.desc = {
@@ -1767,7 +1778,7 @@ const media = (()=>{
                         busy.end(busyId);
                     }
                 }
-            } else if(desc.type === "dataURL") {
+            } else if (desc.type === "dataURL") {
                 const img = new Image();
                 img.src = desc.image.dataURL;
                 const name = desc.image.name;
@@ -1806,7 +1817,7 @@ const media = (()=>{
                     API.updateLoadActions(can);
                     API.fireEvent("oncreated",{media : can});
                 },{once:true});
-            } else if(desc.type === "vector") {
+            } else if (desc.type === "vector") {
                 const vector = {};
                 vector.guid = getGUID();
                 vector.desc = desc;
@@ -1824,7 +1835,7 @@ const media = (()=>{
                 if (callback) { callback(vector) }
                 mediaList.add(vector);
                 API.fireEvent("oncreated",{media : vector});
-            }else if(desc.type === "video"){
+            }else if (desc.type === "video") {
                 const vid = document.createElement("video");
                 vid.guid = getGUID();
                 vid.desc = desc;
@@ -1845,7 +1856,7 @@ const media = (()=>{
                 if (callback) { callback(vid) }
                 if (!desc.private) { mediaList.add(vid) }
                 API.fireEvent("oncreated",{media : vid});
-            }else if(desc.type === "restoreLost"){
+            } else if (desc.type === "restoreLost") {
                 var can = createCanvas(
                     desc.width !== undefined ? desc.width | 0 : 256,
                     desc.height !== undefined ? desc.height | 0 : 256
@@ -1866,7 +1877,7 @@ const media = (()=>{
                 mediaList.replace(can);
                 API.replaceMediaByGUID(can);
                 API.fireEvent("oncontextrestored",{media : can});
-            }else if(desc.type === "canvas" || desc.type ===  "offScreenCanvas"){
+            } else if (desc.type === "canvas" || desc.type ===  "offScreenCanvas") {
                 var can = createCanvas(
                     desc.width !== undefined ? desc.width | 0 : 256,
                     desc.height !== undefined ? desc.height | 0 : 256
@@ -1882,11 +1893,11 @@ const media = (()=>{
                 can.ctx = can.getContext("2d");
                 can.ctx.imageSmoothingEnabled = false;
                 can.ctx.buffer_Id = 0;
-                if(desc.copyImg){
-                    can.ctx.drawImage(desc.copyImg,0,0);
+                if (desc.copyImg){
+                    can.ctx.drawImage(desc.copyImg, 0, 0);
                     desc.copyImg = undefined;
                 }
-				if(!desc.simple) {
+				if (!desc.simple) {
 					createDrawableExtras(can);
 					createImageUtils(can);
 					createImageMirror(can);
@@ -1896,11 +1907,10 @@ const media = (()=>{
 				} else {
 					callback && callback(can);
 				}
-                API.fireEvent("oncreated",{media : can});
-                if(desc.isGif) {
-                    desc.dirty = false;
-                }
-            }else if(desc.type === "copy"){
+                API.fireEvent("oncreated", {media : can});
+                if (desc.isGif) { desc.dirty = false; }
+                
+            } else if (desc.type === "copy"){
                 const copyOf = desc.of;
 				if (copyOf.desc.isSound) {
 					var can = createCanvas(copyOf.w , copyOf.h );
@@ -1949,7 +1959,6 @@ const media = (()=>{
 					can.ctx.imageSmoothingEnabled = false;
 					createDrawableExtras(can);
 					createImageUtils(can);
-					can.clear(false); // Not needed but trying to fix slow renders for canvas that has not been touched by render
 					if (!desc.copySizeOnly) {
 						if(copyOf.isGif){
 							if (subSprite) {
@@ -1976,6 +1985,14 @@ const media = (()=>{
 				}
             }
         },
+        async createImageAsync(width, height, name) {
+            return new Promise(loaded => {
+                setTimeout(
+                    () => media.create({width, height, name, type : "canvas" }, 
+                    media => loaded(media)
+                ), 1);
+            });
+        },
         createImage(width, height, name, callback) {
             setTimeout(()=>media.create({width, height, name, type : "canvas" }, callback), 1);
         },
@@ -1992,157 +2009,3 @@ const media = (()=>{
 })();
 
 
-const Audio = (() => {
-	var dynamicCompressor = settings.dynamicCompressor;
-    settingsHandler.onchange = function getSettings(){
-		var update = false;
-		if (dynamicCompressor !== settings.dynamicCompressor) {
-			dynamicCompressor = settings.dynamicCompressor;
-			update = true;
-		}
-		update && setupAudioState();
-    }
-	var atx, compressor, gain;
-	function setupAudioState() {
-		if (atx) {
-			gain.disconnect();
-			compressor.disconnect();
-			if (settings.dynamicCompressor) {
-				gain.connect(compressor).connect(atx.destination);
-			} else {
-				gain.connect(atx.destination);
-			}
-		}
-	}
-	async function loadSampleBuffer(atx, url) {
-		return await atx.decodeAudioData(await (await fetch(url)).arrayBuffer())
-	}
-	function volBuffer(sprite) {
-        const sound = sprite.sound;
-        const vol = Math.min(2.0, Math.abs((sprite.h * sprite.sy) / sprite.image.h));
-        if (sound.volume !== vol) {
-            sound.volume = vol;
-            if (sprite.image.desc.playing) {
-                sound.gain.gain.value = vol;
-            }
-        }
-    }
-
-    
-	function playBuffer(sprite, rate = 1, from = 0,start = 0, end = desc.sBuffer.duration) {
-		const sound = sprite.sound;
-		const desc = sprite.image.desc;
-		const buf = desc.sBuffer;
-		sound.sample?.stop?.();
-		const sample = sound.sample = atx.createBufferSource();
-		const bufferGain = sound.gain = atx.createGain();
-		sample.buffer = buf;
-		sound.loop = sample.loop = false;//from !== 0;
-		//sound.loop = sample.loop = true;//from !== 0;
-		//sound.loopStart = sample.loopStart = start;
-		//sound.loopEnd = sample.loopEnd = end;
-		sound.rate = rate;
-		const scaledRate = sample.playbackRate.value = sound.rate * sound.rateScale;
-        sound.volume = Math.min(2.0, Math.abs((sprite.h * sprite.sy) / sprite.image.h));
-        
-        
-		bufferGain.gain.value = sound.volume;
-
-		sample.connect(bufferGain).connect(gain);
-        desc.renderPosition(sprite);
-		if (sound.startOffset < 0) {
-			sample.start(sound.startTime = atx.currentTime - sound.startOffset / sound.rateScale, from);
-			sound.startTime -= from;
-		} else {
-			sample.start(sound.startTime = atx.currentTime, (from + sound.startOffset));
-			sound.startTime -= (from + sound.startOffset) / scaledRate;
-		}
-		desc.playing = true;
-		desc.status = "Playing";
-        
-
-    
-		sample.onended = () => {
-			sound.gain = undefined;
-			sound.sample = undefined;
-			desc.playing = false;
-			desc.status = "Stopped";
-		};
-	}
-	function drawPCM(can) {
-		const h = can.h;
-		const w = can.w;
-		const data = can.desc.sBuffer.getChannelData(0);
-		const time = can.desc.sBuffer.duration;
-		const len = data.length;
-		const vBuf = can.desc.vBuf = new Array(w);
-		var x = 0, xx;
-		var i = 0, smin = 0, smax = 0, sMinSum, sMaxSum, c;
-		const ctx = can.ctx;
-		ctx.clearRect(0, 0, w, h);
-		ctx.fillStyle = "#FFF";
-		while (i < len) {
-			sMinSum = sMaxSum = 0;
-			smin = data[i];
-			smax = data[i];
-			c = 0;
-			xx = (i / len) * w | 0;
-			x = xx;
-			while (x === xx && i < len) {
-				const s = data[i++];
-				smin = Math.min(smin, s);
-				smax = Math.max(smax, s);
-				sMinSum += s < 0 ? s : 0;
-				sMaxSum += s > 0 ? s : 0;
-				c ++;
-				xx = (i / len) * w | 0;
-			}
-			vBuf[x * 2] = Math.max(Math.abs(smin), Math.abs(smax));
-			vBuf[x * 2 + 1] = (Math.abs(sMinSum) + Math.abs(sMaxSum)) * 0.5 / c;
-			smin = (1 - (smin * 0.5 + 0.5)) * h;
-			smax = (1 - (smax * 0.5 + 0.5)) * h;
-			ctx.fillRect(x + 0.2, smin  , 0.6, smax - smin);
-			smin = (1 - ((sMinSum / c) * 0.5 + 0.5)) * h;
-			smax = (1 - ((sMaxSum / c) * 0.5 + 0.5)) * h;
-			ctx.fillRect(x, smin  , 1, smax - smin);
-		}
-	}
-	const API = {
-		start() {
-			if (!atx) {
-				atx = new AudioContext();
-				if (dynamicCompressor) {
-					compressor = atx.createDynamicsCompressor();
-					gain = atx.createGain();
-					setupAudioState();
-				}
-			}
-		},
-		loadSound(url, ready, failed) {
-			loadSampleBuffer(atx, url)
-				.then(ready)
-				.catch(failed);
-		},
-		copyBuffer(buffer) {
-			API.start();
-			const copy = atx.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
-			var data, channels = buffer.numberOfChannels, i = 0;
-			while (i < channels) { copy.copyToChannel(buffer.getChannelData(i), i++) }
-			return buffer;
-		},
-		draw: drawPCM,
-		play: playBuffer,
-        vol: volBuffer,
-		stop(spr) {
-			const sound = spr.sound;
-			const desc = spr.image.desc;
-			sound.sample?.stop?.();
-			sound.sample = undefined;
-			sound.gain = undefined;        
-			desc.playing = false;
-			desc.status = "Stopped";
-		},
-		getTime() { return atx?.currentTime },
-	};
-	return API;
-})();

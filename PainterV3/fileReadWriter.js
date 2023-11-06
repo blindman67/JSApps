@@ -28,9 +28,25 @@ function downloadAsJson(data, filename, replacer) {
     return true;
 }
 function localStoreJson(data, name) {
+    var size;
     try {
-        localStorage[name] = JSON.stringify(data);
+        var str = JSON.stringify(data);
+        size = str.length * 2;
+        localStorage[name] = str;
+        str = undefined;
     } catch(e) {
+        log.warn("Local storage write failed!!");
+        if (e.message.includes("exceeded the quota")) {
+            if (size > 1024 * 1024) {
+                log.warn("Data file too large: " + (size / (1024 * 1024)).toFixed(3) + "Mb");
+            } else if (size > 1024) {
+                log.warn("Data file too large: " + (size / 1024).toFixed(3) + "Kb");
+            } else {
+                log.warn("Data file too large: " + size + "bytes");
+            }
+        } else {
+            log.warn(e.message);
+        }
         return false;
     }
     return true;

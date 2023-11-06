@@ -1,7 +1,8 @@
+
 const APIs = {
     GOOGLE_API_KEY: "key=AIzaSyB0mrxnl1gLADK0p3fdV9aKw3PQUgQohJs",
     GOOGLE_FONTS_API: "https://www.googleapis.com/webfonts/v1/webfonts?",
-    LOCAL_GOOGLE_FONT_LIST: APP_ROOT_DIR + APPNAME + "/GoogleFontList.json",
+    LOCAL_GOOGLE_FONT_LIST: APP_ROOT_DIR + "GoogleFontList.json",
     knownFonts: [
         "ABeeZee,Abel,Abril Fatface,Aclonica,Acme,Actor,Adamina,Advent Pro,Aguafina Script,Akronim,Aladin,Aldrich,Alef,Alegreya,Alegreya SC,Alegreya Sans,Alegreya Sans SC,Alex Brush,Alfa Slab One,Alice,Alike,Alike Angular,Allan,Allerta,Allerta Stencil,Allura,Almendra,Almendra Display,Almendra SC,Amarante,Amaranth,Amatic SC,Amethysta",
         "Abril Fatface,Alfa Slab One,Anton,Archivo Black,Asset,Bangers,Bevan,Bowlby One,Bowlby One SC,Black Ops One",

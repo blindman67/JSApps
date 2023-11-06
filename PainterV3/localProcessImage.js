@@ -742,7 +742,8 @@ const localProcessImage = (()=>{
                     }
                 }
                 const allC = [...cols.values()];
-                log("Got " + allC.length);
+                log("Found " + allC.length + " unique colors.");
+                allC.length > 256 && (log.warn("Pallet limit is 256 unique colors. Created pallet contains only the 256th most common colors."),log.warn("Use [Extras Tab > Image processing > Extract > Pallet] to extract a best fit pallet."));
                 allC.sort((a,b) => b[1] - a[1]);
                 const pallet = media.createPallet(0);
                 pallet.sortBy = "noSort";
@@ -2766,6 +2767,7 @@ const localProcessImage = (()=>{
                 img.ctx.globalCompositeOperation = "source-over";
                 img.ctx.globalAlpha = 1;
                 img.ctx.filter = "none";
+                img.ctx.imageSmoothingEnabled = false;
                 const w = dataA.width, h = dataA.height;
                 const wf = dataf.width, hf = dataf.height;
                 var replaceIdx = Math.random() * replaceImgSprs.length | 0;
@@ -2781,15 +2783,6 @@ const localProcessImage = (()=>{
                 const rot90MirrorW = (x, y, w, h) => y + x * w;
                 const rot270 = (x, y, w, h) =>  (w - 1 - y) + x * w;
                 const rot90MirrorH = (x, y, w, h) => (w - 1 - y) + (h - 1 - x) * w;
-
-                /*const normal =       (x, y, w, h) => x + y * w;
-                const mirrorW =      (x, y, w, h) => (w - x) + y * w;
-                const mirrorH =      (x, y, w, h) => x + (h - y) * w;
-                const mirrorWH =     (x, y, w, h) => (w - x) + (h - y) * w;
-                const rot90 =        (x, y, w, h) => y + (h - x) * w;
-                const rot90MirrorW = (x, y, w, h) => y + x * w;
-                const rot270 =       (x, y, w, h) => (w - y) + x * w;
-                const rot90MirrorH = (x, y, w, h) => (w - y) + (h - x) * w;*/
 
                 normal.m = [1,0,0,1,0,0];
                 mirrorW.m = [-1,0,0,1,1,0];
@@ -2835,16 +2828,15 @@ const localProcessImage = (()=>{
                     while (head < usedCount) { usedAreas[tail++] = usedAreas[head++] }
                     usedCount = tail;
                     return OK;
-
                 }
-
                 const isSame = (x, y, transform) => {
                     var xx, yy;
                     if (transform.rot) {
                         if (canFit(x, y, hf, wf)) {
                             for (yy = 0; yy < wf; yy  ++) {
+                                const yy1 = (y + yy) * w + x;
                                 for (xx = 0; xx < hf; xx  ++) {
-                                    if (d32[x + xx + (y + yy) * w] !== df32[transform(xx, yy, wf, hf)]) {
+                                    if (d32[xx + yy1] !== df32[transform(xx, yy, wf, hf)]) {
                                         return false;
                                     }
                                 }
@@ -2853,8 +2845,9 @@ const localProcessImage = (()=>{
                     } else {
                         if (canFit(x, y, wf, hf)) {
                             for (yy = 0; yy < hf; yy  ++) {
+                                const yy1 = (y + yy) * w + x;
                                 for (xx = 0; xx < wf; xx  ++) {
-                                    if (d32[x + xx + (y + yy) * w] !== df32[transform(xx, yy, wf, hf)]) {
+                                    if (d32[xx + yy1] !== df32[transform(xx, yy, wf, hf)]) {
                                         return false;
                                     }
                                 }
@@ -2863,7 +2856,6 @@ const localProcessImage = (()=>{
                     }
                     return true;
                 }
-
                 const replace = (x, y, transform) => {
                     var xx, yy;
                     const m = transform.m
@@ -2910,8 +2902,6 @@ const localProcessImage = (()=>{
                 }
 
                 log("Image find replaced " + found + " sub images");
-                //setPixelData(img, dataA);
-
                 return true;
 
             }
@@ -5337,7 +5327,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 				return true;
 			}			
             const addedSprites = [];
-			//img.encodeSubSprites([{id:0, x:0, y: 0, w: sw, h: sh}],subSpriteGridHeader)
+
 			img.desc.sprites = [{id:0, x:0, y: 0, w: sw, h: sh}];
 			img.desc.gridSubSprites = true;
             for(y = 0; y < ySteps; y++) {
@@ -8052,7 +8042,7 @@ ${strPM} ];
 					foldClass: "extrasImageProcessing",
 				},
                 
-                tileExperiments: {
+               /* tileExperiments: {
                     autoDefine: {
                         help : "Uses sprite names to automate tile sets.\nTile sprites are named 'Tiles'\nand tile px named `Tiles_px`",
                         call() {
@@ -8094,7 +8084,7 @@ ${strPM} ];
                                 log.info("Created collection to hold tiles sprites 'TileSet_Tiles'");    
                             }
                         }
-                    },
+                    },*/
                     /*defineTilePixels: {
                         help : "Select image to represent pixels per tile",
                         call() {
@@ -8129,7 +8119,7 @@ ${strPM} ];
                             API.tileSets.createTiles();  
                         }
                     },  */
-                    createTileView: {
+                    /*createTileView: {
                         help : "",
                         call() {
                             var count = 0, tries = 0;
@@ -8168,12 +8158,8 @@ ${strPM} ];
 
                         }
                     },                        
-                },   
+                },  */ 
                 render : {
-                    /*pixelArtLines : {
-                        help : "Removes doubled pixels from pixel art lines",
-                        call(){   utils.processSelectedImages(API.fixPixelArtLines )    }
-                    },*/
                     fillTransparent : {
                         help : "Fills all transparent pixels with current main color for selected drawable images.",
                         call(){  utils.processSelectedImages(API.fillTransparentWithColor, colours.current)   },
@@ -8257,10 +8243,6 @@ ${strPM} ];
                         }
 
                     },
-                    /*greenScreen: {
-                        help : "Experiment with greem screen",
-                        call(){  utils.processSelectedImages(API.greenScreen, false)   },
-                    },*/
                     countPixels : {
                         help : "Count number of non transparent pixels in an image.",
                         call(){  utils.processSelectedImages(API.countPixels)   },
@@ -8381,32 +8363,6 @@ ${strPM} ];
 								   
 							}
 						},
-						/*tileConnectMap: {
-							help: "Creates a tile connection map based on join colors",
-							call() {
-								const maps = [];
-								selection.eachOfType(spr => {
-									if (spr.image.isDrawable) { maps.push(spr) }
-								},"image");
-								if (maps.length > 0) {
-									var idx = 0;
-									if (maps.some((spr, i) => {
-										if (spr.image.desc.gridSubSprites) {
-											idx = i;
-											return true;
-										}
-									})) {
-										maps.unshift(maps.splice(idx, 1)[0]);
-										API.createTileConnectMap.sets = API.createTileConnectMap(maps);
-
-
-										log.info("Created connect map");
-											
-									} else { log.warn("Select at least one image must be a tile sheet") }
-								} else { log.warn("Select at least one drawable image sprite") }
-								
-							}
-						},*/
 						HelpForMapppingHelpAndBuildTileMap: {
 							help: "Click to get help on 'Tile mapping' and 'Build tile map'",
 							call() {
@@ -8516,101 +8472,36 @@ ${strPM} ];
                             help : "Removes duplicated tiles",
                             call(){   utils.processSelectedImages(API.removeIdenticalTiles)    }
                         },
-						/*dependentTileMap: {
-                            help: "Same as next renderer [Tile Mapper] but keeps tile generation dependancy active",
-                            call() {
-                                extras.render.pixels.tileMapper.call(true);
-                            }
-                        },
-                        tileMapper: {
-                           help : "Creates tile map from pixel map\nFor more help see ref ImageProcessing.Render.Pixels.TileMapper",
-                           call(dependent = false) {
-                                if (selection.length === 1) {
-                                    const spr = selection[0];
-                                    if (spr.type.image && spr.image.desc.sprites) {
-                                        if (spr.attachers?.size === 1) {
-                                            const colMap = ([...spr.attachers.values()])[0];
-                                            if (colMap.type.image && colMap.image.isDrawable) {
-                                                if (colMap.attachers?.size === 1) {
-                                                    const mapSpr = ([...colMap.attachers.values()])[0];
-                                                    if (mapSpr.type.image && mapSpr.image.isDrawable) {
-                                                        if (mapSpr.attachers?.size > 0) {
-                                                            const warn = new Set();
-                                                            const layouts = [...mapSpr.attachers.values()].filter(s => {
-                                                                    if (s.type.image && s.image.isDrawable) {
-                                                                        if (s.attachers?.size) {
-                                                                            var c = 0;
-                                                                            for (const mapping of s.attachers.values()) {
-                                                                                if (mapping.type.image && mapping.image.isDrawable) { c ++ }
-                                                                            }
-                                                                            if (c) { return true }
-                                                                            else { warn.add("Some mappings sprites  are not drawable images") }
-                                                                        } else { warn.add("Some layout do not have attached tile mappings") }
-                                                                    } else { warn.add("Some layout sprites are not drawable images") }
-                                                                });
-                                                            if (layouts.length) {
-                                                                warn.clear();
-                                                                const tiles = API.tileMapper(spr, colMap, mapSpr, layouts);
-                                                                if (dependent) {
-                                                                    const tiledImage = tiles[0].image;
-                                                                    const updateTileMap = () => API.tileMapper(spr, colMap, mapSpr, layouts, true, tiles[0].image, true);
-                                                                    mapSpr.image.addDependent(tiledImage, updateTileMap);
-                                                                    colMap.image.addDependent(tiledImage, updateTileMap);
-                                                                    spr.image.addDependent(tiledImage, updateTileMap);
-																	log("Tile dependency updated");
-
-
-                                                                } else {
-
-
-                                                                    if (tiles.length) {
-                                                                        selection.clear();
-                                                                        selection.add(tiles);
-                                                                        utils.tidyWorkspace();
-                                                                        log("Tile mapper completed task");
-                                                                    } else {
-                                                                        log.warn("Tile mapper completed task but did not add tiles to workspace");
-                                                                    }
-                                                                }
-                                                            } else {
-                                                                log.warn("No layout sprite could be found. Reasons...");
-                                                                for (const w of warn.values()) { log.warn(w) }
-                                                            }
-                                                        } else { log.warn("Map sprite has no attached layout sprites") }
-                                                    } else { log.warn("Map sprite is not a drawable image") }
-                                                } else { log.warn("Color map does not have attached map sprite") }
-                                            } else { log.warn("First attached sprite is not a drawable image") }
-                                        } else { log.warn("Can only use one attached tile color map sprite") }
-                                    } else { log.warn("Selected sprite does not contaile sub/tile sprites") }
-                                } else { log.warn("Select one sprite") }
-                           }
-                        },*/
 					},
 					pixels: {
 					   pixelArtFindReplaceSubImage: {
                             help : "finds sub images and replaces with new sub image",
-                            call() {
+                            async call() {
+                                let update = false;
+                                async function doSet(spr, find) {
+                                    if (find.type.image) {
+                                        if (find.attachers) {
+                                            const replace = [...find.attachers.values()].filter(spr => spr.type.image && spr.image.isDrawable);
+                                            if (replace.length) {
+                                                API.pixelArtSubImageAlignment = 1;
+                                                await utils.processImageNoUpdateAsync(API.pixelArtSubImageReplace, spr, true, true, find, ...replace);
+                                                update = true;
+                                            } else { messages.push("No Attached replacements ") }
+
+                                        } else { messages.push("Attached missing attached replacement spr") }
+
+                                    } else { messages.push("Attached not an image") }      
+                                    return update;
+                                }
                                 if (selection.length === 1) {
-                                    let update = false;
+                                    
                                     const spr = selection[0];
                                     if (spr.type.image) {
                                         spr.image.restore(false);
                                         if (spr.attachers) {
                                             let messages = [];
                                             for (const find of spr.attachers.values()) {
-                                                if (find.type.image) {
-                                                    if (find.attachers) {
-                                                        const replace = [...find.attachers.values()].filter(spr => spr.type.image && spr.image.isDrawable);
-                                                        if (replace.length) {
-                                                            API.pixelArtSubImageAlignment = 1;
-                                                            utils.processImageNoUpdate(API.pixelArtSubImageReplace, spr, true, true, find, ...replace);
-                                                            update = true;
-                                                        } else { messages.push("No Attached replacements ") }
-
-                                                    } else { messages.push("Attached missing attached replacement spr") }
-
-                                                } else { messages.push("Attached not an image") }
-
+                                                await doSet(spr, find);
                                             }
                                             if (messages.length) {
                                                 while (messages.length) {
@@ -8800,8 +8691,6 @@ ${strPM} ];
                             }
                         },                        
                     },
-                 
-                    
                     applyPallets : {
                         applyPallet : {
                             help : "Applys pallet to image not dithering. Must have a drawable image and pallet selected.",
@@ -9163,8 +9052,9 @@ ${strPM} ];
                         call() { utils.processSelectedImages(API.harrisCornerDetect)  }
                     },*/
 					spriteCollisionBounds : {
-						help: "Create a radial collision map of sprites and download it as JS",
-						call(){
+						help: "DISABLED: Creates a radial collision map of sprites and downloads it as JavaScript",
+                        info: {disabled: LOCALS.LOCAL},
+						call() {
 						    var allGood = false;
 							selection.each(spr => {
 								if(spr.type.image && spr.image.desc.sprites) { allGood = true }
@@ -9195,38 +9085,40 @@ ${strPM} ];
 							};
 						}
 					},
-                    /*spritesBoxed : {
-                        help : "Create a packed sprite sheat from selected images\nSprites are marked by bounding box",
+                    spritesBoxed : {
+                        help : "DISABLED: Create a packed sprite sheat from selected images\nSprites are marked by bounding box",
+                        info: {disabled: LOCALS.LOCAL},
                         call(){ createSprites("box") }
                     },
                     spritesSideMarked : {
-                        help : "Create a packed sprite sheat from selected images\nTop and/or left edge is marked with sprite right and bottom",
+                        help : "DISABLED: Create a packed sprite sheat from selected images\nTop and/or left edge is marked with sprite right and bottom",
+                        info: {disabled: LOCALS.LOCAL},
                         call(){ createSprites("sides") }
-                    },*/
+                    },
                     spriteSheet : {
                         help : "Create Sprite sheet from selected images\nSprite are defined by connected pixels",
                         call(){ createSprites("free") }
-                    },
-                    spritesSheetBoxed : {
-                        help : "Create Sprite sheets from selected images\nSprites are marked by bounding box",
-                        call(){ createSprites("box") }
                     },
                     tileSheet : {
                         help : "Creates a tile sheet from selected images\nTiles are added to workspace when done",
                         call(){ createSprites("grid") }
                     },
-
+                    spritesSheetBoxed : {
+                        help : "Create Sprite sheets from selected images\nSprites are marked by bounding box",
+                        info: {disabled: LOCALS.LOCAL},
+                        call(){ createSprites("box") }
+                    },                        
                     imageValue : {
                         help : "Logs a metric of image brightness",
+                        info: {disabled: LOCALS.LOCAL},
                         call(){
                             selection.eachOfType(spr => {
-                                if(spr.image.isDrawable){
-                                    log("Bright = " + API.calcImageValueMetric(spr.image));
-                                }
+                                if(spr.image.isDrawable){ log("Bright = " + API.calcImageValueMetric(spr.image)); }
                             },"image");
 
                         }
                     }
+
                 },
                 utilities : {
                     GIF_Creator : {
@@ -9237,8 +9129,10 @@ ${strPM} ];
                         help : "Opens dialog used to capture animations as a set of still frames",
                         call(){ setTimeout(()=>commandLine("run safe AnimationCapture",true),0) }
                     },
+
                     ProfileShader: {
                         help : "Create a shading map from an image representing profile",
+                        info: {disabled: LOCALS.LOCAL},
                         call()  {                               
                             selection.eachOfType(spr => {
                                 if(spr.image.isDrawable){
@@ -9250,28 +9144,32 @@ ${strPM} ];
                     },
                     Image_To_JS_Map : {
                         help : "Converts image to Javascript character map object (like tile map)",
+                        info: {disabled: LOCALS.LOCAL},
                         call(){   utils.processSelectedImages(API.imageToCharMap)    }
                     },
-					Image_To_Bin16_file: {
-						help: "Save selected as unsigned 16bit bin file\nRight click to see detailed help!",
-						call() {
-							if ((mouse.oldButton & 4) === 4) {
-								callHelp("Image To Bin16 file", API.imageToBin16Help);
-							} else {
-								if (selection.length > 0) {
-									selection.eachOfType(spr => { API.imageToBin16(spr) }, "image");
-								} else {
-									log.warn("Select at least 1 drawable sprite");
-								}
-							}
-						}
-					},
+                    Image_To_Bin16_file: {
+                        help: "Save selected as unsigned 16bit bin file\nRight click to see detailed help!",
+                        info: {disabled: LOCALS.LOCAL},
+                        call() {
+                            if ((mouse.oldButton & 4) === 4) {
+                                callHelp("Image To Bin16 file", API.imageToBin16Help);
+                            } else {
+                                if (selection.length > 0) {
+                                    selection.eachOfType(spr => { API.imageToBin16(spr) }, "image");
+                                } else {
+                                    log.warn("Select at least 1 drawable sprite");
+                                }
+                            }
+                        }
+                    },
                     Image_To_JS_Binary_Map : {
                         help : "Converts image to Javascript binary map for 1 color images",
+                        info: {disabled: LOCALS.LOCAL},
                         call(){   utils.processSelectedImages(API.imageToBinary)    }
                     },
                     Save_Sprite_Coords : {
                         help : "Saves an array of selected sprite positions",
+                        info: {disabled: LOCALS.LOCAL},
                         call(){
                             if(selection.length > 0){
                                 var str = "const sprites = [\n";
@@ -9288,6 +9186,7 @@ ${strPM} ];
                     },
                     Save_Selected_Sprites : {
                         help : "Basic save of sprites",
+                        info: {disabled: LOCALS.LOCAL},
                         call(){
                             if(selection.length > 0){
                                 const spriteArr = [];
@@ -9324,6 +9223,7 @@ ${strPM} ];
                     },
                     Export_VOX_Stack : {
                         help : "Exports a set of images as a 3d VOX file\nMust include a 256 pallet",
+                        info: {disabled: LOCALS.LOCAL},
                         call(){
                             if(selection.length > 0){
                                 const imageStack = [];
@@ -9409,11 +9309,14 @@ ${strPM} ];
                         }
                     }
                 },
-                tensorFlow: {                    
+                /*tensorFlow: {                    
                     bodyParts: {
-                        load: {
-                            help: "Load tensorFlow body detect scripts and models",
+                        clickToLoadModels: {
+                            help: "DISABLED: Load tensorFlow body detect scripts and models\nThis may take a moment or two depending on your setup.",
+                            info: { disabled: true },
                             call(item) {
+                                log.warn("tensorFlow has suddenly stopped working. Reason unknown (Likely my fault).\nTo avoid delaying PainterV3 release tensor flow has been disabled.");
+                                return;
                                 if (!ScriptLoader.canRun("bodyParts")) {
                                     item.element.textContent = "Installing BodyParts. This will take a moment...";
                                     ScriptLoader.addScript("bodyParts", "./tensorFlow/BodyParts.js" , () => typeof BodyParts !== "undefined").then(()=>{
@@ -9456,7 +9359,7 @@ ${strPM} ];
                             }
                         },
                     },
-                },
+                },*/
             };
             return extras
         },

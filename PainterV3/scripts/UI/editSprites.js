@@ -930,6 +930,18 @@ const editSprites = (()=>{
             API.addCreatedSprites(...sprs);
             API.renamingNewSprite = rename;
         },
+        addSprites(sprs, selectAdded = false, focusOn = false, update = false) {
+            
+            for(const spr of sprs) {
+                if (!spr.locks.rotate) { spr.locks.rotate = settings.newSpriteLockRotate }
+                if (!spr.locks.scale) { spr.locks.scale = settings.newSpriteLockScale }
+                spr.rgb.fromColor(lastFillColUsed);
+                sprites.add(spr);
+                selectAdded && selection.add(spr);
+            }
+            focusOn && selectAdded && selection.setView(view);
+            if (update) { API.command(commands.edSprUpdateUI); }
+        },
         addCreatedSprites(...sprs){
             selection.clear(true)
             for(const spr of sprs) {
@@ -938,30 +950,20 @@ const editSprites = (()=>{
                 spr.rgb.fromColor(lastFillColUsed);
                 sprites.add(spr);
                 selection.add(spr);
-
             }
             if (settings.focusOnNew) { selection.setView(view) }
-
             if(API.renamingNewSprite && !commandLine.isInBatch() && settings.nameOnCreate && sprs.length === 1) {
                 const renameList = sprs;
                 const renameFunc = (sl,type,item) => {
-                    if(sprs.length) {
-                        spriteList.renameItem(sprs.shift());
-                    } else {
-                        spriteList.removeEvent("itemrenamed", renameFunc);
-                    }
+                    if(sprs.length) { spriteList.renameItem(sprs.shift()); }
+                    else { spriteList.removeEvent("itemrenamed", renameFunc); }
                 };
                 spriteList.addEvent("itemrenamed", renameFunc);
                 setTimeout(()=> { spriteList.renameItem(sprs.shift()) }, 100);
-
-
                 API.renamingNewSprite = true;
             }
-            if (!API.newSpriteHoldUpdate) {
-                API.command(commands.edSprUpdateUI);
-            } else {
-                API.newSpriteHoldUpdate = false;
-            }
+            if (!API.newSpriteHoldUpdate) { API.command(commands.edSprUpdateUI); }
+            else { API.newSpriteHoldUpdate = false; }
         },
         commands: {
             updateWidget: true,
@@ -1366,7 +1368,7 @@ const editSprites = (()=>{
 						let warn;
 						selection.each(spr => {
 							if (spr.type.image && !spr.type.pattern && spr.image.isDrawable) {
-
+                                spr.prepDrawOn();
                                 spr.type.captureFeedback = !mouse.ctrl;
                                 if (spr.captureList) { spr.captureList.sort((a,b) => a.index - b.index) }
                                 const alpha = spr.a;
@@ -3158,7 +3160,11 @@ const editSprites = (()=>{
                 if (mouse.ctrl && (mouse.oldButton & 1) === 1) {
                     selection.each(spr =>  spr.scaleSquare());
                 } else if (mouse.ctrl && rightClick) {
-                    selection.each(spr =>  spr.resetScale(true));
+                    selection.each(spr =>  spr.resetScale(true, API.snapMode > 1));
+                    if (selection.length) {
+                        log("Selected sprite rescaled to nearest pixel");
+                        if (API.snapMode > 1) { log("and repositioned to align with pixels"); }
+                    }
                 } else if (rightClick) {
                     if (selection.length > 0) {
                         const scaleLocked = !selection[0].locks.scale;

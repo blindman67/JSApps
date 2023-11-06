@@ -1,19 +1,31 @@
-
+assert selected
+if $assertion === false {
+    menu title "20 Missing requierment"
+    menu options "textCenter You must select a sprite to tile!"
+    menu exit "OK"
+    call menu
+    exit
+}
 $comaW = ""
 $comaH = ""
 $optionsW = ""
 $optionsH = ""
 $optionCountA = 0
 $optionCountB = 0
+$sizeList = [5,6,8,10,12,15,16,18,20,24,25,30,32,35,36,40,42,45,48,50,54,55,56,60,64]
+$sizeIdx = 0
 $size = 8
 selected next a
 if $a !== undefined {
+debug on
     $w = $a.w
     $h = $a.h
     $w2 = $w / 2
     $h2 = $h / 2
-    
-    label loop
+
+
+    label loopA
+        $size = $sizeList[$sizeIdx]
         $ww1 = $w / $size
         $ww2 = $w / $size | 0
         if $ww1 === $ww2 {
@@ -29,34 +41,45 @@ if $a !== undefined {
             $comaH = ","
             $optionCountB = $optionCountB + 1
         }   
-        
-        $size = $size + 8
-        if $size < $w2 {
-            if $size < $h2 {
-                jump loop
+        $sizeIdx = $sizeIdx + 1
+        if $sizeIdx < $sizeList.length {
+            jump loopA
+        } else {
+            $size = $sizeList[$sizeIdx]
+            if $size < $w2 {
+                if $size < $h2 {
+                    jump loopA
+                }
             }
         }
 }
 
 if $optionCountB > 0 && $optionCountA > 0  allGood
-    menu title "Could not fit tiles"
-    menu exit "OK"
-    call menu
-    exit
+
+menu title "Could not fit tiles"
+menu exit "OK"
+call menu
+exit
 
 
 label allGood
 
 
 menu title "Select width tiles"
-menu exit "OK"
 menu options $optionsW
+menu exit "Cancel"
+menu exit "OK"
 $ws = call menu
+if $ws === "cancel" exit
+
 
 menu title "Select height tiles"
-menu exit "OK"
 menu options $optionsH
+menu exit "Cancel"
+menu exit "OK"
 $hs = call menu
+if $hs === "cancel" exit
+
 
 $xx = $a.x - $a.w / 2
 $yy = $a.y - $a.h / 2
@@ -66,7 +89,6 @@ $jc = $a.h / $hs
 label loopY
     $ic = $a.w / $ws
     label loopX
-        
         com edSprCreateCutter
         select
         selected as b
@@ -75,12 +97,10 @@ label loopY
         $b.x = $xx + $ws / 2
         $b.y = $yy + $hs / 2
         $xx = $xx + $ws
-        
         $ic = $ic -1
     if $ic > 0 loopX
     $xx = $xxp
     $yy = $yy + $hs
-
     $jc = $jc -1
 if $jc > 0 loopY
     

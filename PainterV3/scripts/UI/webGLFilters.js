@@ -445,6 +445,7 @@ const webGLFilterMenus = (()=>{
         hasAnimated = false;
         selection.eachImage((spr, image) => {
             if (image.isDrawable && !image.isLocked) {
+                spr.prepDrawOn();
                 imageList.push({spr, image})
                 if (spr.type.animated && spr.animation.tracks.image) {
                     hasAnimated = true;

@@ -175,7 +175,6 @@ body {
     display: block;
 }
 
-
 /* UI pannel*/
 .pannel {
     position : relative;
@@ -1121,6 +1120,11 @@ td {
     color : white;
     background : red;
 }
+.listItem.disabledItem {
+    color: #A99;
+    cursor: not-allowed;
+}
+
 .foldItem {
     text-align : left;
     cursor : pointer;
@@ -1296,8 +1300,6 @@ td {
 }
 /* fold styles for extras pannel. Do not add rules that change layout and functionality. */
 
-
-
 .extrasHelpers .foldItem { background: hsl(50, 22%, 49%); }
 .extrasHelpers .listItem { background: hsl(50, 24%, 42%); }
 .extrasHelpers .foldItem:hover { background: hsl(50, 18%, 55%); }
@@ -1317,8 +1319,6 @@ td {
 .extrasImageProcessingWebGL .listItem { background: hsl(200, 24%, 32%); }
 .extrasImageProcessingWebGL .foldItem:hover { background: hsl(200, 18%, 45%); }
 .extrasImageProcessingWebGL .listItem:hover { background: hsl(200, 60%, 20%); }
-
-
 
 .extrasAnimation .foldItem { background: hsl(90, 22%, 49%); }
 .extrasAnimation .listItem { background: hsl(90, 24%, 42%); }

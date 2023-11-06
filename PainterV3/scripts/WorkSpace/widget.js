@@ -314,6 +314,7 @@ const widget = (() => {
     var selectingAxisEdges;  // bit field bits 3,2,1 for left,center, right, or top, center, bottom
     var widgetColor = "yellow";
     var selectorColor = "white";
+    var audioLevelColor = "#0AF";
     var selectorDashSize = 10;
     var selectorDash = [selectorDashSize];
     const cursors = [
@@ -1642,6 +1643,61 @@ const widget = (() => {
         }
         
     }
+    function drawLevelPath(spr) {
+        if (spr.levels && spr.levels.length > 1) {
+            c.setTransform(vm[0], vm[1], vm[2], vm[3], vm[4], vm[5]);
+            const mat = spr.key.m;
+            c.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
+            c.globalAlpha = 0.5;
+            c.strokeStyle = "#000";
+            c.lineWidth = v.invScale * 2;
+            const len = spr.levels.length;
+            var i = 0, pathW = spr.sx * spr.w, pathH = spr.sy * spr.h, offY = spr.cy;
+            c.beginPath();
+            const wp1 = utils.point;
+            const wp2 = utils.point;
+            var xPosA, yPosA;
+            var minDist = pathH / 10;
+            while (i < len) {
+                const p = spr.levels[i]
+                const xPosB = p.x * pathW - spr.cx;
+                const yPosB = (1 - p.y) * pathH - offY;
+                c.lineTo(xPosB, yPosB);
+                if (xPosA !== undefined) {
+                    const dist = distPointFromLineseg(xPosA, yPosA, xPosB, yPosB, spr.key.lx- spr.cx, spr.key.ly - offY);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        wp1.as(xPosA, yPosA);
+                        wp2.as(xPosB, yPosB);
+                    }
+                }
+                i++;
+                xPosA = xPosB;
+                yPosA = yPosB;
+                
+            }
+            c.stroke();                
+            c.globalAlpha = 1.0;
+            c.strokeStyle = audioLevelColor;
+            c.lineWidth = v.invScale;
+            c.stroke();                
+            if (minDist < pathH) {
+                c.beginPath();
+                c.lineWidth = v.invScale * 3;
+                c.lineTo(wp1.x, wp1.y);
+                c.lineTo(wp2.x, wp2.y);
+                c.stroke();                
+            }
+            /*   c.beginPath();
+                c.lineWidth = v.invScale * 3;
+                c.lineTo(spr.key.lx - 5 - spr.cx, spr.key.ly - offY);
+                c.lineTo(spr.key.lx + 5 - spr.cx, spr.key.ly - offY);
+                c.moveTo(spr.key.lx - spr.cx, spr.key.ly - 5 - offY);
+                c.lineTo(spr.key.lx - spr.cx, spr.key.ly + 5 - offY);
+                c.stroke();  */
+        }
+        
+    }    
     const API = {
         gridLineColor : settings.gridLineColor,
         setView(view) {
@@ -1979,10 +2035,10 @@ const widget = (() => {
                                 }else {
                                     timeline.addKeyToSelectedSpr(commands.animSetKeyPosScale);
                                 }
-                            }else if(timeline.editMode === timeline.editModes.modify){
-                                if(changedForAnim === center || changedForAnim === attachCenter) {
+                            } else if (timeline.editMode === timeline.editModes.modify){
+                                if (changedForAnim === center || changedForAnim === attachCenter) {
                                     timeline.modifyKeysOfSelectedSpr(commands.animSetKeyPos);
-                                }else if(changedForAnim === rotate || changedForAnim === rotateSide) {
+                                } else if(changedForAnim === rotate || changedForAnim === rotateSide) {
                                     timeline.modifyKeysOfSelectedSpr(commands.animSetKeyRotate);
                                 }
                             }
@@ -2284,11 +2340,13 @@ const widget = (() => {
                 }
                 spriteRender.drawSpriteList(selectingPreviouseArray, selectingAxisId, selectingAxisEdges);
             }
-            if (singleSprite && selection[0] && selection[0].type.showAnimPath) {
-                if (!selection[0].widgetAnimPath) {
-                    selection[0].updateWidgetAnimPath();
-                }
-                drawAnimPath(selection[0]);
+            if (singleSprite && selection[0]) {
+                if (selection[0].type.showAnimPath) {
+                    if (!selection[0].widgetAnimPath) { selection[0].updateWidgetAnimPath(); }
+                    drawAnimPath(selection[0]);
+                } 
+                if (selection[0].type.hasLevelPath) { drawLevelPath(selection[0]); }
+                
             }            
         },
         update() {
@@ -2393,6 +2451,7 @@ const widget = (() => {
         limitModify = settings.limitModify;
         widgetColor = settings.widgetColor;
         selectorColor = settings.selectorColor;
+        audioLevelColor = settings.audioLevelColor;
         selectorDashSize = Number(settings.selectorDashSize);
         selectorDash[0] = selectorDashSize;
         gridSnapDist = settings.gridLineSnapDistance;

@@ -941,6 +941,7 @@ const utils = (()=>{
         get boxPacker() { return boxPacker() },
         get matrix() { return new Matrix() },
         get point() { return new Point() },
+        getPoint(x, y) { return new Point(x, y) },
         get size() { return new Size() },
         get rgba() { return new RGBA() },
         get colorRange() { return new ColorRange(API.rgba,API.rgba) },
@@ -1039,6 +1040,9 @@ const utils = (()=>{
             }
             API.tidyWorkspace();
         },
+        async processImageNoUpdateAsync(call, image, ...args) {
+            return new Promise(done => { setTimeout(()=> done(call(image,...args)), 0) });
+        },
         processImageNoUpdate(call, image, ...args){
             call(image,...args);
         },
@@ -1055,7 +1059,8 @@ const utils = (()=>{
             lastProcessingCall = [call,...args];
             var count = 0;
             log.info("Processing");
-            selection.processImages((img, i) => {
+            selection.processImages((img, i, spr) => {
+                spr.prepDrawOn();
                 img.restore(false);
                 const processed = call(img,...args); //localProcessImage.halfSizeBitmap(img);
                 sprites.each(spr => { if(spr.type.image && spr.image === img) {  spr.imageResized(true) } });

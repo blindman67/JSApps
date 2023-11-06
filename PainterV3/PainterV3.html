@@ -7,29 +7,31 @@
         <meta name="keywords" content="Image editor, bitmap editor, drawing, pixelart, game design, Mark Spronck" />
         <meta name="description" content="Iamge editor and drawing application for the browser." />
         <meta name="author" content="Mark Spronck" />
+        <link rel="manifest" href="manifest.json" />
         <link rel="icon" type="image/svg" href="icons/Icon.svg" >
         <link href='https://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css' id = "googleFonts">
         <link rel="stylesheet" type="text/css" href="PainterV3.css">
         <style id="dinamicStyleElement"></style>
         <script src="firstLoadScript.js"></script>
         <script src="./scripts/UI/customCursors.js"></script>
-        <script src="./geeQuery/geeQuery.js"></script>
-        <script src="./LZipper/LZipperLite.js"></script>
-        <script src="./PracticalSVG/createSVG.js" ></script>
-        <script src="./SVGFilters/SVGFilters.js"></script>
-        <script src="./CanvasShapes/canvasShapesExtension.js"></script>
-        <script src="./EZWebWorkers/EZWebWorkers.js"></script>
+        <script src="./scripts/geeQuery/geeQuery.js"></script>
+        <script src="./scripts/LZipper/LZipperLite.js"></script>
+        <script src="./scripts/practicalSVG/createSVG.js" ></script>
+        <script src="./scripts/SVGFilters/SVGFilters.js"></script>
+        <script src="./scripts/CanvasShapes/canvasShapesExtension.js"></script>
+        <script src="./scripts/EZWebWorkers/EZWebWorkers.js"></script>
         <script src="quant256.js"></script>
         <script src="./scripts/UI/commands.js"></script>
         <script src="./scripts/WorkSpace/filters.js"></script>
         <script src="utils.js"></script>
         <script src="fileReadWriter.js"></script>
         <script src="./scripts/UI/buttons.js"></script>
-        <script src="./EZView/EZView.js"></script>
+        <script src="./scripts/EZView/EZView.js"></script>
         <script src="Events.js"></script>
         <script src="./scripts/Drawing/curves.js"></script>
         <script src="./scripts/UI/nameBrushPresets.js"></script>
         <script src="media.js"></script>
+        <script src="./scripts/Audio.js"></script>
         <script src="localProcessImage.js"></script>
         <script src="./scripts/WorkSpace/IKSolver.js"></script>
         <script src="./scripts/WorkSpace/functionLinkBuilder.js"></script>
@@ -65,7 +67,6 @@
         <script src="./scripts/animation/LightBoxPannel.js"></script>
         <script src="./scripts/WorkSpace/spriteSVGRender.js"></script>
         <script src="ShadowPath2D.js"></script>
-        <!--<script src="WaveFuncCollapse.js"></script>-->
     </head>
     <body style="background-color:#4488ff;font-family : arial;" id="doc">
         <div id="editContainer" style="left: 0px; right: 521px; top: 0px; bottom: 0px;">
@@ -102,7 +103,6 @@
         <script src="kinematics.js"></script>
         <script src="./scripts/WorkSpace/render.js"></script>
         <script src="system.js"></script>
-
         <script src="./scripts/UI/commandManager.js"></script>
         <script src="./scripts/UI/infoPannel.js"></script>
         <script src="./scripts/UI/SpritePannel.js"></script>
@@ -112,11 +112,10 @@
         <script src="./scripts/UI/commandLine.js"></script>
         <script src="undos.js"></script>
         <script src="PainterV3.js"></script>
-        <!--<script src="HTMLAnimationExport.js" defer=true></script>-->
+        <script src="HTMLAnimationExport.js" defer=true></script>
         <script src="functionLinkCompiler.js" defer=true></script>
-        <script src="./GIFGroover/GIFGroover.js" defer=true></script>
-        <script src="./FilterGL/FilterGL.js" defer=true></script>
-        <!--<script src="../GitHub/FilterGL/FilterGL3.js" defer=true></script>-->
+        <script src="./scripts/GIFGroover/GIFGroover.js" defer=true></script>
+        <script src="./scripts/FilterGL/FilterGL.js" defer=true></script>
         <script src="workers/worker_Lzipper.js" defer=true></script>
         <script src="workers/worker_Dithering.js" defer=true></script>
         <script src="workers/worker_HighLowFilters.js" defer=true></script>
@@ -125,7 +124,5 @@
         <script src="webmEncoder.js" defer=true></script>
         <script src="canvasRecorder1.js" defer=true></script>
         <script src="ScriptLoader.js" defer=true></script>
-
-
     </body>
 </html>

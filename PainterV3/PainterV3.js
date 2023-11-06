@@ -14,7 +14,7 @@ function addLoadedMedia(name){
     if (settings.recent.length > settings.recentCount) { settings.recent.shift(); }
     settingsHandler.saveSettings();
 }
-const DM = new DropManager( "mainCanvas",
+const DM = new DropManager( "mainCanvas"); /*,
     (file) => {
         if (file) {
             if (typeof file === "string") { file = {name: file} }
@@ -30,7 +30,7 @@ const DM = new DropManager( "mainCanvas",
         } else { log.error("Unknown file type."); }
     },
     ["*"]
-);
+);*/
 const fileList = (()=>{
     var fileList = localStorage[APPNAME + "_fileList"] ;
     if (fileList === undefined) {

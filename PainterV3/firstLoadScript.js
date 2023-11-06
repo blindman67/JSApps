@@ -1,6 +1,8 @@
 "use strict";
 const VERSION = "Groover 3";
-const SUB_VERSION = ".1.0";
+//const SUB_VERSION = ".1.0"; 
+const SUB_VERSION = ".2.0";   // 10/2023
+document.title = "PainterV3" + SUB_VERSION;
 var globalTime = 0;
 var frameCount = 0;  // uSome functions are called from many places, this is used to ID a frame and make sure functions are not being called more times than needed
 var globalEscape = false;
@@ -86,27 +88,50 @@ const busy = (() => {
 var AID = 1; // app id, this can have duplicates and be reused
 var UID = 1000000; // Unique Id to session, must not be duplicated, must not be reused
 var maxUID = 1000000;
-const APP_PROTOCOL = document.location.protocol;
-const LOCAL = document.location.href.includes("localhost");
-const HOST = "//blindman67.github.io/JSApps/PainterV3";
-const APPNAME = "AppPainterV3";
-const APP_ROOT_DIR_SHORT = APP_PROTOCOL + (LOCAL ? "//localhost/JSApps/PainterV3" : HOST);
-const APP_ROOT_DIR = APP_PROTOCOL + (LOCAL ? "//localhost/JSApps/PainterV3/" : HOST + "/");
-const APP_ROOT_DIR_REG = APP_PROTOCOL === "https:" ? (LOCAL ? /https:\/\/localhost\/JSApps\/PainterV3\//gi : /https:\/\/blindman67\.github\.io\/JSApps\/PainterV3\//gi ) : (LOCAL ? /http:\/\/localhost\/JSApps\/PainterV3\//gi : /http:\/\/blindman67\.github\.io\/JSApps\/PainterV3\//gi);
-localStorage[APPNAME + "_GUID"] = localStorage[APPNAME + "_GUID"] ? localStorage[APPNAME + "_GUID"] : UID;
-
-/* First run on new non local client */
-!LOCAL && (localStorage[APPNAME + "_settings"] = localStorage[APPNAME + "_settings"] ? localStorage[APPNAME + "_settings"] : '{"backgroundColor":"rgba(47,70,90,255)","widgetColor":"#0F0","highlightColor":"cyan","highlightSelFit":"#FF4","highlightSelLookat":"#44F","highlightSelAttach":"#4F4","highlightSelLinked":"#F44","highlightSelLocate":"#4FF","highlightSelAlign":"#F4F","highlightSelZorder":"#FF6","highlightSelSubSprite":"#F66","highlightSelInput":"#6F6","highlightSelOutput":"#FA6","selectedColor":"orange","showColor":"#888","cutterColor":"#555","snapOpenColor":"#F00","snapLockedColor":"#FF0","snapCrossSize":10,"cutterSize":256,"flashTime":200,"selectorColor":"#0A0","selectorDashSize":10,"spriteShowColor":"#888","spriteSelectedColor":"#F80","spriteCutterColor":"#888","spriteHighlightColor":"#0FF","onAnimationKeyColor":"#F00","functionLinkTextColor":"#FFF","functionLinkOutlineColor":"#8F8","shapeIconColor":"#F93","paintCaptureFrameRate":30,"paintCaptureBitRate":2000000,"videoCaptureBitRate":2000000,"sleepTime":"0","microSleepFrames":"0","sleepWakeFrames":15,"UI_Hide_Time":500,"drawSpacingGuid":false,"displayFont":"arial","textSpriteFont":"arial","textSpriteFontSize":"32","SVG_Export_Num_Size":2,"SVG_Export_Indent":4,"newSpriteLockScale":false,"newSpriteLockRotate":false,"gridSpriteDefaultSteps":8,"showMouseInfo":true,"nameOnCreate":true,"gridLineSnapDistance":8,"pixelSnap":"1","gizmoSnapsCorners":true,"gizmoSnapsMidEdge":false,"gizmoSnapsCenter":false,"focusOnNew":false,"dashSize":5,"dashAlpha":0.5,"dashLightColor":"white","dashDarkColor":"black","allow_HSL_Model":true,"wheelScaleRate":1.05,"wheelScaleResponse":0.7,"scaleRate":1.01,"recentCount":40,"allowUnsafe":false,"JPEG_Save_Quality":0.9,"downloadDir":"https://localhost/Downloads/","recent":["https://localhost/Downloads/imagerip_lhyuufdx.jpg","https://localhost/Downloads/canvas381913.png","https://localhost/Downloads/TilesGrassSandSea16By384679%20(1).png","https://localhost/MarkArmy_Store/GrassSandSea_tiles.png","https://localhost/Downloads/HeightMapDump.png","https://localhost/Downloads/minimapDump.png","https://localhost/Downloads/FlowMapPalDump.png","https://localhost/Downloads/FlowMapDump.png","https://localhost/Downloads/FOWMapDump.png","https://localhost/Downloads/gunMan_variation_1_Dump.png","https://localhost/Downloads/imagerip_lj3mm40n.jpg","https://localhost/Downloads/imagerip_lj8r18kw.jpg","https://localhost/Downloads/imagerip_ljm152t4.png","https://localhost/MarkArmy_Store/ArmyBases.png","https://localhost/Downloads/TileHome.png","https://localhost/Downloads/TileHome%20(1).png","https://localhost/Downloads/WallTilesShaded.png","https://localhost/Downloads/WallTiles.png","https://localhost/MarkArmy_Store/LandUseTiles.png","https://localhost/Downloads/TicTacToeRobot423593.png","https://localhost/Downloads/imagerip_lmtqif0y.jpg","https://localhost/Downloads/imagerip_lmwq5w0l.jpg","https://localhost/Downloads/IsoMorphicLand%20(1).png","https://localhost/Downloads/imagerip_lnazcqt1.jpg","https://localhost/Downloads/imagerip_lnb1cwxq.jpg","https://localhost/Downloads/imagerip_lnfk52ro.jpg","https://localhost/Downloads/imagerip_lnfj42m9.jpg","https://localhost/Downloads/imagerip_lnfj5g2h.jpg","https://localhost/Downloads/imagerip_lnfjhppn.jpg","https://localhost/Downloads/imagerip_lnfju7kv.jpeg","https://images.theconversation.com/files/380799/original/file-20210127-17-if809z.jpg?ixlib=rb-1.1.0&rect=0%2c0%2c5000%2c3330&q=20&auto=format&w=320&fit=clip&dpr=2&usm=12&cs=strip","https://localhost/Downloads/imagerip_lnfkmmya.jpg","https://localhost/Downloads/ImageRip_lnfju7kv.jpeg","https://localhost/Downloads/ImageRip_lnfjhppn.jpg","https://localhost/Downloads/ImageRip_lnfj42m9.jpg","https://localhost/Downloads/ImageRip_lnfj5g2h.jpg","https://localhost/Downloads/ImageRip_lnfk52ro.jpg","https://localhost/Downloads/ImageRip_lnfkmmya.jpg","https://localhost/Downloads/ImageRip_lns4257t.jpg","https://localhost/Downloads/imagerip_lns6he0g.jpg"],"saveGridState":true,"dynamicCompressor":true,"limitModify":false,"help":true,"animateGifOnLoad":false,"namePostFixDigits":2,"autoSpriteNamePrefix":false,"showInfoAlerts":true,"showWarnAlerts":true,"showErrorAlerts":true,"alertTime":20,"alertSize":10,"gridMix":"0.35","gridSize":"8","palletFormat":"Hex32","prettyJSON":true,"autoScrollSprite":true,"undoLevels":20,"imageExtraUndos":true,"autoSizeTimeline":true,"includeUnsavedImagesWhenSaving":true,"appendIdOnSave":false,"author":"Blindman67","copyright":"All content copyright Blindman67. All rights reserved. 2018","project":"Painter V3 Development","selectLoaded":false,"viewLoaded":false,"zoomOnLoadedOn":false,"addLoadedAsCollection":false,"localMedia":true,"maxAnimationLength":18000,"Render_U_I_Size":10,"mouseHangTime":5,"Key_HSL_Slide_Step":"16","storeOnPaintClose":true,"emojiIcons":true,"maxConvoluteSize":11,"infoPannelShowDelay":500,"useOffscreenCanvas":true,"maxImageDependencyRate":4,"timelineMaxTracks":"32","limitDrawTime":false,"maxDrawTime":10,"useDetailedNames":false,"J_I_T_Curves":false,"useGridWorkaround":false,"gridLineColor":"#000","gridColor1":"#CCC","gridColor2":"#999","gridColor3":"#666","gridColor4":"#333","keyColorSlideStep":4,"lightBox1Alpha":0.7,"lightBox2Alpha":0.6,"lightBox3Alpha":0.5,"lightBox4Alpha":0.45,"lightBox5Alpha":0.4,"lightBox6Alpha":0.35,"lightBox7Alpha":0.325,"lightBox8Alpha":"0.9","lightBox9Alpha":"0.8"}');
-!LOCAL && (localStorage[APPNAME + "_Layout"]   = localStorage[APPNAME + "_Layout"]   ? localStorage[APPNAME + "_Layout"]   : '0.99, 0.001, 0, false');
-
-
+const EMPTY_FUNCTION = function(){};
 function getGUID(){  // Global unique to Painter  must not be duplicated, must not be reused
-    var GUID = localStorage[APPNAME + "_GUID"];
-    localStorage[APPNAME + "_GUID"] = GUID = Number(GUID) + 1;
+    var GUID = Number(localStorage[APPNAME + "_GUID"] ) + 1;
+    localStorage[APPNAME + "_GUID"]  = GUID;
     return GUID;
 }
-const subSpriteHeader = "0PV30SUB0SPR";
-const subSpriteGridHeader = "0PV30GRD0SPR";
+
+const APP_LOCALS = Object.freeze({
+    DEV: {
+        ROOT: "//localhost/PainterV3",
+        ROOT_REG: /https:\/\/localhost\/PainterV3\//gi,
+        APP_NAME: "PainterV3",
+        isLocation() { return document.location.href.includes("localhost/PainterV3") },
+        LOCAL: true,
+        MEDIA: "Downloads/",
+    },
+    LOCAL: {
+        ROOT: "//localhost/JSApps/PainterV3",
+        ROOT_REG: /https:\/\/localhost\/JSApps\/PainterV3\//gi,
+        APP_NAME: "AppPainterV3",
+        isLocation() { return document.location.href.includes("localhost/JSApps/PainterV3") },
+        LOCAL: true,
+        MEDIA: "Examples/",
+    },
+    GIT: {
+        ROOT: "//blindman67.github.io/JSApps/PainterV3",
+        ROOT_REG: /https:\/\/blindman67\.github\.io\/JSApps\/PainterV3\//gi,
+        APP_NAME: "AppPainterV3",
+        isLocation() { return document.location.href.includes("blindman67.github.io/JSApps/PainterV3") },
+        LOCAL: false,
+        MEDIA: "Examples/",
+    },
+});
+const LOCALS = Object.values(APP_LOCALS).find(local => local.isLocation());
+const APP_PROTOCOL = document.location.protocol;
+const APPNAME            = LOCALS.APP_NAME;
+const APP_ROOT_DIR_SHORT = APP_PROTOCOL + LOCALS.ROOT;
+const APP_ROOT_DIR       = APP_PROTOCOL + LOCALS.ROOT + "/";
+const APP_ROOT_DIR_REG   = LOCALS.ROOT_REG;
+localStorage[APPNAME + "_GUID"] = localStorage[APPNAME + "_GUID"] ? localStorage[APPNAME + "_GUID"] : UID;
+!LOCALS.LOCAL && (localStorage[APPNAME + "_settings"] = localStorage[APPNAME + "_settings"] ? localStorage[APPNAME + "_settings"] : '{"backgroundColor":"rgba(47,70,90,255)","widgetColor":"#0F0","highlightColor":"cyan","highlightSelFit":"#FF4","highlightSelLookat":"#44F","highlightSelAttach":"#4F4","highlightSelLinked":"#F44","highlightSelLocate":"#4FF","highlightSelAlign":"#F4F","highlightSelZorder":"#FF6","highlightSelSubSprite":"#F66","highlightSelInput":"#6F6","highlightSelOutput":"#FA6","selectedColor":"orange","showColor":"#888","cutterColor":"#555","snapOpenColor":"#F00","snapLockedColor":"#FF0","snapCrossSize":10,"cutterSize":256,"flashTime":200,"selectorColor":"#0A0","selectorDashSize":10,"spriteShowColor":"#888","spriteSelectedColor":"#F80","spriteCutterColor":"#888","spriteHighlightColor":"#0FF","onAnimationKeyColor":"#F00","functionLinkTextColor":"#FFF","functionLinkOutlineColor":"#8F8","shapeIconColor":"#F93","paintCaptureFrameRate":30,"paintCaptureBitRate":2000000,"videoCaptureBitRate":2000000,"sleepTime":"0","microSleepFrames":"0","sleepWakeFrames":15,"UI_Hide_Time":500,"drawSpacingGuid":false,"displayFont":"arial","textSpriteFont":"arial","textSpriteFontSize":"32","SVG_Export_Num_Size":2,"SVG_Export_Indent":4,"newSpriteLockScale":false,"newSpriteLockRotate":false,"gridSpriteDefaultSteps":8,"showMouseInfo":true,"nameOnCreate":true,"gridLineSnapDistance":8,"pixelSnap":"1","gizmoSnapsCorners":true,"gizmoSnapsMidEdge":false,"gizmoSnapsCenter":false,"focusOnNew":false,"dashSize":5,"dashAlpha":0.5,"dashLightColor":"white","dashDarkColor":"black","allow_HSL_Model":true,"wheelScaleRate":1.05,"wheelScaleResponse":0.7,"scaleRate":1.01,"recentCount":40,"allowUnsafe":false,"JPEG_Save_Quality":0.9,"downloadDir":"https://localhost/Downloads/","recent":["https://localhost/Downloads/imagerip_lhyuufdx.jpg","https://localhost/Downloads/canvas381913.png","https://localhost/Downloads/TilesGrassSandSea16By384679%20(1).png","https://localhost/MarkArmy_Store/GrassSandSea_tiles.png","https://localhost/Downloads/HeightMapDump.png","https://localhost/Downloads/minimapDump.png","https://localhost/Downloads/FlowMapPalDump.png","https://localhost/Downloads/FlowMapDump.png","https://localhost/Downloads/FOWMapDump.png","https://localhost/Downloads/gunMan_variation_1_Dump.png","https://localhost/Downloads/imagerip_lj3mm40n.jpg","https://localhost/Downloads/imagerip_lj8r18kw.jpg","https://localhost/Downloads/imagerip_ljm152t4.png","https://localhost/MarkArmy_Store/ArmyBases.png","https://localhost/Downloads/TileHome.png","https://localhost/Downloads/TileHome%20(1).png","https://localhost/Downloads/WallTilesShaded.png","https://localhost/Downloads/WallTiles.png","https://localhost/MarkArmy_Store/LandUseTiles.png","https://localhost/Downloads/TicTacToeRobot423593.png","https://localhost/Downloads/imagerip_lmtqif0y.jpg","https://localhost/Downloads/imagerip_lmwq5w0l.jpg","https://localhost/Downloads/IsoMorphicLand%20(1).png","https://localhost/Downloads/imagerip_lnazcqt1.jpg","https://localhost/Downloads/imagerip_lnb1cwxq.jpg","https://localhost/Downloads/imagerip_lnfk52ro.jpg","https://localhost/Downloads/imagerip_lnfj42m9.jpg","https://localhost/Downloads/imagerip_lnfj5g2h.jpg","https://localhost/Downloads/imagerip_lnfjhppn.jpg","https://localhost/Downloads/imagerip_lnfju7kv.jpeg","https://images.theconversation.com/files/380799/original/file-20210127-17-if809z.jpg?ixlib=rb-1.1.0&rect=0%2c0%2c5000%2c3330&q=20&auto=format&w=320&fit=clip&dpr=2&usm=12&cs=strip","https://localhost/Downloads/imagerip_lnfkmmya.jpg","https://localhost/Downloads/ImageRip_lnfju7kv.jpeg","https://localhost/Downloads/ImageRip_lnfjhppn.jpg","https://localhost/Downloads/ImageRip_lnfj42m9.jpg","https://localhost/Downloads/ImageRip_lnfj5g2h.jpg","https://localhost/Downloads/ImageRip_lnfk52ro.jpg","https://localhost/Downloads/ImageRip_lnfkmmya.jpg","https://localhost/Downloads/ImageRip_lns4257t.jpg","https://localhost/Downloads/imagerip_lns6he0g.jpg"],"saveGridState":true,"dynamicCompressor":true,"limitModify":false,"help":true,"animateGifOnLoad":false,"namePostFixDigits":2,"autoSpriteNamePrefix":false,"showInfoAlerts":true,"showWarnAlerts":true,"showErrorAlerts":true,"alertTime":20,"alertSize":10,"gridMix":"0.35","gridSize":"8","palletFormat":"Hex32","prettyJSON":true,"autoScrollSprite":true,"undoLevels":20,"imageExtraUndos":true,"autoSizeTimeline":true,"includeUnsavedImagesWhenSaving":true,"appendIdOnSave":false,"author":"Blindman67","copyright":"All content copyright Blindman67. All rights reserved. 2018","project":"Painter V3 Development","selectLoaded":false,"viewLoaded":false,"zoomOnLoadedOn":false,"addLoadedAsCollection":false,"localMedia":true,"maxAnimationLength":18000,"Render_U_I_Size":10,"mouseHangTime":5,"Key_HSL_Slide_Step":"16","storeOnPaintClose":true,"emojiIcons":true,"maxConvoluteSize":11,"infoPannelShowDelay":500,"useOffscreenCanvas":true,"maxImageDependencyRate":4,"timelineMaxTracks":"32","limitDrawTime":false,"maxDrawTime":10,"useDetailedNames":false,"J_I_T_Curves":false,"useGridWorkaround":false,"gridLineColor":"#000","gridColor1":"#CCC","gridColor2":"#999","gridColor3":"#666","gridColor4":"#333","keyColorSlideStep":4,"lightBox1Alpha":0.7,"lightBox2Alpha":0.6,"lightBox3Alpha":0.5,"lightBox4Alpha":0.45,"lightBox5Alpha":0.4,"lightBox6Alpha":0.35,"lightBox7Alpha":0.325,"lightBox8Alpha":"0.9","lightBox9Alpha":"0.8"}');
+!LOCALS.LOCAL && (localStorage[APPNAME + "_Layout"]   = localStorage[APPNAME + "_Layout"]   ? localStorage[APPNAME + "_Layout"]   : '0.99, 0.001, 0, false');
+
+
 const APP_SESSION_ID = getGUID();
 function setUID(val) { UID = val }
 function getUID(){ return UID++ }
@@ -119,18 +144,27 @@ const directortySearch = {
 		}
 	}
 }
-localStorage.MS_localDownloads = APP_ROOT_DIR + (LOCAL ? "Examples/" : "Examples/");  // for other WEB apps on this domain to access the download directory.
-const directories = [  // list of search URl when locating files
+localStorage.MS_localDownloads = APP_ROOT_DIR + LOCALS.MEDIA;  // for other WEB apps on this domain to access the download directory.
+const directories = [                                          // list of search URl when locating files by URL string
     localStorage[APPNAME + "_searchDirectory"] !== undefined ? localStorage[APPNAME + "_searchDirectory"] : APP_ROOT_DIR + "icons/",
     APP_ROOT_DIR + "icons/",
     APP_ROOT_DIR + "templates/",
-    ...(LOCAL ? [
+    ...(LOCALS.LOCAL ? [
         APP_ROOT_DIR + "Aoids3Store/",
         APP_ROOT_DIR + "MarkArmy_Store/",
         APP_ROOT_DIR + "Mark2D_Store/",
     ] : [] ),
-    APP_ROOT_DIR + (LOCAL ? "Examples/" : "Examples/"),
+    APP_ROOT_DIR + LOCALS.MEDIA,
 ];
+
+
+const NAMED_DIRECTORIES = {
+    icons:      APP_ROOT_DIR + "icons/",
+    templates:  APP_ROOT_DIR + "templates/",
+    downloads:  APP_ROOT_DIR + "Downloads/",
+    brushs:     APP_ROOT_DIR + "brushes/",
+    aoids:      APP_ROOT_DIR + "Aoids3Store/",
+};
 const ICON_FROM = uni => String.fromCharCode(55357) + String.fromCharCode(uni);
 const STYLE_WRAP_ICON_FROM = (uni, className) => `<span class="${className}">${ICON_FROM(uni)}</span>`;
 const STYLE_WRAP_STR_FROM = (str, className) => `<span class="${className}">${str}</span>`;
@@ -159,6 +193,7 @@ const unicodeIcons = {
     ungrouped:       "\u2443",
     delete:         STYLE_WRAP_STR_FROM("\u274C","textRed"),
 	speakerOn:         "\uD83D\uDD0A",
+    undoCircle:       "\u21BA",
 }
 const emojiIcons = {
     emojis: true,
@@ -217,6 +252,7 @@ const emojiIcons = {
     inbox:             "\u{1F4E5}",
     magnifyingGlass:   "\u{1F50D}",
     keyboard:          "\u2328",
+    undoCircle:        "\u21BA",
     strToMath(str) {
         var s = "";
         const sup = "\u2070\u2071²³\u2074\u2075\u2076\u2077\u2078\u2079";
@@ -405,6 +441,7 @@ const namedGLFilters = ["?"]; // for commaqnd line auto complete
 	}
 })();
 const CanDo = {
+    paintRecorder: false,
     clipboard: false,
     clipboardHasImage: false,
     clipboardHasText: false,
@@ -430,9 +467,10 @@ const CanDo = {
     }
 };
 CanDo.check();
+const DISABLE_PAINT_RECORDER = !CanDo.paintRecorder;
 const unsafeMessage = "Some functions will taint the canvas and are thus turned off.\nYou can turn off browser security and activate unsafe functions\nusing the command safe.";
 const settings = {
-    backgroundColor: "#2f465a",
+    backgroundColor: "#ffffff",
     widgetColor: "#0F0",
     highlightColor: "cyan",        // When highlighting a sprite
     highlightSelFit: "#FF4",
@@ -464,11 +502,12 @@ const settings = {
     functionLinkTextColor: "#FFF",
     functionLinkOutlineColor: "#8F8",
     shapeIconColor: "#F93",
+    audioLevelColor: "#08F",
     paintCaptureFrameRate: 30,
     paintCaptureBitRate: 2000000,
     videoCaptureBitRate: 2000000,
-    sleepTime: 0,
-    microSleepFrames: 0,
+    sleepTime: 120,
+    microSleepFrames: 2,
     sleepWakeFrames: 15,
     UI_Hide_Time: 500,
     drawSpacingGuid: false,
@@ -500,7 +539,7 @@ const settings = {
     recentCount: 40,               // number of media files to keep in recent media list
     allowUnsafe: false,            // if true then allows draw functions that taint the canvas.
     JPEG_Save_Quality: 0.9,          // Used when saving images as jpg. Valid range 0 to 1 with 1 being best quality.
-    downloadDir: APP_ROOT_DIR + "Examples/",
+    downloadDir: APP_ROOT_DIR + "Downloads/",
     recent: [],
     saveGridState: true,
 	dynamicCompressor: true,
@@ -525,11 +564,13 @@ const settings = {
     autoScrollSprite: true,
     undoLevels: 20,
     imageExtraUndos: true,
+    Image_J_I_T_Undo: true,
+    debugUndos: true,
     autoSizeTimeline: true,
     includeUnsavedImagesWhenSaving: true,
     appendIdOnSave: false,
-    author: "Mark Spronck",
-    copyright: "All content copyright Mark Spronck. All rights reserved. 2015-2023",
+    author: "Blindman67",
+    copyright: "All content copyright Blindman67. All rights reserved. 2022",
     project: "Painter V3 Development",
     selectLoaded: true,
     viewLoaded: true,
@@ -640,6 +681,7 @@ const settingsHandler = {
     settingsMenuItems: {},
     settingsDescriptive: {
         colors : {
+            audioLevelColor: "Color of audio sprite levels line widget",
             backgroundColor : "Background colour",
             widgetColor : "Colour of sprite wiget",
             highlightColor : "When highlighting a sprite",
@@ -677,7 +719,6 @@ const settingsHandler = {
         },
         UI_ : {
             undoLevels: "Number of undo levels. Max value 100",
-            imageExtraUndos: "If true use experimental undos for images.",
             limitModify:  "When in modif mode and timeline open only modify selected tracks",
             flashTime : "Time in ms. Logger has a attention catcher. This is the length of time the change is on for",
             focusOnNew : "If true workspace is moved to center the new sprite object",
@@ -764,6 +805,9 @@ const settingsHandler = {
             downloadDir: "When using with Image Zoom extension and running on local host",
         },
         experimental : {
+            imageExtraUndos: "If true use experimental undos for images.",
+            Image_J_I_T_Undo: "If true image undo buffers are optimised.",
+            debugUndos: "If true shows addition media information regarding Undo buffers in media list.",
             storeOnPaintClose: "If on image content is safely stored in RAM so it can be recoved if GPU context is lost.",
             limitDrawTime : "This option is currently ignored as with maxDrawTime. Avalible only with experimental versions of Painter3",
             maxDrawTime : "Time in ms. Some draw functions can be slow. This sets the max time a draw function can have befor exiting the function\nThis prevents the function from blocking mouse input.",

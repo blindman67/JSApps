@@ -124,6 +124,7 @@ const extrasList = (()=>{
         },
         add(addItem){
             var item;
+            const disabled = addItem.source.info?.disabled === true;
             addItem.boss = this.boss;
             addItem.owner = this;
             this.items = this.items || [];
@@ -132,6 +133,7 @@ const extrasList = (()=>{
             addItem.listItem = item;
             item.element.listItem = item;
             item.element.classList.add("hideItem");
+            disabled && item.element.classList.add("disabledItem");
             this.flash("newItem");
         },
         removeItem(item){
@@ -229,7 +231,11 @@ const extrasList = (()=>{
                         });
                         item.source.owner = item;
                         const call = desc.call.bind(this)
-                        this.boss.fCommands.set(this.boss.customCommandId, (...data) => { call(item.listItem, ...data) })
+                        this.boss.fCommands.set(this.boss.customCommandId, (...data) => { 
+                            if (item.listItem.item.source.info?.disabled === true) {
+                                log.warn("This function has been disabled!");
+                            } else { call(item.listItem, ...data) }
+                        })
                         currentPath[name] = this.boss.customCommandId;
                         this.boss.customCommandId ++;
                     }else if(desc !== null && typeof desc === "object"){
@@ -277,17 +283,12 @@ const extrasList = (()=>{
     const API = {
         list : null,
         ...Fold.prototype,
-
-        // The next set of properties are requiered for Fold to work
         customCommandId : commands.extrasCustom,
         lastOpen : null,
-        //flash(name) { flasher(name) },  // can be omitted. Used to flash UI on changes
         flash() {},  // can be omitted. Used to flash UI on changes
         paths: currentPath,
         fCommands,  // A Map relating commandId to item callback function
         isAPI : true,  // ALWAY set this to true
-        // End of requiered
-
         ready(pannel) {
             tabElement = pannel.titleElement;
 
@@ -305,7 +306,6 @@ const extrasList = (()=>{
             }
 
         },
-
         command(commandId,button,event){
             if(commandId >= commands.extrasOption1 && commandId <= commands.extrasOption4){
                 const op = optionButtons["option" + (commandId - commands.extrasOption1 + 1)];

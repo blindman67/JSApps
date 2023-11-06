@@ -2313,6 +2313,83 @@ var commandLine = (()=>{
                     }
                 }
             }
+        },        
+        file : {
+            batchOnly: true,
+            help : "> Experimental file access ?` for help",
+            helpExtended : [
+                "> file open: Creates OS file dialog to load file/s",    
+                "> file save: Creates OS file dialog to save file/s",    
+                
+            ],
+            f(args){
+                if (showHelp("file",args)) { return  }
+                args = tokenize(args);
+                args.shift();
+                if(args.length > 0) {
+
+                    var openClose = (args.length ? args.shiftVal() : "").toLowerCase();
+                    if (openClose === "save") {
+
+                        warn("File save is no longer supported, Remove from spec by W3C.");
+                        return;
+                        /* 
+                        window.requestFileSystem = window.requestFileSystem ?? window.webkitRequestFileSystem;
+                        if (!window.PV3FileSystem) {
+                            const pvFS = window.PV3FileSystem = {
+                                
+                                directories: {
+                                },
+                            };
+                            function onFileSystemError(error) {
+                                log.obj(error, true, 3);
+                            };
+
+                            function onFileSystem(fileSystem) {
+                                log("Got file system");
+                                pvFS.fileSystem = fileSystem;
+                                fileSystem.root.getDirectory("PainterCache", {create: true }, (directoryEntry) => { pvFS.directories.cache = directoryEntry; log("Got file directory entry"); }, pvFS.onFileSystemError);
+                       
+                            };
+                            requestFileSystem(TEMPORARY, 1024 * 1024, onFileSystem, onFileSystemError);
+                        } 
+                        const pvFS = window.PV3FileSystem;
+                        if (pvFS.directories.cache) {                            
+                            log(pvFS.directories.cache);
+                            const dirReader = pvFS.directories.cache.createReader();  // FileSystemDirectoryReader
+                            const fileEntry = pvFS.directories.cache.getFile("newFilename.txt", {create:true}, (file) => {  // FileSystemFileEntry
+                                 debugger;
+
+                            });
+                        }*/
+                        
+                    } else if (openClose === "open") {
+                        
+                        const pickerOpts = {
+                          types: [
+                            {accept: {"image/png":         [".png"]  }},
+                            {accept: {"image/jpg":         [".jpg"]  }},
+                            {accept: {"image/jpeg":        [".jpeg"] }},
+                            {accept: {"image/gif":         [".gif"]  }},
+                            {accept: {"image/webp":        [".webp"] }},
+                            {accept: {"application/json":  [".json"] }},
+                          ],
+                          excludeAcceptAllOption: true,
+                          multiple: true,
+                        };
+
+                        async function getTheFile() {
+                            const fileHDLs = await showOpenFilePicker(pickerOpts);
+                            while (fileHDLs.length) { await DM.loadFile(await (fileHDLs.shift()).getFile()); }
+                        }            
+                        getTheFile().catch(e => console.log(e));
+                    } else {
+                        log.warn("Unkown file command.");
+                    }
+                    
+                    
+                }
+            }
         },
         move : {
             batchOnly: true,
@@ -3032,7 +3109,7 @@ var commandLine = (()=>{
                             log.warn("'" + newName + "' is a protected name and can not be used.");
                         } else {
                             sprites.sceneName = newName;
-                            document.title = "V3 '" + sprites.sceneName + "'";
+                            document.title = "P3" + SUB_VERSION + " '" + sprites.sceneName + "'";
                             log("Scene name changed to '"+sprites.sceneName + "'");
                         }
                     }
@@ -3188,44 +3265,19 @@ var commandLine = (()=>{
         },
         color: {
             autoComplete: ["?", "list", "main", "second"],
-            help : "> Show colors from pallet",
+            help : "> Show colors from pallet. Alias for pallet command",
             helpExtended : [
+                "> color new [col ... n]: creates a new pallet",
+                "> color [col ... n]: adds one or more colors to existing pallet",
+                "> color remove [col ... n]: removes one or more colors from existing pallet",
                 "> color list: Lists colors as CSS hex values in log",
                 "> color main: Logs CSS hex of main color",
                 "> color second: Logs CSS hex of second color",
-
             ],
             f(args){
                 if (showHelp("color",args)) { return  }
-                var str = args;
-                args = tokenize(args);
-                args.shift();
-                var a1 = args.shiftVal();
-                if (a1 === "main") {
-                    log.info("Main color")
-                    log(colours.mainColor.css);
-                    log(utils.RGB2CSSHex(colours.mainColor));
-                    
-                } else if (a1 === "second") {
-                    log.info("Second color");
-                    log(colours.secondColor.css);
-                    log(utils.RGB2CSSHex(colours.secondColor));
-                    
-                } else if (a1 === "list") {
-                    let colStr = "";
-                    let s = "";
-                    let count = 0;
-
-                    colours.each(col => {
-                        colStr += s + utils.RGB2CSSHex(col);
-                        count ++;
-                        s = ", ";
-                    })
-                    log("Current pallet contains " + count + " colors");
-                    log(colStr);
-                } else {
-                    log.warn("Unknown color command");
-                }
+                lineCommands.pallet(args);
+                return;
             }
         },    
         pallet: {
@@ -3238,10 +3290,9 @@ var commandLine = (()=>{
                 "> pallet list: Lists colors as CSS hex values in log",
                 "> pallet main: Logs CSS hex of main color",
                 "> pallet second: Logs CSS hex of second color",
-
             ],
             f(args){
-                if (showHelp("pallet",args)) { return  }
+                if (showHelp("pallet", args)) { return  }
                 var str = args;
                 args = tokenize(args);
                 args.shift();
@@ -3250,12 +3301,10 @@ var commandLine = (()=>{
                     log.info("Main color")
                     log(colours.mainColor.css);
                     log(utils.RGB2CSSHex(colours.mainColor));
-                    
                 } else if (a1 === "second") {
                     log.info("Second color");
                     log(colours.secondColor.css);
                     log(utils.RGB2CSSHex(colours.secondColor));
-                    
                 } else if (a1 === "list") {
                     let colStr = "";
                     let s = "";
@@ -3285,26 +3334,20 @@ var commandLine = (()=>{
                     palSpr.setScale(8,8);
                     selection.clear();
                     selection.add(palSpr);
-
-
                 } else if (a1 === "remove") {
                     if (!uiPannelList.color.isOpen) {
                         log.warn("Color pannel must be open to add or remove colors");
-                        return;
-                    }
-                    a1 = args.shiftVal();
-                    while (a1) {
-                        colours.removeColor(utils.CSS2RGB(a1));
+                    } else {
                         a1 = args.shiftVal();
+                        while (a1) {
+                            colours.removeColor(utils.CSS2RGB(a1));
+                            a1 = args.shiftVal();
+                        }
                     }
-
-
                 } else {
                     if (!uiPannelList.color.isOpen) {
                         log.warn("Color pannel must be open to add or remove colors");
-                        return;
-                    }
-                    if (a1) {
+                    } else if (a1) {
                         colours.addColor(utils.CSS2RGB(a1));
                         a1 = args.shiftVal();
                         while (a1) {
@@ -3316,23 +3359,26 @@ var commandLine = (()=>{
             }
         },
         create : {
-            autoComplete: ["?", "image", "sprite", "row"],
+            autoComplete: ["?", "image", "sprite", "text", "cutter"],
             help : "> Create an object.",
             helpExtended : [
-                "> create image name w [h] [sel] : creates an image",
-                ">             name of image",
-                ">             w is width",
-                ">             h is height optional",
-                ">             sel if include image is selected",
-                ">             in media tab",
-                "> eg create image 128 128",
-                ">    create image 128",
-                ">    create image 128 128 sel",
-                "> create sprite name x y : create sprite",
-                ">        name is image name",
-                ">        x y is location of sprite center",
-                "> create row y name name ... name",
-                ">        creates a row of named sprites ",
+                "> create image name w [h] [sel] : Creates an image",
+                ">     name: of image",
+                ">     w: is width",
+                ">     h: is height optional",
+                ">    \"sel\": if include image is selected in media list",
+                "> create sprite name x y [select]: Create an image sprite",
+                ">     name: of image used. Uses first image with name",
+                ">     x y: location of sprite center",
+                ">     select: Optional one of two strings [sel, seladd]",
+                "> create cutter x y w h [select]: Create a cutter sprite",
+                ">     x y: location of cutter's center",
+                ">     w h: size of cutter",
+                ">     select: Optional one of two strings [sel, seladd]",
+                "> create text x y [select] \"textString\" : create text sprite",
+                ">     x y: location of sprite center",
+                ">     select: Optional one of two strings [sel, seladd]",
+                ">     textString: text",
             ],
             f(args){
                 if (showHelp("create",args)) { return  }
@@ -3341,93 +3387,89 @@ var commandLine = (()=>{
                 args.shift()
                 const com = args.shiftVal();
                 if(com === "sprite"){
-                    var name = args.shiftVal();;
-                    var x = args.shiftVal();;
-                    var y = args.length > 0 ? args.shiftVal() : x;
-                    if(isNum(x) && isNum(y)){
-                        var image = media.byName(name);
-                        if(image) {
-                            var sprite = new Sprite(x * info.size, y * info.size, image.w, image.h,"Batch created ");
-                            sprite.changeImage(image);
-                            sprites.add(sprite);
-                        }else{
-                            log.error("No image by name '"+name+"'");
+                    if (args.length >= 3) {
+                        var name = args.length ? args.shiftVal() : "";
+                        var m = media.byName(name);
+                        if (m) {
+                            var x = Number(args.shiftVal());
+                            var y = Number(args.shiftVal());
+                            x = isNaN(x) ? 0 : x;
+                            y = isNaN(y) ? 0 : y;
+                            var tex = args.length ? args.shiftVal() : "";
+                            var sel = tex === "sel";
+                            var selAdd = tex === "seladd";
+                            var sprite = new Sprite(x * info.size, y * info.size, m.w, m.h,"Batch created ");
+                            sprite.changeImage(m);
+                            sel && selection.clear();
+                            editSprites.addSprites([sprite], sel || selAdd, false, true);
+                        } else {
+                            log.error("Could not locate media named '" + name + "'");
+                            log.warn(str);
                         }
+                    } else {
+                        log.error("Bad arguments for create sprite");
+                        log.warn(str);
+                    }
+                } else if(com === "image"){
+                    if (args.length >= 2) {
+                        var name = args.shiftVal();;
+                        var w = args.shiftVal();
+                        w = isNaN(w) ? 0 : Number(w);
+                        var tex = args.length ? args.shiftVal() : "";
+                        var h = isNaN(tex) ?  w : Number(tex);
+                        if (w <= 0 || h <= 0) { log.error("Image must have dimensions."); return; }
+                        tex = args.length ? args.shiftVal() : tex;
+                        var selectOnCreate = tex === "sel";
+                        media.create({name : name, type : "canvas", width : w, height : h}, m => m && selectOnCreate && setTimeout(()=>mediaList.mediaSelected.add(m), 100));
                     }else{
                         log.error("Bad arguments for command string ");
                         log.warn(str);
                     }
-                }
-                if(com === "image"){
-                    var name = args.shiftVal();;
-                    var w = args.shiftVal();;
-                    var h = args.length > 0 ? args.shiftVal() : w;
-                    var selectOnCreate = false
-                    h = h === "sel" ? (selectOnCreate = true, w) : h;
-                    var sel = args.length > 0 ? args.shiftVal() : "";
-                    selectOnCreate = sel === "sel" ? true : selectOnCreate;
+                } else if(com === "text"){
+                    if (args.length >= 2) {
+                        var x = Number(args.shiftVal());
+                        var y = Number(args.shiftVal());
+                        x = isNaN(x) ? 0 : x;
+                        y = isNaN(y) ? 0 : y;
+                        var tex = args.length ? args.shiftVal() : "";
+                        var sel = tex === "sel";
+                        var selAdd = tex === "seladd";
+                        var str = args.length ? args.shiftVal() : (sel || selAdd ? "" : tex);
+                        var sprite = new Sprite(x, y, 255, 255, "Text");
+                        sprite.changeToText(str);
+                        sel && selection.clear();
+                        editSprites.addSprites([sprite], sel || selAdd, false, true);
 
-                    if(isNum(w) && isNum(h)){
-                        media.create({
-                                name : name,
-                                type : "canvas",
-                                width : w,
-                                height : h
-                        }, (m) => {
-                            if(selectOnCreate) {
-                                setTimeout(()=>mediaList.mediaSelected.add(m),100);
-                            }
-                        });
                     }else{
-                        log.error("Bad arguments for command string ");
+                        log.error("Bad arguments for create text");
+                        log.warn(str);
+                    }
+                } else if(com === "cutter"){
+                    if (args.length >= 2) {
+                        var x = Number(args.shiftVal());
+                        var y = Number(args.shiftVal());
+                        var w = Number(args.shiftVal());
+                        var h = Number(args.shiftVal());
+                        x = isNaN(x) ? 0 : x;
+                        y = isNaN(y) ? 0 : y;
+                        w = isNaN(w) ? 0 : w;
+                        h = isNaN(h) ? 0 : h;
+                        if (w <= 0 || h <= 0) { log.error("Sprite must have dimensions."); return; }
+                        var tex = args.length ? args.shiftVal() : "";
+                        var sel = tex === "sel";
+                        var selAdd = tex === "seladd";
+                        var str = args.length ? args.shiftVal() : (sel || selAdd ? "" : tex);
+                        var sprite = new Sprite(x, y, w, h, "cutter");
+                        sprite.changeToCutter();
+                        sel && selection.clear();
+                        editSprites.addSprites([sprite], sel || selAdd, false, true);
+
+                    }else{
+                        log.error("Bad arguments for create cutter");
                         log.warn(str);
                     }
                 }
-                return
-                if(args[1] === "row"){
-                    var name;
-                    var idx = 2;
-                    if(!isNaN(args[idx])){
-                        var y = Number(args[idx++]) | 0;
-                        var x = 0;
-                        while(idx < args.length){
-                            var image = media.byName(args[idx++]);
-                            if(image) {
-                                var sprite = new Sprite(x * info.size, y * info.size, image.w, image.h, "*" + image.name);
-                                sprite.changeImage(image);
-                                sprites.add(sprite);
-                                x += 1;
-                            }
-                        }
-                        return;
-                    }
-                    log.error("Bad arguments row. ? for help");
-                }
-                if(com === "image"){
-                    var name;
-                    var idx = 2;
-                    if(isNaN(args[idx])) {
-                        name = args[idx ++];
-                    }
-                    if(!isNaN(args[idx])){
-                        const w = Number(args[idx++]) | 0;
-                        var h = w;
-                        if(!isNaN(args[idx])){ h = Number(args[idx]) | 0 }
-                        if(w > 0 && h > 0){
-                            media.create({
-                                name : name,
-                                type : "canvas",
-                                width : w,
-                                height : h
-                            });
-                            //log.sys("Created image " + w +" by " + h );
-                            return;
-                        }
-                    }
-                    log.error("Bad arguments could not create image. create ? for help");
-                    return;
-                }
-                log.error("Create is missing arguments. create ? for help");
+                return;
             }
         },
         filter : {

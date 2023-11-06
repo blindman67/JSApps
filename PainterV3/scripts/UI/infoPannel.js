@@ -94,20 +94,17 @@ const infoPannel = (()=> {
     }
     function sprImage(r, x, y, w, h, subSprites) {
         if (r.w < width || r.h < height) { ctxD.canvas.classList.add("englarged"); ctxD.imageSmoothingEnabled = false }
-        else { ctxD.canvas.classList.remove("englarged"); ctxD.imageSmoothingEnabled = true }
+        else { ctxD.canvas.classList.remove("englarged"); ctxD.imageSmoothingEnabled = false }
         ctxD.drawImage(r, x, y, w, h);
-        ctxD.setTransform(r.w / w, 0, 0, r.h / h, x, y);
-        ctxD.strokeStyle = "#FFF";
-        ctxD.lineWidth = 1;
-        ctxD.globalCompositeOperation = "difference";
+        ctxD.setTransform(w / r.w, 0, 0, h / r.h, x, y);
         ctxD.beginPath();
-        for (const ss of subSprites) {
-            ctxD.rect(ss.x, ss.y, ss.w, ss.h);
-        }
+        for (const ss of subSprites) {  ctxD.rect(ss.x, ss.y, ss.w, ss.h);  }
         ctxD.setTransform(1, 0, 0, 1, 0, 0);
+        ctxD.strokeStyle = "#F88";
+        ctxD.lineWidth = 1;        
         ctxD.stroke();
         ctxD.globalCompositeOperation = "source-over";
-        canShow = true;
+        canShow = true;DropDeadFaceBook9182
     }
     function rImage(r, x, y, w, h) {
         if (r.w < width || r.h < height) { ctxD.canvas.classList.add("englarged"); ctxD.imageSmoothingEnabled = false }

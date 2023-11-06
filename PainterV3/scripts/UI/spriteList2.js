@@ -1204,7 +1204,9 @@ const spriteList = (()=>{
                 if (backup) {
                     localStorage[APPNAME+"_BackupSessionId"] = APP_SESSION_ID;
                 }
-                log.info(backup ? "Scene saved as backup" : "Sprites saving in local storage.");
+                if (name !== undefined) {
+                    log.info(backup ? "Scene saved as backup" : "Sprites saving in local storage.");
+                }
             } else {
                 const name = storage.saveJSON( {
                     workspace: editSprites.serializeWorkspace(),

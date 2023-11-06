@@ -2,6 +2,7 @@
 
 const Sprite = (()=>{
     var CUTTER_SIZE = settings.cutterSize;
+    var imageJITUndo = settings.Image_J_I_T_Undo;
     const workPointA = {x : 0, y :  0};
     const workPoint0 = {x : 0, y :  0};
     const workPoint1 = {x : 0, y :  0};
@@ -225,6 +226,7 @@ const Sprite = (()=>{
     function getSettings(){
         CUTTER_SIZE = settings.cutterSize;
         defaults.color = settings.cutterColor;
+        imageJITUndo = settings.Image_J_I_T_Undo;
         Sprite.prototype.toString = settings.useDetailedNames ? nameMethods.toStringComplex : nameMethods.toString;
     }
     const nameMethods = {
@@ -490,6 +492,16 @@ const Sprite = (()=>{
 			sample: undefined,
 			gain: undefined,
 		};	
+		owner.type.hasLevelPath = true;         
+		owner.levels = [
+            utils.getPoint(0.0000, 0.00),
+            utils.getPoint(0.0025, 1.00),
+            utils.getPoint(0.1000, 1.00),
+            utils.getPoint(0.2000, 0.50),
+            utils.getPoint(0.3000, 1.00),
+            utils.getPoint(0.9975, 1.00),
+            utils.getPoint(1.0000, 0.00),
+        ];        
 	}		
 	
     function AnimationTrack(name) {
@@ -3096,10 +3108,16 @@ const Sprite = (()=>{
         canDrawOn() {
             return this.type.image && this.image.isDrawable && !this.type.hidden && !this.locks.UI;
         },
+        prepDrawOn(){
+            if (this.type.image && this.image.isDrawable && this.image.prepDrawOn) {
+                this.image.prepDrawOn();
+            }
+        },        
         setDrawOn(state){
             if (this.type.image && this.image.isDrawable && !this.type.hidden && !this.locks.UI) {
+                if (state) { this.image.prepDrawOn();}
                 this.drawOn = state;
-                if(this.image.desc.capturing) {
+                if (this.image.desc.capturing) {
                     this.image.desc.shared = state;
                 }
             }
@@ -3692,26 +3710,38 @@ const Sprite = (()=>{
             this.key.update();
             return this;
         },
-        resetScale(pixelAlign){
-            if(pixelAlign){
-                if(this.type.pallet){
+        resetScale(pixelAlign, alignPosition = false) { // position aligned only if pixelAlign is true
+            if (pixelAlign) {
+                if (this.type.pallet) {
                     this.w = Math.round(this.pallet.image.w * 4);
                     this.h = Math.round(this.pallet.image.h * 4);
                     this.cx = this.w / 2;
                     this.cy = this.h / 2;
                     this.sx = 1;
                     this.sy = 1;
-                } else if(this.type.cutter){
+                } else if (this.type.normalisable) {
                     this.w = Math.round(this.w);
                     this.h = Math.round(this.h);
                     this.cx = this.w / 2;
                     this.cy = this.h / 2;
                     this.sx = 1;
                     this.sy = 1;
-                }else{
+                } else if (this.type.image) {
+                    this.w = Math.round(this.image.w);
+                    this.h = Math.round(this.image.h);
+                    this.cx = this.w / 2;
+                    this.cy = this.h / 2;                    
+                    this.sx = 1;
+                    this.sy = 1;
+                } else {
                     this.sx = Math.round(this.w * spr.sx) / this.w;
                     this.sy = Math.round(this.h * spr.sy) / this.h;
                 }
+                if (alignPosition) {
+                    this.x = Math.round(this.x) - (this.cx % 1);
+                    this.y = Math.round(this.y) - (this.cy % 1);
+                }
+
             }else{
                 if(this.type.pallet){
                     this.w = Math.round(this.pallet.image.w * 4);
@@ -3720,7 +3750,7 @@ const Sprite = (()=>{
                     this.cy = this.h / 2;
                     this.sx = 1;
                     this.sy = 1;
-                } else  if(this.type.cutter){
+                } else if(this.type.normalisable) {  
                     this.w = CUTTER_SIZE;
                     this.h = CUTTER_SIZE;
                     this.cx = this.w / 2;

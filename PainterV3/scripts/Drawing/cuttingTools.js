@@ -416,13 +416,26 @@ const cutBuffer = (()=> {
         },
         toClipboard() {
             if (API.hasContent) {
-                buffer.toBlob((blob) => {
-                    const data = [new ClipboardItem({ [blob.type]: blob })];
-                    navigator.clipboard.write(data).then(
-                        () => {  },
-                        () => { log.warn("Could not copy cutbuffer to clipboard"); },
-                    );
-                });
+                if (buffer.toBlob) {
+                    buffer.toBlob((blob) => {
+                        const data = [new ClipboardItem({ [blob.type]: blob })];
+                        navigator.clipboard.write(data).then(
+                            () => {  },
+                            () => { log.warn("Could not copy cutbuffer to clipboard"); },
+                        );
+                    });
+                } else if (buffer.convertToBlob) {
+                    buffer.convertToBlob()
+                        .then(blob => {
+                            const data = [new ClipboardItem({ [blob.type]: blob })];
+                            navigator.clipboard.write(data).then(
+                                () => {  },
+                                () => { log.warn("Could not copy cutbuffer to clipboard"); },
+                            );
+                        })
+                        .catch(() => log.warn("Copy to clipboarded failed!"));
+                }
+
             }          
         },
     };

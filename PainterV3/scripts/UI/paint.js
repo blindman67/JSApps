@@ -1311,6 +1311,7 @@ const paint = (()=>{
 				}
 			},
             [commands.paintRecordPaintingToggle]() {
+                if (DISABLE_PAINT_RECORDER) {  log.warn("Recorder has been disabled!"); return; }
                 if(!API.recording && !media.videoCapture) {
                     let foundCount = 0;
                     let foundMedia, foundView;
@@ -1901,7 +1902,7 @@ const paint = (()=>{
 
 
 		updateUI() {
-
+            if (DISABLE_PAINT_RECORDER) { buttonMap.get(commands.paintRecordPaintingToggle).disable(); }
             if(paint.randColor && paint.palletFrom === commands.paintColImage && colours.useHSLModel) {
                 if(!settings.allow_HSL_Model){
                     issueCommand(commands.useHSLColorRange);
@@ -2127,12 +2128,14 @@ const paint = (()=>{
                 buttonMap.get(commands.paintToggleGuidSpaceLockZ).disable();
             }
             
-            
-            if(!media.videoCapture) {
-                buttonMap.get(commands.paintRecordPaintingToggle).enable();
-                buttons.groups.setCheck(buttonMap.get(commands.paintRecordPaintingToggle).group,commands.paintRecordPaintingToggle, API.recording);
-            } else {
-                buttonMap.get(commands.paintRecordPaintingToggle).disable();
+
+            if (!DISABLE_PAINT_RECORDER) { 
+                if(!media.videoCapture) {
+                    buttonMap.get(commands.paintRecordPaintingToggle).enable();
+                    buttons.groups.setCheck(buttonMap.get(commands.paintRecordPaintingToggle).group,commands.paintRecordPaintingToggle, API.recording);
+                } else {
+                    buttonMap.get(commands.paintRecordPaintingToggle).disable();
+                }
             }
         },
         drawTypeCommands: {

@@ -119,10 +119,10 @@ const system = (()=>{
 
                     spriteList.globalAction(commandId);
                 } else if (uiPannelList.mediaTabs.media.isOpen) {
-                    log("media down");
+                    
 
                 } else if (uiPannelList.mediaTabs.extras.isOpen) {
-                    log("extras down");
+                    
                 }
 
         },
