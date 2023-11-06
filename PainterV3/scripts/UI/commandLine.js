@@ -2701,7 +2701,7 @@ var commandLine = (()=>{
                 } else {
                     name2 = undefined;
                 }
-                fileReadWriter.load("pscripts/" + name + ".pscript", (file) => {
+                fileReadWriter.load("pScripts/" + name + ".pscript", (file) => {
                     if (file.status === "loaded") {
                         const bat = file.ajax.responseText;
                         if (helpOnly && bat.includes("assert help")) {
@@ -2754,7 +2754,7 @@ var commandLine = (()=>{
                     }
                     name = name1;
                 }
-                fileReadWriter.load("pscripts/" + name + ".pscript", (file) => {
+                fileReadWriter.load("pScripts/" + name + ".pscript", (file) => {
                     if (file.status === "loaded") {
                         const bat = file.ajax.responseText;
                         if (helpOnly && bat.includes("assert help")) {
