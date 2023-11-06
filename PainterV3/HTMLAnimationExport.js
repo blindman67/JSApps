@@ -74,7 +74,10 @@ const HTMLAnimationExport = (()=> {
         },20);
         "####SCRIPT####";
     }
-    const SCRIPT = javaScriptScript.toString().replace(/\r\n        /g,"\r\n").split("\"####SCRIPT####\";\r\n")[1].split("\r\n");
+    const SCRIPT = LOCALS.LOCAL ? 
+        javaScriptScript.toString().replace(/\r\n        /g,"\r\n").split("\"####SCRIPT####\";\r\n")[1].split("\r\n") :
+        javaScriptScript.toString().replace(/\n        /g,"\n").split("\"####SCRIPT####\";\n")[1].split("\n");
+        
     const PACKETS = { // B unsigned char, S unsigned int16, L unsigned in32, F float 32
         HEAD: 1, // B 1, L tracks, L frames
         TRACK: 2, // B 2, B [alpha,color,matrix bits], L trackId, [ L frameNum (bits 31, 30 define color property to set (0b00 color, 0b01 fill, 0b10 stroke, 0b11 reserved), [B alpha and or  [B,B,B RGB] and or [F,F,F,F,F,F matrix]]
