@@ -43,7 +43,7 @@ label getNextSelected
     $pal.scale = 8
     $pal.x = $a.x + ($a.w * $a.sx * 0.5) + ($pal.w * $pal.sx * 0.5)
     $pal.y = $a.y - ($a.h * $a.sy * 0.5) + ($pal.h * $pal.sy * 0.5)
-    $r = $pal.key.update()
+    $r = selection[0].key.update()
     jump getNextSelected
 label allDone
 $r = selection.clear()
