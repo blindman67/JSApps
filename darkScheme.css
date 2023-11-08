@@ -1,6 +1,6 @@
 body {
     background: #111;
-    color: white;
+    color: #BBB;
 }
 #root {
     background: #000;
@@ -26,9 +26,15 @@ body {
 	color: #FDB;
 }
 #root > ul > li.ignore {
-    color: white;
+    color: #BBB;
 }
 #root > ul > li.ignore.head {
-    border-top-color: white;
+    border-top-color: #BBB;
     border-top: 1px solid;
 } 
+#root > ul > li.ignore.head {
+    color: #DDD;
+}
+#root > ul > li > img {
+    border: 3px solid #BBB;
+}

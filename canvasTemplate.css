@@ -4,9 +4,6 @@ body {
 #root {
     padding: 8px;
 }
-#root > h1, #root > h2, #root > h3, #root > h4 {
-     text-align: center;
-}
 #root > ul {
      display: table;
 }
@@ -14,15 +11,22 @@ body {
     font-family: monospace;
 	cursor: pointer;
     padding-left: 8px;
-    display: table-caption
+    display: table-caption;
+    text-align: center;
 }
-#root > ul > .links {
-    padding-top: 4px;
+#root > ul > .links, #root > ul > li.link {
+    font-size: x-large;
     border-bottom: 1px solid;
+    margin-top: 14px;
+    margin-bottom: 14px;
 }
-#root > ul > li.link {
-    padding-top: 4px;
-    border-bottom: 1px solid;
+.padLink {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.padLink:hover {
+    padding-left: 20px;
+    padding-right: 20px;
 }
 #root > ul > li > span.link {
     padding-top: 4px;
@@ -35,14 +39,19 @@ body {
     min-height: 12px;
 }
 #root > ul > li.ignore.head {
-    font-size: larger;
-    margin-top: 10px;
+    font-size: xx-large;
+    text-align: center;
+    margin-top: 120px;
+}
+#root > ul > li.ignore.bigHead {
+    font-size: xxx-large;
 }
 #root > ul > li.ignore.help {
-    font-size: small;
+    font-size: large;
+    margin-top: 20px;
 }
 #root > ul > li.ignore.help.indent {
-    padding-left: 16px;
-    font-size: smaller;
+    font-size: small;
+    margin-top: initial;
 }
 

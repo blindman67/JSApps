@@ -31,4 +31,6 @@ body {
     border-top-color: black;
     border-top: 2px solid;
 } 
-
+#root > ul > li > img {
+    border: 3px solid #000;
+}
