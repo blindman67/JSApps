@@ -188,7 +188,6 @@ function LightBoxPannel() {
             }
         },
         spriteStateChangeChanged() {
-            log("xdsdf");
             var hasAnimatedImages = false;
             selection.eachOfType(spr => {
                 if (spr.type.animated && spr.animation.tracks.image) { return hasAnimatedImages = true }

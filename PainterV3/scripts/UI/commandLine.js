@@ -2693,7 +2693,11 @@ var commandLine = (()=>{
                     helpOnly = true;
                 } else if (name === "safe") {
                     if (quickMenu.open) {
-                        log.info("Existing dialog should be closed!");
+                        log.warn("Existing dialog should be closed!");
+                        return;
+                    }
+                    if (LightBoxPannel.open) {
+                        log.warn("PainterV3 demo. Light box pannel is marked as a dialog and should be closed befor opening a new dialog!");
                         return;
                     }
                     name = name1;

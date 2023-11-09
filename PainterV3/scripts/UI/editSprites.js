@@ -1599,9 +1599,7 @@ const editSprites = (()=>{
                 var update = false;
                 if (right) {
                     if (!commandLine.quickMenuOpen()) {setTimeout(()=>commandLine("run safe functionLinkDialog",true),0) }
-                    else { log.info("Existing dialog must be closed!") }
-
-
+                    else { log.warn("Existing dialog must be closed!") }
                 }else{
                     if(mouse.ctrl && selection.length > 0) {
                         if(selection.length === 1 && selection[0].type.shape) {
@@ -1658,7 +1656,6 @@ const editSprites = (()=>{
                         }
                         API.commands.updateWidget = true;
                         update = true;
-
                     }else{
                         const fLink = new Sprite(...utils.viewCenter,48 * 2,16,"Func");
                         fLink.changeToFunctionLink();
@@ -1667,10 +1664,8 @@ const editSprites = (()=>{
                         API.commands.updateWidget = true;
                         update = true;
                     }
-
                 }
                 return update;
-
             },
             [commands.sysGlobalEscape]() {
                 if (animation.playing) {
