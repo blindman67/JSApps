@@ -864,11 +864,15 @@ const buttons = (() => {
                     return arr
                 },[]),
                 ...exitButtons.map(text => {
+                    var help = text.includes("?") ? text.split("?") : [text, ""];
+                    help.shift();
+                    help = help.join("?");
                     return {
                         x : (endX++) * exitWidth, y : y + 1, w : exitWidth, h : 1.5,
                         command : commandBase++,
                         className : "dialogExit",
-                        text
+                        text: (text.includes("?") ? text.split("?")[0] : text),
+                        help,
                     };
                 })
             ],  {pannel: pannel, size: 16});
@@ -1081,6 +1085,7 @@ const buttons = (() => {
         return new Promise((onClosed, onCancel) => {
             const dialog = createSimpleDialog(textDesc);
             dialog.onclosed = () => {
+                dialog.exitClicked = dialog.exitClicked.split("?")[0];
                 if (dialog.exitClicked === "Cancel" || (dialog.exitClicked === "" && dialog.optionClicked === "")) {
                     const value = (dialog.exitClicked === "" && dialog.optionClicked === "") ? "Closed" : dialog.exitClicked;
                     setTimeout(() => {onCancel({exit: value})}, 100);

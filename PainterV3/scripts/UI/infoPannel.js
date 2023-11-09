@@ -104,7 +104,7 @@ const infoPannel = (()=> {
         ctxD.lineWidth = 1;        
         ctxD.stroke();
         ctxD.globalCompositeOperation = "source-over";
-        canShow = true;DropDeadFaceBook9182
+        canShow = true;
     }
     function rImage(r, x, y, w, h) {
         if (r.w < width || r.h < height) { ctxD.canvas.classList.add("englarged"); ctxD.imageSmoothingEnabled = false }

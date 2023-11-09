@@ -2891,8 +2891,10 @@ const localProcessImage = (()=>{
                 var x, y;
                 const alignment = Math.max(1, API.pixelArtSubImageAlignment);
                 const edge = Math.min(hf, wf) - 1;
-                for (y = 0; y < h - edge; y  += alignment) {
-                    for (x = 0; x < w - edge; x  += alignment) {
+                const hEdge = mirror || rotate ? edge : hf - 1;
+                const wEdge = mirror || rotate ? edge : wf - 1;
+                for (y = 0; y < h - hEdge; y  += alignment) {
+                    for (x = 0; x < w - wEdge; x  += alignment) {
                         let i = Math.random() * transforms.length | 0
                         for (const tran of transforms) {
                             const t = transforms[(i++) % transforms.length];
@@ -4789,6 +4791,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     var pixels = 0, j, i = 0, area = 0, areaSpaced = 0, xx,yy;
                     if(sideMark){
                         const markColor = d32[0];
+                        if (markColor === 0) {
+                            log.warn("Could not complete extraction. Sprite sheet image top left most pixel must have mark color.");
+                            return;                            
+                        }
                         marked = true;
                         for(xx = 0; xx < data.width; xx++){
                             const idx = xx;
@@ -7765,18 +7771,18 @@ ${strPM} ];
                         fromSprite: null,
                     };
                     const dialogs = {
-                        locateOnly: "Extract Sprites method|Locate,Repack,Mark,Cancel|text Select exract method,",
+                        locateOnly: "Extract Sprites method|Locate?Does not create new sprite sheet\nsprites are only located on existing sheet,Repack?Creates a new sprite sheet\nSprites are packed to create a small as possible sheet,Mark?Disabled,Cancel?Do not extract and close dialog|text Select exract method,",
                         addToWorkspace: "20 Add to workspace?|Don't add,Add|text Add found sprites to workspace\\?",
                         dontAddEmpty: "20 Add empty tiles?|AddEmpty,IgnoreEmpty|text Add or not empty tiles to workspace\\?",
                         addUniqueOnly: "20 Add unique only?|AddAny,AddUnique|text Add any tile or only tiles with the same pxs once\\?",
                         save: "20 Save sprites list?|Don't save,Save|text Do you wish to save the created sprite list\\?",
-                        joiner: "20 Use joiner?|No joiner,Joiner|text Use top left pixel to join sprites\\?",
+                        joiner: "20 Use joiner?|No joiner?Joiner color is ignored,Joiner?Joiner color conects single sprite\nJoiner color is removed from resulting sprites|text Use top left sprite sheet pixel color to define joiner color\\?",
                         spacing: "20 Pad packed sprites?|No padding,Pad|text Seperate packed sprites with 1 pixel padding\\?",
                         gridSize: "20 Select size method|Pixels,Counts|text Pixels set grid size in pixels,text Count set grid size in row ans columns,",
                         xSize: "Select X axis size Px|OK,Cancel|{,1,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,18,20,22,24,28,30,32,48,},{,64,96,128,160,192,224,256,512,},",
-                        ySize: "Select Y axis size Px|OK,Cancel|{,1,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,18,20,22,24,28,30,32,48,},{,64,96,128,160,192,224,256,512,},{,Square,Half,Quater,}",
+                        ySize: "Select Y axis size Px|OK,Cancel|{,1,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,18,20,22,24,28,30,32,48,},{,64,96,128,160,192,224,256,512,},{,Square?Use same size as width,Half?Use same size as half width,Quater?Use same size as quater width,}",
                         xCount: "Select horizontal count|OK,Cancel|{,1,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,17,18,19,20,21,22,23,24,},{,25,26,27,28,29,30,31,32,33,}",
-                        yCount: "Select vertical count|OK,Cancel|{,1,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,17,18,19,20,21,22,23,24,},{,25,26,27,28,29,30,31,32,33,},{,Square,Half,Quater,},"
+                        yCount: "Select vertical count|OK,Cancel|{,1,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,17,18,19,20,21,22,23,24,},{,25,26,27,28,29,30,31,32,33,},{,Square?Use same size as width,Half?Use same size as half width,Quater?Use same size as quater width,},"
                     }
 
                     if(markType === "grid" || markType === "gridoverlay") {
@@ -7868,9 +7874,11 @@ ${strPM} ];
                     buttons.dialogTree(dialogs, dialogTree).then(res => {
                         log.info("Sprite extract dialog results");
                         log.obj(res);
-                        log.info("Extracting sprites...........");
+
 						const markLocs = res.locateOnly === "Mark";
 						if (markLocs) {
+                            log.warn("This function has been disabled.");
+                            return;
 							const addedSprites = [];
 							selection.eachOfType(fromSprite => {
 								if (fromSprite.image.desc.sprites) {
@@ -7898,6 +7906,7 @@ ${strPM} ];
 							return;
  							
 						}
+                        log.info("Extracting sprites...........");                       
                         const locateOnly = res.locateOnly === "Locate";
                         const spacing = res.spacing === "Pad" ? 1 : 0;
                         const addToWorkspace = res.addToWorkspace === "Add";
@@ -8034,7 +8043,8 @@ ${strPM} ];
             }
 
 
-            
+            var RGBsColorEl;
+            var YIQColorEl;
             var wfc;
             const extras = {
 				foldInfo: {
@@ -8524,8 +8534,8 @@ ${strPM} ];
                                 }
                             }
                         },
-					   pixelArtFindReplaceImageAlign4: {
-                            help : "Finds sub images and replaces with new sub image. Aligns to 4 by 4 pixel grid",
+					   pixelArtFindReplaceImageNoRotMir: {
+                            help : "Finds sub images and replaces with new sub image. Does not rotate or mirror search images",
                             call() {
                                 if (selection.length === 1) {
                                     let update = false;
@@ -8539,8 +8549,8 @@ ${strPM} ];
                                                     if (find.attachers) {
                                                         const replace = [...find.attachers.values()].filter(spr => spr.type.image && spr.image.isDrawable);
                                                         if (replace.length) {
-                                                            API.pixelArtSubImageAlignment = 4;
-                                                            utils.processImageNoUpdate(API.pixelArtSubImageReplace, spr, true, true, find, ...replace);
+                                                            API.pixelArtSubImageAlignment = 1;
+                                                            utils.processImageNoUpdate(API.pixelArtSubImageReplace, spr, false, false, find, ...replace);
                                                             update = true;
                                                         } else { messages.push("No Attached replacements ") }
 
@@ -8644,7 +8654,7 @@ ${strPM} ];
                             call(){  utils.processSelectedImages(API.normalMap, "smooth")   },
                         },
                     },
-                    I_S_O_experiments: {
+                    ISO_experiments: {
                         defineISOPlan: {
                             help : "Set image that defines the 6 faces of the box\nRed is x, Green is y, and blue is z.",
                             call() {
@@ -8738,18 +8748,24 @@ ${strPM} ];
                                 setTimeout(()=>commandLine("run safe applyPalletToImage",true),0)
                             }
                         },*/
-                        useYIQColorLookup: {
+                        YIQ_Color_Lookup: {
                             help : "Uses YIQ NTSC color model to lookup colors",
-                            call(){
+                            call(item){
                                 localProcessImage._palletModel = "YIQ ";
-                                log("Pallet lookup set to YIQ.");
+                                log.info("Pallet lookup set to YIQ.");
+                                if (RGBsColorEl) { RGBsColorEl.textContent = "RGBs Color Lookup"; }
+                                YIQColorEl = item.element;
+                                YIQColorEl.textContent = ">> YIQ Color Lookup: Active";
                             }
                         },
-                        useRGBsColorLookup: {
+                        RGBs_Color_Lookup: {
                             help : "Uses RGBs (approx) color model to lookup colors",
-                            call(){
+                            call(item){
                                 localProcessImage._palletModel = "RGB linear ";
-                                log("Pallet lookup set to RGBs linear.");
+                                log.info("Pallet lookup set to RGBs.");
+                                if (YIQColorEl) { YIQColorEl.textContent = "YIQ Color Lookup"; }
+                                RGBsColorEl = item.element;
+                                RGBsColorEl.textContent = ">> RGBs Color Lookup: Active";
                             }
                         },
                         applyPalletRandomDither : {
@@ -9009,7 +9025,7 @@ ${strPM} ];
                         call(){ setTimeout(()=>commandLine("run safe quantImage",true),0) }
                     },
                     pixelArtPallet : {
-                        help : "For use on images with 256 or less colors",
+                        help : "Creates pallet containing all colors in\nselected sprite sorted by frequency of use\nIf image contains more than 256 colors\nonly the 256th most used colors are used.",
                         call(){
                             const pallets = [];
                             utils.processSelectedImagesCallback(API.getPxArtColors, pallet => {
@@ -9052,7 +9068,7 @@ ${strPM} ];
                         call() { utils.processSelectedImages(API.harrisCornerDetect)  }
                     },*/
 					spriteCollisionBounds : {
-						help: "DISABLED: Creates a radial collision map of sprites and downloads it as JavaScript",
+						help: (!LOCALS.LOCAL ? "DISABLED: " : "") + "Creates a radial collision map of sprites and downloads it as JavaScript",
                         info: {disabled: !LOCALS.LOCAL},
 						call() {
 						    var allGood = false;
@@ -9085,31 +9101,26 @@ ${strPM} ];
 							};
 						}
 					},
-                    spritesBoxed : {
-                        help : "DISABLED: Create a packed sprite sheat from selected images\nSprites are marked by bounding box",
+                    spriteSheetBoxed : {
+                        help : (!LOCALS.LOCAL ? "DISABLED: " : "") + "Create a packed sprite sheat from selected images\nSprites are marked by bounding box",
                         info: {disabled: !LOCALS.LOCAL},
                         call(){ createSprites("box") }
                     },
-                    spritesSideMarked : {
-                        help : "DISABLED: Create a packed sprite sheat from selected images\nTop and/or left edge is marked with sprite right and bottom",
+                    /*spritesSideMarked : {
+                        help : (!LOCALS.LOCAL ? "DISABLED: " : "") + "Create a packed sprite sheat from selected images\nTop and/or left edge is marked with sprite right and bottom",
                         info: {disabled: !LOCALS.LOCAL},
                         call(){ createSprites("sides") }
-                    },
+                    },*/
                     spriteSheet : {
-                        help : "Create Sprite sheet from selected images\nSprite are defined by connected pixels",
+                        help : "Create Sprite sheet from selected sprite sheet images\nSprite are defined by connected pixels",
                         call(){ createSprites("free") }
                     },
                     tileSheet : {
-                        help : "Creates a tile sheet from selected images\nTiles are added to workspace when done",
+                        help : "Creates a tile sheet from selected tile sheet images",
                         call(){ createSprites("grid") }
-                    },
-                    spritesSheetBoxed : {
-                        help : "Create Sprite sheets from selected images\nSprites are marked by bounding box",
-                        info: {disabled: !LOCALS.LOCAL},
-                        call(){ createSprites("box") }
-                    },                        
+                    },                      
                     imageValue : {
-                        help : "Logs a metric of image brightness",
+                        help : (!LOCALS.LOCAL ? "DISABLED: " : "") + "Logs a metric of image brightness",
                         info: {disabled: !LOCALS.LOCAL},
                         call(){
                             selection.eachOfType(spr => {
