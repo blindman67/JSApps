@@ -119,15 +119,15 @@ function worker_ImageFindReplace() {
         }
         var x, y;
         const alignment = 1;
-        const edge = Math.min(hf, wf) - 1;
-        const hEdge = mirror || rotate ? edge : hf - 1;
-        const wEdge = mirror || rotate ? edge : wf - 1;
+        const edge = Math.max(hf, wf) ;
+        const hEdge = mirror || rotate ? edge : hf;
+        const wEdge = mirror || rotate ? edge : wf;
         const total = (h - hEdge) * (w - wEdge) / alignment;
-        const progUpdate = Math.max(2048, total / (w * 0.5)) | 0;
+        const progUpdate = Math.max(8000, total / (w * 0.5)) | 0;
         var replaceIdx = Math.random() * replaceImgD8.length | 0;
         var progressCount = 0;
-        for (y = 0; y < h - hEdge; y  += alignment) {
-            for (x = 0; x < w - wEdge; x  += alignment) {
+        for (y = 0; y < h - hEdge; y += alignment) {
+            for (x = 0; x < w - wEdge; x += alignment) {
                 let i = Math.random() * transforms.length | 0
                 for (const tran of transforms) {
                     const t = transforms[(i++) % transforms.length];
