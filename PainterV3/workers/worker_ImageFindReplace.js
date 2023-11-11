@@ -120,8 +120,8 @@ function worker_ImageFindReplace() {
         var x, y;
         const alignment = 1;
         const edge = Math.max(hf, wf) ;
-        const hEdge = mirror || rotate ? edge : hf;
-        const wEdge = mirror || rotate ? edge : wf;
+        const hEdge = (mirror || rotate ? edge : hf) - 1;
+        const wEdge = (mirror || rotate ? edge : wf) - 1;
         const total = (h - hEdge) * (w - wEdge) / alignment;
         const progUpdate = Math.max(8000, total / (w * 0.5)) | 0;
         var replaceIdx = Math.random() * replaceImgD8.length | 0;
