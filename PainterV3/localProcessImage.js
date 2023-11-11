@@ -54,7 +54,6 @@ function ProcessImageWorker() {
         b = b1 / (b1 + b2);
         if(Math.random() < (r + g + b) / 3) { return idx + (idx1 << 8) }
         return idx + (idx << 8);
-
     }
     function closestColor(fr,fg,fb){
         fr *= fr; fg *= fg; fb *= fb;
@@ -71,11 +70,8 @@ function ProcessImageWorker() {
             }
             i ++;
         }
-
         return idx;
-
     }
-
     const ditherMap = {
         map2 : [0/4,2/4,3/4,1/4],
         map3 : [0/9,7/9,3/9,6/9,5/9,2/9,4/9,1/9,8/9],
@@ -86,11 +82,8 @@ function ProcessImageWorker() {
         const offset = (currentMap[(x%currentSize) + (y%currentSize) * currentSize] - 0.5) * spread;
         return closestColor(r + offset,g + offset,b + offset)
     }
-
-
     const API = {
         applyPalletToImage(data, palletData, pallet, matrixSize){
-
             pLookup = palletData;
             spread = 255 / (pallet.length/ 3);
             currentMap = ditherMap["map" + matrixSize];
@@ -102,7 +95,6 @@ function ProcessImageWorker() {
             var x = 0;
             var y = 0;
             var chunkSize = 64 * 64;
-
             function processPixels(){
                 var count = chunkSize;
                 var i1,ci,r,g,b,i = idx * 4;
@@ -132,11 +124,8 @@ function ProcessImageWorker() {
             progressMessage(value);
         },
     };
-
-
     function workerFunction(data){
         var result;
-
         if(typeof API[data.call] === "function"){
             result = API[data.call](...data.args);
         }
@@ -146,13 +135,10 @@ function ProcessImageWorker() {
 const localProcessImage = (()=>{
     var workingCanvas = CanvasGroover();
     var ctx = workingCanvas.ctx;
-
     var holdingId = 100;
     var holding;
     function copyToWorking(image, showError = true){
         if(workingCanvas){
-
-
             if(workingCanvas.width !== image.w || workingCanvas.height !== image.h){
                 workingCanvas.w = workingCanvas.width = image.w;
                 workingCanvas.h = workingCanvas.height = image.h;
@@ -163,8 +149,6 @@ const localProcessImage = (()=>{
             ctx.globalCompositeOperation = "copy";
             ctx.drawImage(image,0,0);
             ctx.globalCompositeOperation = "source-over";
-
-
             return true;
         }else{
             showError && log.error("Image processing failed. Working canvas is locked");
@@ -177,12 +161,10 @@ const localProcessImage = (()=>{
         image.ctx.filter = "none";
         image.ctx.drawImage(workingCanvas,0,0);
         image.ctx.restore();
-
     }
     function resourceClean(){
         workingCanvas.width = 1;
         workingCanvas.height = 1;
-
     }
     function canProcess (img) { return img.isDrawable && !img.isLocked }
     function getPixelData8Bit(image, hold) {
@@ -218,7 +200,6 @@ const localProcessImage = (()=>{
             return spr.image.ctx.putImageData(data, 0, 0);
         }
     }
-
     function RGBToHSLQuick(r, g, b, hsl = {}){
         var dif, h,s,l, min, max;
         min = Math.min(r, g, b);
@@ -268,9 +249,9 @@ const localProcessImage = (()=>{
                 }
                 const workObj = {};
                 const worker = workers.get(job.name);
-                const wCall = EZWebWorkers.namedWorker(worker.worker,{obj : workObj, onprogress : (progress) => {job.image.progress = progress}});
+                const wCall = EZWebWorkers.namedWorker(worker.worker, {obj: workObj, onprogress: (progress) => {job.image.progress = progress}});
                 working += 1;
-                wCall({call : job.name, args : [data, ...job.args]})
+                wCall({call: job.name, args: [data, ...job.args]})
                     .then(data => {
                         wCall.close();
                         working -= 1;
@@ -278,9 +259,8 @@ const localProcessImage = (()=>{
                             job.image.unlock(data);
                             job.image.lastAction = job.name;
                             fireEvent(job.jobId);
-                        } else {
-                            API.fireEvent("workercomplete",[job.jobId, data]);
                         }
+                        API.fireEvent("workercomplete", [job.jobId, data]);
                         setTimeout(workerUpdate,0);
                     })
                     .catch(error => {
@@ -290,15 +270,13 @@ const localProcessImage = (()=>{
                         if (!job.inspect) {
                             job.image.unlock();
                             fireEvent(job.jobId)
-                        } else {
-                            API.fireEvent("workercomplete",job.jobId, false);
                         }
+                        API.fireEvent("workercomplete", [job.jobId, false]);
                         setTimeout(workerUpdate,0);
                     });
             }
         }
     }
-
     const workers = new Map();
     // Events are intended as a broadcasting service
     function fireEvent(pId){
@@ -337,35 +315,27 @@ const localProcessImage = (()=>{
             })
         },
         createJob(name, image, ...args) {
-            if(image.isDrawable){
-                if(workers.has(name)){
+            if (image.isDrawable) {
+                if (workers.has(name)) {
                     const w = workers.get(name);
                     image.lockPending(w.lockType)
                     const jobId = getGUID();
-                    jobQueue.push({name, image, args, jobId });
-                    setTimeout(workerUpdate,0);
+                    jobQueue.push({name, image, args, jobId});
+                    setTimeout(workerUpdate, 0);
                     return jobId;
-                }else{
-                    log.warn("No worker named '"+name+"' found");
-                }
-            }else{
-                log.warn("Can not process. Image '"+image.name + "' not drawable");
-            }
+                } else { log.warn("No worker named '"+name+"' found") }
+            } else { log.warn("Can not process. Image '"+image.name + "' not drawable") }
         },
         createJobInspect(name, image, ...args) {  // Inspects the image. Pixels are not returned
-            if(image.isDrawable){
-                if(workers.has(name)){
+            if (image.isDrawable) {
+                if (workers.has(name)) {
                     const w = workers.get(name);
                     const jobId = getGUID();
                     jobQueue.push({name, image, args, inspect: true, jobId });
                     setTimeout(workerUpdate,0);
                     return jobId;
-                }else{
-                    log.warn("No worker named '"+name+"' found");
-                }
-            }else{
-                log.warn("Can not process. Image '"+image.name + "' not drawable");
-            }
+                } else { log.warn("No worker named '"+name+"' found") }
+            } else { log.warn("Can not process. Image '"+image.name + "' not drawable") }
         },
         halfSizeBitmap(img){
             var a1,a2,a3,a4,ch,cc;
@@ -389,7 +359,6 @@ const localProcessImage = (()=>{
                         var id = y * ww + x * 4;
                         var id1 = (y / 2 | 0) * ww + (x / 2 | 0) * 4;
                         i2 = x + 1 === w ? 0 : 4
-
                         a1 = d[id + 3];
                         a2 = d[id + 3 + i2];
                         a3 = d[id + i4 + 3 ];
@@ -475,7 +444,6 @@ const localProcessImage = (()=>{
                 const sRGB2RGB = 1 / RGB2sRGB;
                 const sRGBMax = 255 ** RGB2sRGB;
                 var x, y = 0, sx, sy, xx, yy, r, g, b, a;
-
                 while (y < h) {
                     sy = y * yStep;
                     x = 0;
@@ -524,8 +492,6 @@ const localProcessImage = (()=>{
                 img.lastAction = "Down Sampled";
                 img.restore();
                 return true;
-
-
             }
         },
         halfSizeBitmapNearestDom(img, vert, dark) {
@@ -548,7 +514,6 @@ const localProcessImage = (()=>{
                 var val = [0,0];
                 const xStep = vert ? 1 : 2;
                 const yStep = vert ? 2 : 1;
-
                 for (y = 0; y < h; y += yStep) {
                     for (x = 0; x < w; x += xStep) {
                         idA = (y*ww+x) * 4;
@@ -576,13 +541,9 @@ const localProcessImage = (()=>{
                                     else { d32[id1] = pxs[1] | aa }
                                 }
                             }
-
                         }
-
-
                     }
                 }
-
                 w = vert ? w : w / 2 | 0;
                 h = vert ? h / 2 | 0 : h;
                 img.desc.mirror.width = w ;
@@ -602,7 +563,6 @@ const localProcessImage = (()=>{
         halfSizeBitmapNearest(img, dark = false) {
             var a1,a2,a3,a4;
             if(img.isDrawable){
-
                 var w = img.w;
                 var h = img.h;
                 if (w === 1 || h === 1) {
@@ -624,7 +584,6 @@ const localProcessImage = (()=>{
                 var Mv = 0;
                 var minPx = 0;
                 var maxPx = 0;
-
                 for (y = 0; y < h; y += 2) {
                     for (x = 0; x < w; x += 2) {
                         idA = (y * w + x) * 4;
@@ -677,7 +636,6 @@ const localProcessImage = (()=>{
                         }
                     }
                 }
-
                 const setCol = (val, vCmp) => {
                     for (y = 0; y < h; y += 2) {
                         for (x = 0; x < w; x += 2) {
@@ -702,9 +660,6 @@ const localProcessImage = (()=>{
                     setCol(minPx, minPx & 0xFFFFFF);
                     setCol(maxPx, maxPx & 0xFFFFFF);
                 }
-
-
-
                 w >>= 1;
                 h >>= 1;
                 img.desc.mirror.width = w;
@@ -752,9 +707,6 @@ const localProcessImage = (()=>{
                 }
                 return pallet;
             }
-
-
-
         },
         pixelShuffle(img){
             if(img.isDrawable){
@@ -868,10 +820,8 @@ const localProcessImage = (()=>{
                     9,                10,
                     11,               15,
                     11,11,12,13,14,15,15
-
                 ];
                 //const revs = [[
-
                 var x,y;
                 const isConnected = (level, idx, px) => {
                     const os = offsets[level];
@@ -903,12 +853,10 @@ const localProcessImage = (()=>{
                     }
                     nei.free = free;
                     nei.mask = freeMask;
-
                     return free;
                 }
                 //  76543210,   76543210,   76543210,   76543210,   76543210,   76543210,   76543210,   76543210,   76543210,
                 const spaceMasks =  [0b00101111, 0b00111111, 0b10010111, 0b01101011, 0b11010110, 0b11101001, 0b11111100, 0b11110100];
-
                 // 0 1 2
                 // 3 - 4
                 // 5 6 7
@@ -916,26 +864,20 @@ const localProcessImage = (()=>{
                     [3,0,1],[0,1,2],[1,2,4], [5,3,0], [7,4,2], [6,5,3], [7,6,5], [4,7,6],
                 ];
                 const nPath = [];
-
                 const canJoin = (px, idx, crn, os) => {
                     if (d32[idx + os[crn[0]]] === px ||
                         d32[idx + os[crn[1]]] === px ||
                         d32[idx + os[crn[2]]] === px) {
                             return true;
                     }
-
-
                 }
                 const nextNt = (idx, px, fMask)=> {
                     const os = offsets[0];
                     const len = offsets[0].length;
-
-
                     var i = len, o = 0;
                     while (i-- > 0) {
                         const sm = spaceMasks[o];
                         if ((fMask & sm) === sm) {
-
                             const crn = spaceCorn[o];
                             const idx1 = idx + os[o];
                             if (canJoin(px, idx1, crn, os)) {
@@ -994,18 +936,12 @@ const localProcessImage = (()=>{
                         }
                     }
                 }
-
-
-
                 const pathsCount2 = offsets[2].length;
                 const pathsCount1 = offsets[1].length;
                 const levPathA = paths[0], levPathB = paths[1], os = offsets[0];
                 const  os1 = offsets[2];
                 var moveMaxDist = 10;
                 var moveDist = 0;
-
-
-
                 const move1 = (idx, pp) => {
                     const toPos =  (pp & 0b11111) - 1;
                     const add = os[levPathA[toPos]];
@@ -1027,7 +963,6 @@ const localProcessImage = (()=>{
                             moveDist --;
                             move2(idx + addLoc, cp);
                         }
-
                     }
                 }
                 const move2 = (idx, pp) => {
@@ -1056,7 +991,6 @@ const localProcessImage = (()=>{
                         }
                     }
                 }
-
                 const connectIsolated = (mask, move) => {
                     var i = d32.length;
                     var idx = 0;
@@ -1087,22 +1021,16 @@ const localProcessImage = (()=>{
                         idx ++;
                     }
                 }
-
                 markIsolated();
                 connectIsolated(0b00100000, move1);
                 connectIsolated(0b01000000, move2);
                 connectIsolatedTails();
-
-
                 setPixelData(img, data);
                 img.processed = true;
                 img.lastAction = "Pixel Fun";
                 img.update();
                 return true;
-
-
             }
-
         },
         CreateMappedEPS(maps) {
             const posMap = (idx) => {
@@ -1140,8 +1068,8 @@ const localProcessImage = (()=>{
                 };
                 var getSet;
                 yy = 0;
-                while (yy < map.h) { 
-                    xx = 0;                                 
+                while (yy < map.h) {
+                    xx = 0;
                     while (xx < map.w){
                         const pIdx = idx + xx + yy * w;
                         p32[pIdx] = 0;
@@ -1187,7 +1115,7 @@ const localProcessImage = (()=>{
             }
             const p32 = maps.pos32;
             const f32 = maps.from32;
-            const t32 = maps.to32; 
+            const t32 = maps.to32;
             maps.maps = [];
             const w = maps.w;
             const h = maps.h;
@@ -1206,7 +1134,7 @@ const localProcessImage = (()=>{
             }
             maps.pos32  = undefined;
             maps.from32 = undefined;
-            maps.to32   = undefined; 
+            maps.to32   = undefined;
         },
         EPSMapped(img, foldEl) {
             if(img.isDrawable){
@@ -1220,22 +1148,17 @@ const localProcessImage = (()=>{
                     const imgFrom = [...imgPos.linkers][0];
                     if (!imgFrom.linkers) { log.warn("No to linkers found"); return }
                     const imgTo =  [...imgFrom.linkers][0];
-                    
                     if (!imgPos.type.image || !imgFrom.type.image || !imgTo.type.image) { log.warn("Not all linkers are images"); return }
-                    
-                    
                     const maps = API.EPSMapped.maps = {
                         //ready: false,
                         imgPos: imgPos.image,
                         imgFrom: imgFrom.image,
                         imgTo: imgTo.image,
-                    };       
-                    foldEl.textContent = "Double_EPS_mapped";    
+                    };
+                    foldEl.textContent = "Double_EPS_mapped";
                     selection.clear();
                     return;
-                    
                 }
-
                 const maps = API.EPSMapped.maps;
                 maps.w = maps.imgPos.w;
                 maps.h = maps.imgPos.h;
@@ -1246,8 +1169,7 @@ const localProcessImage = (()=>{
                 maps.from32 = new Uint32Array(dat2.data.buffer);
                 maps.to32 =   new Uint32Array(dat3.data.buffer);
                 API.CreateMappedEPS(maps);
-                maps.ready = true;    
-                
+                maps.ready = true;
                 const transforms = [
                     (x, y) => [ x,  y],
                     (x, y) => [-y,  x],
@@ -1267,7 +1189,7 @@ const localProcessImage = (()=>{
                     (x, y) => [    y,     x],
                     (x, y) => [1 - x,     y],
                     (x, y) => [1 - y, 1 - x]
-                ];                
+                ];
                 const checkMap = (idx, map, transformer) => {
                     const px = d32[idx];
                     //if (px === 0) { return false;  }
@@ -1283,7 +1205,7 @@ const localProcessImage = (()=>{
                             if (px === d32[idx + xx + yy * w]) {
                                 count ++;
                             } else { break; }
-                        } else { break; }                        
+                        } else { break; }
                     }
                     if (i < map.same.length || count < map.same.length / 2) { return false; }
                     i = 0;
@@ -1296,12 +1218,12 @@ const localProcessImage = (()=>{
                             if (px !== d32[idx + xx + yy * w]) {
                                 count ++;
                             } else { break; }
-                        } else { 
-                            count ++; 
-                        }                        
+                        } else {
+                            count ++;
+                        }
                     }
-                    if (i < map.not.length || count < map.not.length / 2) { return false; }       
-                    return true;       
+                    if (i < map.not.length || count < map.not.length / 2) { return false; }
+                    return true;
                 }
                 const setMap = (idx, map, transformer) => {
                     var x = (idx % w) * 2;
@@ -1314,9 +1236,9 @@ const localProcessImage = (()=>{
                         const ry = y + yy;
                         if (rx >= 0 && rx < w2 && ry > 0 && ry < h2) {
                             dest32[rx + ry * w2] = px;
-                        }                      
+                        }
                     }
-                }               
+                }
                 var w = img.w;
                 var h = img.h;
                 const size = w * h;
@@ -1328,14 +1250,12 @@ const localProcessImage = (()=>{
                 var d8 = data.data;
                 var d32 = new Uint32Array(d8.buffer);
                 const m = img.desc.mirror;
-
-
                 m.width = w2;
                 m.height = h2;
                 m.ctx.imageSmoothingEnabled = false;
                 m.ctx.drawImage(img, 0, 0, w2, h2);
                 var data2 = m.ctx.getImageData(0, 0, w2, h2);
-                var dest32 = new Uint32Array(data2.data.buffer);   
+                var dest32 = new Uint32Array(data2.data.buffer);
                 var idx = 0;
                 while (idx < size) {
                     nextMap: for (const map of maps.maps) {
@@ -1348,10 +1268,6 @@ const localProcessImage = (()=>{
                     }
                     idx ++;
                 }
-
-
-                
-                
                 m.ctx.putImageData(data2, 0, 0);
                 img.w = img.width = w2;
                 img.h = img.height = h2;
@@ -1360,8 +1276,8 @@ const localProcessImage = (()=>{
                 img.desc.clippedTop = - w / 2;
                 img.desc.clippedLeft = - h / 2;
                 img.restore();
-                return true;       
-            }                
+                return true;
+            }
         },
         doubleBitmapSoft(img, fixCorners = false, tollerance = 0){
             var a1,a2,a3,a4,ch,cc;
@@ -1377,7 +1293,6 @@ const localProcessImage = (()=>{
                 var d8 = data.data;
                 var d32 = new Uint32Array(d8.buffer);
                 const m = img.desc.mirror;
-
                 if (tollerance > 0) {
                     var data2 = API.doublePixelsQuality(img);
                 } else {
@@ -1399,12 +1314,10 @@ const localProcessImage = (()=>{
                             else if (rotMir === 5) { data.push(-y + x * w2) }
                             else if (rotMir === 6) { data.push(y - x * w2) }
                             else { data.push(-y - x * w2) }
-
                         } else if (rotMir === 0) { data.push(x + y * w2) }
                         else if (rotMir === 1) { data.push(-x + y * w2) }
                         else if (rotMir === 2) { data.push(x - y * w2) }
                         else { data.push(-x - y * w2) }
-
                     }
                     return data;
                 }
@@ -1438,7 +1351,6 @@ const localProcessImage = (()=>{
                     toOff: [],
                     toOn: createOffsets(rotMir,    [-1,0, 0,-2, 2,-1, 1,1]),
                 });
-
                 const fromStr = (str, c, r) => {
                     const shape = {on: [0,0], off: [],  toOff: [], toOn: []};
                     const xero = str.indexOf("*");
@@ -1449,7 +1361,6 @@ const localProcessImage = (()=>{
                         const C = str[i];
                         if (C !== " ") {
                             const x1 = x - xx, y1 = y - yy;
-
                             if (C === "#" || C === "-") { shape.on.push(x1,y1) }
                             else if (C === "." || C === "+") { shape.off.push(x1,y1) }
                             if (C === "+") { shape.toOn.push(x1,y1) }
@@ -1461,7 +1372,6 @@ const localProcessImage = (()=>{
                     }
                     return shape;
                 }
-
                 const join = (rotMir) => ({
                     on:    createOffsets(rotMir,   join.shape.on),
                     off:   createOffsets(rotMir,   join.shape.off),
@@ -1483,14 +1393,11 @@ const localProcessImage = (()=>{
                     toOn:  createOffsets(rotMir,   joinB.shape.toOn),
                 })
                 joinB.shape = fromStr(".#+#" +"#*++" +"++##" +"#+#.", 4, 4);
-
                 const cornerSets = (corner, sets = [0,1,2,3]) => {
                     const set = [];
                     for (const i of sets) { set.push(corner(i)) }
                     return set;
                 }
-
-
                 function checkCorner(x, y, rule, inData, outData) {
                     var idx = x + y * w2;
                     var i = 0;
@@ -1518,9 +1425,6 @@ const localProcessImage = (()=>{
                     const a = d8[idx1] - d8[idx2];
                     return (r * r + g * g + b * b + a * a) ** 0.5  < tollerance;
                 }
-
-
-
                 var x,y,a,b,c,d,i,a1,b1,c1,d1;
                 var ai,    ab,   ac,   ad, aa1, ab1, ac1, ad1;
                 var bi,    bc,   bd,  ba1, bb1, bc1, bd1;
@@ -1529,9 +1433,6 @@ const localProcessImage = (()=>{
                 var a1b1;
                 var b1c1;
                 var c1d1;
-
-
-
                 tollerance *= tollerance;
                 for(y = 1; y < h-1; y += 1){
                     for(x = 1; x < w-1; x +=1){
@@ -1578,7 +1479,6 @@ const localProcessImage = (()=>{
                             a1b1 = dist(ia1, ib1);
                             b1c1 = dist(ib1, ic1);
                             c1d1 = dist(ic1, id1);
-
                         } else {
                             ai  = a === i;
                             ab  = a === b;
@@ -1609,15 +1509,10 @@ const localProcessImage = (()=>{
                             a1b1 = a1 === b1;
                             b1c1 = b1 === c1;
                             c1d1 = c1 === d1;
-
                         }
-
-
 						if (!ai && ab && bc && cd && aa1 && a1b1 && b1c1 && c1d1) {
                             const idx2 = x*2 + y * 2 * w2;
                             dest32[idx2 + w2 * 2] = dest32[idx2 + 2 + w2] = dest32[idx2 + 1 - w2] = dest32[idx2 - 1] = i;
-
-
                         } else if (!bi  && bc && cd && !ab && !ba1 && !bd1 && !bc1 && !bd1) {
 							const idx2 = x*2 + y * 2 * w2;
 							dest32[idx2 + 1 + w2] = b;
@@ -1669,7 +1564,6 @@ const localProcessImage = (()=>{
                             }
                         }
                     }
-
                 }
                 m.ctx.putImageData(data2, 0, 0);
                 img.w = img.width = w2;
@@ -1698,13 +1592,11 @@ const localProcessImage = (()=>{
                 m.ctx.drawImage(img, 0, 0, w * 2, h * 2);
                 var data2 = m.ctx.getImageData(0,0,m.width,m.height);
                 var dest32 = new Uint32Array(data2.data.buffer);
-
                 var x,y,a,b,c,d,p1,p2,p3,p4;
                 var w2 = w*2;
                 for(y = 1; y < h-1; y += 1){
                     for(x = 1; x < w-1; x +=1){
                         const idx = x + y * w;
-
                         a = d32[idx - w];
                         b = d32[idx + 1];
                         c = d32[idx + w];
@@ -1734,7 +1626,6 @@ const localProcessImage = (()=>{
         doublePixelsQuality(img){
             var a1,a2,a3,a4,ch,cc;
             ch = [];
-
             var w = img.w;
             var h = img.h;
             var data = img.ctx.getImageData(0,0,w,h);
@@ -1752,19 +1643,16 @@ const localProcessImage = (()=>{
             var data2 = m.ctx.getImageData(0,0,m.width,m.height);
             var dest8 = data2.data;
             var dest32 = new Uint32Array(data2.data.buffer);
-
             var x,y,a,b,c,d,p1,p2,p3,p4;
             var ar,br,cr,dr;
             var ag,bg,cg,dg;
             var ab,bb,cb,db;
             var aa,ba,ca,da;
-
             for(y = 0; y < h-1; y += 1){
                 for(x = 0; x < w-1; x +=1){
                     idx32 = x + y * w;
                     idx1 = idx = idx32 * 4;
                     a = d32[idx32];
-
                     ar = d8[idx] ** pow;
                     br = d8[idx + 4] ** pow;
                     cr = d8[idx + w4] ** pow;
@@ -1775,13 +1663,11 @@ const localProcessImage = (()=>{
                     cg = d8[idx + w4] ** pow;
                     dg = d8[idx + w44] ** pow;
                     idx ++;
-
                     ab = d8[idx] ** pow;
                     bb = d8[idx + 4] ** pow;
                     cb = d8[idx + w4] ** pow;
                     db = d8[idx + w44] ** pow;
                     idx ++;
-
                     aa = d8[idx];
                     ba = d8[idx + 4];
                     ca = d8[idx + w4];
@@ -1850,21 +1736,16 @@ const localProcessImage = (()=>{
                                 db = cb;
                             }
                         }
-
-
                         const idx24 = idx2 * 4;
                         dest32[idx2] = a;
-
                         dest8[idx24 + w24    ] = ((ar + cr) / 2) ** root;
                         dest8[idx24 + w24 + 1] = ((ag + cg) / 2) ** root;
                         dest8[idx24 + w24 + 2] = ((ab + cb) / 2) ** root;
                         dest8[idx24 + w24 + 3] = (aa + ca) / 2;
-
                         dest8[idx24 + 4] = ((ar + br) / 2) ** root;
                         dest8[idx24 + 5] = ((ag + bg) / 2) ** root;
                         dest8[idx24 + 6] = ((ab + bb) / 2) ** root;
                         dest8[idx24 + 7] = (aa + ba) / 2;
-
                         dest8[idx24 + w244    ] = ((ar + br + cr + dr) / 4) ** root;
                         dest8[idx24 + w244 + 1] = ((ag + bg + cg + dg) / 4) ** root;
                         dest8[idx24 + w244 + 2] = ((ab + bb + cb + db) / 4) ** root;
@@ -1896,19 +1777,16 @@ const localProcessImage = (()=>{
                 var data2 = m.ctx.getImageData(0,0,m.width,m.height);
                 var dest8 = data2.data;
                 var dest32 = new Uint32Array(data2.data.buffer);
-
                 var x,y,a,b,c,d,p1,p2,p3,p4;
                 var ar,br,cr,dr;
                 var ag,bg,cg,dg;
                 var ab,bb,cb,db;
                 var aa,ba,ca,da;
-
                 for(y = 0; y < h-1; y += 1){
                     for(x = 0; x < w-1; x +=1){
                         idx32 = x + y * w;
                         idx1 = idx = idx32 * 4;
                         a = d32[idx32];
-
                         ar = d8[idx] ** pow;
                         br = d8[idx + 4] ** pow;
                         cr = d8[idx + w4] ** pow;
@@ -1919,13 +1797,11 @@ const localProcessImage = (()=>{
                         cg = d8[idx + w4] ** pow;
                         dg = d8[idx + w44] ** pow;
                         idx ++;
-
                         ab = d8[idx] ** pow;
                         bb = d8[idx + 4] ** pow;
                         cb = d8[idx + w4] ** pow;
                         db = d8[idx + w44] ** pow;
                         idx ++;
-
                         aa = d8[idx];
                         ba = d8[idx + 4];
                         ca = d8[idx + w4];
@@ -1994,21 +1870,16 @@ const localProcessImage = (()=>{
                                     db = cb;
                                 }
                             }
-
-
                             const idx24 = idx2 * 4;
                             dest32[idx2] = a;
-
                             dest8[idx24 + w24    ] = ((ar + cr) / 2) ** root;
                             dest8[idx24 + w24 + 1] = ((ag + cg) / 2) ** root;
                             dest8[idx24 + w24 + 2] = ((ab + cb) / 2) ** root;
                             dest8[idx24 + w24 + 3] = (aa + ca) / 2;
-
                             dest8[idx24 + 4] = ((ar + br) / 2) ** root;
                             dest8[idx24 + 5] = ((ag + bg) / 2) ** root;
                             dest8[idx24 + 6] = ((ab + bb) / 2) ** root;
                             dest8[idx24 + 7] = (aa + ba) / 2;
-
                             dest8[idx24 + w244    ] = ((ar + br + cr + dr) / 4) ** root;
                             dest8[idx24 + w244 + 1] = ((ag + bg + cg + dg) / 4) ** root;
                             dest8[idx24 + w244 + 2] = ((ab + bb + cb + db) / 4) ** root;
@@ -2034,10 +1905,8 @@ const localProcessImage = (()=>{
                 var data = img.ctx.getImageData(0,0,w,h);
                 var d = data.data;
                 var d32 = new Uint32Array(d.buffer);
-
                 var x,y,a,b, x1, y1, x2, y2, a1,a2,a3,a4,a5,l, idx;
                 var count = 0, max, start, maxStart;
-
                 while (slices--) {
                     var w2 = w*2;
                     const areas = [];
@@ -2105,7 +1974,6 @@ const localProcessImage = (()=>{
                             }
                         }
                     }
-
                     y1 = y2 = maxLine;
                     x1 = x2 = maxStart;
                     while (y1 < h || y2 > -1) {
@@ -2192,14 +2060,12 @@ const localProcessImage = (()=>{
                     }
                     w -= 1;
                 }
-
                 img.desc.mirror.width = w ;
                 img.desc.mirror.height = h;
                 img.w = img.width = w;
                 img.h = img.height = h;
                 img.ctx.putImageData(data,0,0);
                 img.desc.mirror.ctx.drawImage(img,0,0);
-
                 img.desc.dirty = true;
                 img.lastAction = "Pixel cut";
                 img.desc.clippedTop = - 0;
@@ -2219,7 +2085,6 @@ const localProcessImage = (()=>{
                     }
                     const r = max - min;
                     var i = 0;
-
                     while (i < e.length) {
                         e[i] = (((e[i] - min) / r) ** p) * 255;
                         i++;
@@ -2258,7 +2123,6 @@ const localProcessImage = (()=>{
                 }
                 function removeSeams(seams, rows) {
                     var y = 0, yy, idx, idxX, idxY, x = 0, xx, next, seamIdx = 0, i;
-
                     if (rows) {
                         while (x < w) {
                             idx = x;
@@ -2278,7 +2142,6 @@ const localProcessImage = (()=>{
                         }
                         top -= (seams.length / 2 | 0);
                         bottom -= (seams.length - (seams.length / 2 | 0));
-
                     } else {
                         while (y < h) {
                             idx = y * w;
@@ -2297,11 +2160,9 @@ const localProcessImage = (()=>{
                         }
                         ;
                         right -= seams.length;
-
                     }
                 }
                 function getEnergySRGB() {
-
                     var x, y, r, g, b, idx, scale;
                     const scaler = 255 * 255;
                     const doColumn = (left, right) => {
@@ -2349,7 +2210,6 @@ const localProcessImage = (()=>{
                             y += w4;
                         }
                     }
-
                     idx = y = x = 0;
                     doColumn(false, true);
                     x ++;
@@ -2374,7 +2234,6 @@ const localProcessImage = (()=>{
                     const seam = [];
                     const energies = [];
                     var idx = x, dir, i = 0, total = 0, min, hasRed = false;
-
                     const len = e.length;
                     const w2 = w - 2;;
                     while (idx < len) {
@@ -2405,7 +2264,6 @@ const localProcessImage = (()=>{
                             return {idxs: seam, x, energies, prevSeam: leftSeam, total};
                         }
                         total += min;
-
                         seam.push(idx);
                         energies.push(total);
                         idx +=  w;
@@ -2484,7 +2342,6 @@ const localProcessImage = (()=>{
                         full.y = seam.y;
                     }
                 }
-
                 function getSeams(e, rows = false) {
                     const seams = [];
                     var x = 0, y = 0, i = 0;
@@ -2505,7 +2362,6 @@ const localProcessImage = (()=>{
                     if (fullSeams.length) {
                         for (const seam of seams) { reduceSeam(seam) }
                         /*var min = fullSeams[0].total, minSeam = fullSeams[0], max = min;
-
                         for (const seam of fullSeams) {
                             if (seam.total > max) { max = seam.total }
                             if (seam.total < min) {
@@ -2513,7 +2369,6 @@ const localProcessImage = (()=>{
                                 minSeam = seam;
                             }
                         }
-
                         const dif = max - min * 0.1;
                         return fullSeams.filter(seam => seam.total <= min + dif);*/
                     }
@@ -2540,7 +2395,6 @@ const localProcessImage = (()=>{
                     if (fullSeams.length) {
                         for (const seam of seams) { reduceSeam(seam) }
                         var min = fullSeams[0].total, minSeam = fullSeams[0], max = min;
-
                         for (const seam of fullSeams) {
                             if (seam.total > max) { max = seam.total }
                             if (seam.total < min) {
@@ -2548,17 +2402,12 @@ const localProcessImage = (()=>{
                                 minSeam = seam;
                             }
                         }
-
                         const dif = max - min * 0.05;
                         removeSeams(can, fullSeams.filter(seam => seam.total <= min + dif));
                     } else {
                         log("Too hard")
                     }
-
-
                 }
-
-
                 var top = 0, bottom = 0
                 var left = 0, right = 0
                 const m = img.desc.mirror;
@@ -2586,9 +2435,7 @@ const localProcessImage = (()=>{
                     energy.length = d32.length;
                     energy.fill(0);
                 }
-
                 const cols = [0xFFFF0000,0xFF00FF00,0xFF0000FF,0xFFFFFF00,0xFF00FFFF,0xFFFF00FF];
-
                     let reducing = true;
                     while (reducing) {
                         normalizeEnergy(getEnergySRGB(), 2);
@@ -2604,11 +2451,6 @@ const localProcessImage = (()=>{
                             break;
                         }
                     }
-
-   
-
-
-
                 img.w = img.width = WW + right + left;
                 img.h = img.height = HH + top + bottom;
                 img.desc.dirty = true;
@@ -2681,7 +2523,6 @@ const localProcessImage = (()=>{
                 } else if (how === "mirrorx") {
                     ctx.setTransform(-1,0,0,1,w,0);
                     ok = true;
-
                 } else if (how === "mirrory") {
                     ctx.setTransform(1,0,0,-1,0,h);
                     ok = true;
@@ -2692,7 +2533,6 @@ const localProcessImage = (()=>{
                     ctx.filter = "none";
                     ctx.shadowColor ="rgba(0,0,0,0)";
                     ctx.globalCompositeOperation = "copy";
-
                     ctx.drawImage(source, 0, 0);
                     if (restore) {
                         source.width = source.w = dest.width;
@@ -2702,10 +2542,8 @@ const localProcessImage = (()=>{
                     img.desc.dirty = true;
                     img.processed = true;
                     img.lastAction = how;
-
                     img.update();
                     return true;
-
                 }
             }
             return false;
@@ -2757,6 +2595,7 @@ const localProcessImage = (()=>{
             }
             return false;
         },
+        // pixelArtSubImageReplace no longer used
         pixelArtSubImageAlignment: 4,
         pixelArtSubImageReplace(imgSpr, rotate = true, mirror = true, findImgSpr, ...replaceImgSprs) {
             const img = imgSpr.image;
@@ -2783,7 +2622,6 @@ const localProcessImage = (()=>{
                 const rot90MirrorW = (x, y, w, h) => y + x * w;
                 const rot270 = (x, y, w, h) =>  (w - 1 - y) + x * w;
                 const rot90MirrorH = (x, y, w, h) => (w - 1 - y) + (h - 1 - x) * w;
-
                 normal.m = [1,0,0,1,0,0];
                 mirrorW.m = [-1,0,0,1,1,0];
                 mirrorH.m = [1,0,0,-1,0,1];
@@ -2796,14 +2634,12 @@ const localProcessImage = (()=>{
                 rot270.rot = true;
                 rot90MirrorW.rot = true;
                 rot90MirrorH.rot = true;
-
                 const transforms = [
                     normal,
                     ...(()=> mirror && !rotate ? [ mirrorW, mirrorH, mirrorWH] : [])(),
                     ...(()=> rotate && !mirror ? [rot90, mirrorWH, rot270] : [])(),
                     ...(()=> rotate && mirror ? [ mirrorW, mirrorH, mirrorWH,  rot90, rot90MirrorW, rot270, rot90MirrorH] : [])(),
                 ];
-
                 const usedAreas = [];
                 var usedCount = 0;
                 const used = (x, y, w, h) => usedAreas[usedCount++] = {x, y, x1: x + w, y1: y + h};
@@ -2865,8 +2701,6 @@ const localProcessImage = (()=>{
                     const replaceImg = replaceImgSpr.image;
                     const w = isSub ? sub.w : replaceImg.w;
                     const h = isSub ? sub.h : replaceImg.h;
-
-
                     if (transform.rot) {
                         img.ctx.setTransform(m[0], m[1], m[2], m[3], m[4] * h + x, m[5] * w + y);
                         img.ctx.clearRect(0, 0, w, h);
@@ -2886,7 +2720,6 @@ const localProcessImage = (()=>{
                     }
                     found ++;
                     return x;
-
                 }
                 var x, y;
                 const alignment = Math.max(1, API.pixelArtSubImageAlignment);
@@ -2902,18 +2735,40 @@ const localProcessImage = (()=>{
                         }
                     }
                 }
-
                 log("Image find replaced " + found + " sub images");
                 return true;
-
             }
         },
+        async pixelArtSubImageReplaceWorker(imgSpr, mirror, rotate, randReplace, findImgSpr, ...replaceImgSprs) { // returns workers jobId or null
+            return new Promise((done, error) => {
+                if(canProcess(imgSpr.image)){
+                    const jobId = localProcessImage.createJob("replaceSubImages", imgSpr.image, mirror, rotate, randReplace, findImgSpr.image.pixels(), ...replaceImgSprs.map(spr => spr.image.pixels()));  
+                    if (jobId !== undefined) {
+                        const completeEvent = (owner, name, data, eventUID) => {
+                            if (data[0] === jobId) {
+                                API.removeEvent("workercomplete", completeEvent);
+                                if (data[1] === false) {
+                                    log.warn("Local Process Image worker had problems completing the job!");
+                                    done(false);
+                                } else {
+                                    done(true);
+                                }
+                            }
+                        }
+                        API.addEvent("workercomplete", completeEvent);
+                    } else {
+                        
+                    }
+                } else {
+                    error("pixelArtSubImageReplaceWorker can not process supplied image!");
+                }
+            })
+        },        
         tileMapper(tileSpr, colMapSpr, mapSpr, layoutSprs, asImage = true, tileImage, redraw = false) {  // assumed arguments are vetted
             const addedSprites = [];
             const tileSheet = tileSpr.image;
             const tiles = tileSheet.desc.sprites;
             const isGrid = tileSheet.desc.gridSubSprites;
-
             var tx = 0, ty = 0, tw = tiles[0].w, th = tiles[0].h, cw = colMapSpr.image.w, ch = colMapSpr.image.h;
             const [gW, gH] = isGrid ? [tileSheet.w / tw | 0, tileSheet.h / th | 0] : [0, 0];
             const cols = !redraw ? new Uint32Array(colMapSpr.image.ctx.getImageData(0, 0, cw, ch).data.buffer) : undefined;
@@ -2922,7 +2777,6 @@ const localProcessImage = (()=>{
             const [W, H] = mapView ? [mapView.w, mapView.h] : [mapSpr.image.w, mapSpr.image.h];
             const [mW, mH] = [mapSpr.image.w, mapSpr.image.h];
             var iW = 0, iH = 0;
-
             if (asImage && !tileImage) {
                 iW = W * tw;
                 iH = H * th;
@@ -2963,7 +2817,6 @@ const localProcessImage = (()=>{
                         wildCol[cols[idx]] = match;
                     } else { break }
                 }
-
                 asImage && (tileImage.tileWildCols = wildCol);
                 for (const l of layoutSprs) {
                     const c32 = [];
@@ -2982,7 +2835,6 @@ const localProcessImage = (()=>{
                         };
                         layout.ignore = c32.length === 0;
                         lSprs.push(layout);
-
                     }
                 }
                 asImage && (tileImage.tileLayouts = lSprs);
@@ -3049,7 +2901,6 @@ const localProcessImage = (()=>{
                                 const {w, h} = l;
                                 if (matchLayout(xx, yy, l)) {
                                     if (l.ignore) {
-
                                     } else {
                                         asImage ?  addTileToImage(x, y, l) : addTile(x, y, l);
                                     }
@@ -3086,7 +2937,6 @@ const localProcessImage = (()=>{
             return addedSprites;
         },
 		buildConnectedMap(map, sheet, mapping, tileImage) { // assumed arguments are vetted
-			
 			const w = map.image.w, h = map.image.h;
 			const tw = map.image.desc.sprites[0].w, th = map.image.desc.sprites[0].h, cols = w / tw | 0, rows = h / th | 0;
 			const sheetImg = sheet.image;
@@ -3095,7 +2945,7 @@ const localProcessImage = (()=>{
 			var iW, iH;
 			const maps = [...mapping.values()];
 			const layCount = [];
-			for (const col of maps) { 
+			for (const col of maps) {
 				i = 0;
 				for (const v of col.vals) {
 					layCount[i] === undefined && (layCount[i] = 0);
@@ -3103,8 +2953,6 @@ const localProcessImage = (()=>{
 					i++;
 				}
 			}
-						
-					
 			const mapShapes = maps.map(()=>[]);
 			const tileCount = cols * rows;
 			const d32 = new Uint32Array(map.image.ctx.getImageData(0, 0, w, h).data.buffer);
@@ -3127,12 +2975,11 @@ const localProcessImage = (()=>{
 						bit ++;
 					}
 				}
-				for (const col of maps) { 
-					mapShapes[col.idx][i] = col.val; 
+				for (const col of maps) {
+					mapShapes[col.idx][i] = col.val;
 				};
 				i++;
 			}
-	
 			var addedSprites = [];
 			iW = cols * stw;
 			iH = rows * sth;
@@ -3153,7 +3000,7 @@ const localProcessImage = (()=>{
 					tileImage.h = tileImage.height = iH;
 				}
 			}
-			tileImage.ctx.clearRect(0, 0, tileImage.w, tileImage.h);	
+			tileImage.ctx.clearRect(0, 0, tileImage.w, tileImage.h);
 			i = 0;
             var found, score, count, foundAll = new Map(), all = [], allc;
 			var tIdx;
@@ -3161,32 +3008,29 @@ const localProcessImage = (()=>{
 				var i = 0;
 				var max = 6, found;
 				for (const v of set) {
-					if (v === shape) { 
-						found = i; 
-						max = 16; 
+					if (v === shape) {
+						found = i;
+						max = 16;
 						foundAll.has(i) ? foundAll.get(i)[0] ++ : foundAll.set(i, [1]);
-					} 
-						
+					}
 					i++;
 				}
 				return [found, max];
-				
 			}
 			i = 0;
-			
 			var tileMap = map.tileMap;
 			if (!tileMap || tileMap.length !== tileCount) {
 				tileMap = new Uint16Array(tileCount);
 			}
 			tileMap.rows = rows;
 			tileMap.cols = cols;
-			while (i < tileCount) {		
+			while (i < tileCount) {
 				tIdx = -1;
-				xx = i % cols;				
+				xx = i % cols;
 				yy = i / cols | 0;
 				foundAll.clear();
 				count = 0;
-				for (const col of maps) { 
+				for (const col of maps) {
 					if (mapShapes[col.idx][i] !== 0) {
 						const shape = mapShapes[col.idx][i];
 						[found, score] = closest(shape, col.vals);
@@ -3196,35 +3040,31 @@ const localProcessImage = (()=>{
 				if (count) {
 					allc = 0;
 					if (count === 1) {
-						for (const [idx, c] of foundAll.entries()) { 
+						for (const [idx, c] of foundAll.entries()) {
 							if (c[0] === count && layCount[idx] === 1) { all[allc++] = idx; }
-						}	
-						
+						}
 					} else {
-						for (const [idx, c] of foundAll.entries()) { 
+						for (const [idx, c] of foundAll.entries()) {
 							if (c[0] === count) { all[allc++] = idx }
-						}	
+						}
 					}
 					if (allc) {
 						tIdx = all[Math.random() * allc | 0];
-					}					
-					if (tIdx > -1) {				
-						tileImage.ctx.drawImage(sheetImg, (tIdx % gW) * stw, (tIdx / gW | 0) * sth, stw, sth, xx * stw, yy * sth, stw, sth);					
-					}		
-				}		
+					}
+					if (tIdx > -1) {
+						tileImage.ctx.drawImage(sheetImg, (tIdx % gW) * stw, (tIdx / gW | 0) * sth, stw, sth, xx * stw, yy * sth, stw, sth);
+					}
+				}
 				tileMap[i] = tIdx > -1 ? tIdx : 0xffff;
 				i++;
-			
 			}
 			API.buildConnectedMap.tiles = tileMap;
 			map.tileMap = tileMap;
 			return addedSprites;
-		
 		},
 		removeIdenticalTiles(img) {
 			if (!img.isDrawable) { log.warn("Image is not drawable");return false }
 			if (!img.desc.gridSubSprites) { log.warn("Image is not a tile sheet"); return false }
-
 			const tiles = img.desc.sprites;
 			const w = img.w, h = img.h;
 			const tw = tiles[0].w, th = tiles[0].h, cols = w / tw | 0, rows = h / th | 0;
@@ -3236,8 +3076,8 @@ const localProcessImage = (()=>{
 				const xB = (tIdxB % cols) * tw;
 				const yB = (tIdxB / cols | 0) * th;
 				for (y = 0; y < th; y++) {
-					for (x = 0; x < tw; x++) {		
-						if (d32[xA + x + (yA + y) * w] !== d32[xB + x + (yB + y) * w] ) { return false }						
+					for (x = 0; x < tw; x++) {
+						if (d32[xA + x + (yA + y) * w] !== d32[xB + x + (yB + y) * w] ) { return false }
 					}
 				}
 				return true;
@@ -3246,8 +3086,8 @@ const localProcessImage = (()=>{
 				const xx = (tIdx % cols) * tw;
 				const yy = (tIdx / cols | 0) * th;
 				for (y = 0; y < th; y++) {
-					for (x = 0; x < tw; x++) {		
-						if (d32[xx + x + (yy + y) * w] !== 0 ) { return false }						
+					for (x = 0; x < tw; x++) {
+						if (d32[xx + x + (yy + y) * w] !== 0 ) { return false }
 					}
 				}
 				return true;
@@ -3256,20 +3096,19 @@ const localProcessImage = (()=>{
 				const xx = (tIdx % cols) * tw;
 				const yy = (tIdx / cols | 0) * th;
 				for (y = 0; y < th; y++) {
-					for (x = 0; x < tw; x++) {		
+					for (x = 0; x < tw; x++) {
 						d32[xx + x + (yy + y) * w] = 0;
 					}
 				}
 				return true;
 			}
-			
 			var x, y, r, c, rr, cc, count;
 			for (r = 0; r < rows; r++) {
-				for (c = 0; c < cols; c++) {		
+				for (c = 0; c < cols; c++) {
 					const gIdxA = c + r * cols;
 					if (!isEmpty(gIdxA)) {
 						for (rr = 0; rr < rows; rr++) {
-							for (cc = 0; cc < cols; cc++) {				
+							for (cc = 0; cc < cols; cc++) {
 								const gIdxB = cc + rr * cols;
 								if (gIdxB > gIdxA) {
 									if (isSame(gIdxA, gIdxB)) {
@@ -3286,15 +3125,14 @@ const localProcessImage = (()=>{
 			img.desc.dirty = true;
 			img.lastAction = "Removed " + count + " identical tiles";
 			img.processed = true;
-			img.update();	
-			
+			img.update();
 			return true;
-		},			
+		},
 		createTileMapping(map) { // assumed arguments are vetted
             const img = map.image;
             const tiles = img.desc.sprites;
 			const w = img.w, h  = img.h;
-			const tw = tiles[0].w, th = tiles[0].h, columns = w / tw | 0, rows = h / th | 0;			
+			const tw = tiles[0].w, th = tiles[0].h, columns = w / tw | 0, rows = h / th | 0;
 			const d32 = new Uint32Array(img.ctx.getImageData(0, 0, w, h).data.buffer);
 			var x, y, r, c;
 			const cols = new Map();
@@ -3305,8 +3143,7 @@ const localProcessImage = (()=>{
 				var i = 0;
 				while(i < d32.length) {
 					var px = d32[i];
-					if (px !== 0 && px !== 0xFFFF0000 && px !== 0xFF0000FF) {			
-						
+					if (px !== 0 && px !== 0xFFFF0000 && px !== 0xFF0000FF) {
 						if (!cols.has(px)) {
 							const col = {px, idx: cols.size, val: 0, vals: []};
 							cols.set(px, col);
@@ -3329,7 +3166,7 @@ const localProcessImage = (()=>{
 					let i = 0;
 					for (y = 0; y < th; y++) {
 						for (x = 0; x < tw; x++) {
-							const col = cols.get(d32[xx + x + (yy + y) * w]);		
+							const col = cols.get(d32[xx + x + (yy + y) * w]);
 							if (col) {
 								col.val += 1 << i;
 							}
@@ -3341,7 +3178,6 @@ const localProcessImage = (()=>{
 			}
 			if (warn) {
 				log.warn(warnStr);
-				
 			}
 			return cols;
 		},
@@ -3352,7 +3188,6 @@ const localProcessImage = (()=>{
 			var x, y, r, c;
 			const gridEdges = new Map();
 			const sets = {};
-			
 			var add = true;
 			for (const spr of maps) {
 				const d32 = new Uint32Array(spr.image.ctx.getImageData(0, 0, spr.image.w, spr.image.h).data.buffer);
@@ -3370,7 +3205,7 @@ const localProcessImage = (()=>{
 								} else  if (px === 0xFF0000FF) { // RED top bottom edges
 									if (y === 0) { T += 1 << x }
 									else if (y === th1) { B += 1 << x }
-								} 
+								}
 							}
 						}
 						gridEdges.set(gIdx, {idx: gIdx, T, B, L, R});
@@ -3395,11 +3230,9 @@ const localProcessImage = (()=>{
 					if (match.B.length === 0) { del ++; delete match.B }
 					if (del < 4) { nSet.push(match) }
 				}
-				sets[spr.name] = nSet;	
-					
+				sets[spr.name] = nSet;
 			}
 			return sets;
-				
 		},
 		tileMapperV2(tileSpr, colMapSpr, mapSpr, tileImage ) { // assumed arguments are vetted
             const addedSprites = [];
@@ -3412,7 +3245,7 @@ const localProcessImage = (()=>{
             const [W, H]   = [mapSpr.image.w, mapSpr.image.h];
             const [mW, mH] = [mapSpr.image.w, mapSpr.image.h];
 			iW = W * tw;
-			iH = H * th;			
+			iH = H * th;
             if (!tileImage) {
                 media.create({width: iW, height: iH, type: "canvas" , name: NAMES.register(tileSpr.image.desc.name + "_Mapped")}, canvas => {
                     tileImage = canvas;
@@ -3428,7 +3261,6 @@ const localProcessImage = (()=>{
 					tileImage.h = tileImage.height = iH;
 				}
 			}
-
 			/*if (!tileImage.tileMap || tileImage.tileMap.w !== W || tileImage.tileMap.h !== H) {
 				tileImage.tileMap = new Array(W * H).fill(outsideCol);
 				tileImage.tileMap.w = W;
@@ -3466,8 +3298,6 @@ const localProcessImage = (()=>{
 				}
 				i++;
 			}
-				
-				
 			return addedSprites;
 		},
         fixPixelArtLines(img, doNotUpdate = false, pixels){
@@ -3476,17 +3306,13 @@ const localProcessImage = (()=>{
                     var data = pixels;
                 } else {
                     var data = getPixelData8Bit(img);
-
                 }
                 var w = img.w;
                 var h = img.h;
                 const d = data.data;
-
                 var x,y;
-
                 var ww4 = w*4;
                 var changed = false;
-
                 const mirror = bits => {
                     var b = 0;
                     b += bits & 1   ? 32 : 0;
@@ -3535,7 +3361,6 @@ const localProcessImage = (()=>{
                 add(0b10011010);
                 add(0b00111111);
                 add(0b11011100);
-
                 const change = new Set(bitShapes);
                 const getShape = (index) => {
                     index += 3;
@@ -3549,13 +3374,10 @@ const localProcessImage = (()=>{
                         bits += d[index+ww4-4] > 0  ? 32 : 0;
                         bits += d[index+ww4] > 0    ? 64 : 0;
                         bits += d[index+ww4+4] > 0  ? 128 : 0;
-
-
                         return bits;
                     }
                     return bits;
                 }
-
                 for(y = 0; y < h; y+=1){
                     for(x = 0; x < w; x+=1){
                         var index = (y * w + x) * 4;
@@ -3573,7 +3395,6 @@ const localProcessImage = (()=>{
                     return true;
                 }
                 return pixels;
-
             }
         },
         fixPixelArtLinesV2(img){
@@ -3587,14 +3408,12 @@ const localProcessImage = (()=>{
                 const offsets = [-w-1, -w, -w+1, -1, 1, w-1, w, w+1];
                 const bits = [128,64,32,16,8,4,2,1];
                 const rules = new Uint8Array(256);
-
                 // bits shape
                 // 7,6,5
                 // 4   3
                 // 2,1,0
                 // order 76543210
                 rules[0] = 0;
-
                 rules[0b00011111] = 1;
                 rules[0b01101011] = 1;
                 rules[0b00101111] = 1;
@@ -3608,11 +3427,8 @@ const localProcessImage = (()=>{
                 rules[0b00101011] = 1;
                 rules[0b01101001] = 1;
                 rules[0b00010110] = 1;
-
                 rules[0b11111111] = 0;
-
                 var x,y;
-
                 const getShape = idx => {
                     const px = d32A[idx];
                     var i = 0;
@@ -3629,7 +3445,6 @@ const localProcessImage = (()=>{
                     }
                     return 0;
                 }
-
                 var change = true;
                 var its = 100;
                 while (its-- && change) {
@@ -3649,15 +3464,12 @@ const localProcessImage = (()=>{
                     [d32A, d32B] = [d32B, d32A];
                     [dataA, dataB] = [dataB, dataA];
                 }
-
                 //fixPixelArtLines(img, true, dataA)
                 setPixelData(img, API.fixPixelArtLines(img, true, dataA));
                 img.processed = true;
                 img.lastAction = "Fix pixel art V2";
                 img.update();
                 return true;
-
-
             }
         },
         SaveShaderToyImage(img, pallet){
@@ -3670,7 +3482,7 @@ const localProcessImage = (()=>{
                     return;
                 }
                 var dataA = getPixelData8Bit(img).data;
-                //var d32A = new Uint32Array(dataA.data.buffer);     
+                //var d32A = new Uint32Array(dataA.data.buffer);
                 const pxBuf = new Uint8Array(w * h);
                 const tBuf = new Uint8Array(w * h * 4);
                 var tSize = 0, ttSize;;
@@ -3690,7 +3502,6 @@ const localProcessImage = (()=>{
                     }
                     iy++;
                 }
-                
                 const U32 = new Uint32Array(1);
                 const wByte = val => tBuf[tSize++] = val;
                 const wBytes = (...vals) => vals.forEach(wByte);
@@ -3701,7 +3512,6 @@ const localProcessImage = (()=>{
                 const rByte = () => tBuf[tSize++];
                 const rShort = () => (rByte() << 8) + rByte();
                 const rInt = () => (U32[0]=(rByte() << 24) + (rByte() << 16) + (rByte() << 8) + rByte(),U32[0]);
-                
                 wByte(w);
                 wByte(h);
                 wByte(pSize);
@@ -3746,7 +3556,7 @@ const localProcessImage = (()=>{
                     } else {
                         if (pPx !== pSize) {
                             wByte(same);
-                            wByte(pPx);                            
+                            wByte(pPx);
                             rowSize += 2;
                         }
                         wSeek(rowIdx + iy * 2);
@@ -3759,30 +3569,25 @@ const localProcessImage = (()=>{
                 const tPos = tSize;
                 var str = `
 //---------------------------------------------------------------------------------------------------------------------------------
-// Work by Blindman67. 
+// Work by Blindman67.
 // Copyright Blindman67 2023.
-// You cannot host, display, distribute or share this Work neither as it is or altered, in any form including physical and digital. 
-// You cannot use this Work in any commercial or non-commercial product. 
+// You cannot host, display, distribute or share this Work neither as it is or altered, in any form including physical and digital.
+// You cannot use this Work in any commercial or non-commercial product.
 `;
                 i = 0;
-                str += "// PainterV3 Image Export: localProcessImage.SaveShaderToyImage('" + img.desc.name + "', unnamedPallet);\n";                
+                str += "// PainterV3 Image Export: localProcessImage.SaveShaderToyImage('" + img.desc.name + "', unnamedPallet);\n";
                 str += "//---------------------------------------------------------------------------------------------------------------------------------\n";
-
-
                 str += "const uvec3 IMG_SIZE = uvec3(" + w + "u, " + h + "u, " + pSize +"u);\n";
                 str += "const vec3 pallet[" + pSize + "] = vec3[](\n";
                 var tail = "";
                 while (i < pSize) {
                     str +=  tail + "    vec3(" + (pA[i][0] / 255).toFixed(3) + ", " +(pA[i][1] / 255).toFixed(3)+ ", " +(pA[i][2] / 255).toFixed(3)+ ")";
-             
                     tail = ",\n";
                     i++;
                 }
                 str += ");\n";
                 str += "const uint img[" + (((tSize - rowIdx) / 4) | 0 + 1) + "] = uint[](\n    ";
                 var tail = "";
-                
-                
                 i = rowIdx;
                 var dataPos = 0;
                 var dataIdx = 0;
@@ -3796,8 +3601,7 @@ const localProcessImage = (()=>{
                         tail = ", ";
                     }
                 }
-                str += ");\n\n\n\n";    
-                
+                str += ");\n\n\n\n";
                 if (img.desc.sprites) {
                     i = 0;
                     const sMap = new Map();
@@ -3822,7 +3626,7 @@ const localProcessImage = (()=>{
                         tail = ", ";
                         i++;
                     }
-                    str += ");\n"; 
+                    str += ");\n";
                     for (const [name, sm] of sMap) {
                         str += "const uint SPR_" + name + "[" + sm.count + "] = uint[](";
                         i = 0;
@@ -3832,13 +3636,10 @@ const localProcessImage = (()=>{
                             tail = ", ";
                             i++;
                         }
-                        str += ");\n";                        
+                        str += ");\n";
                     }
-                        
-                    str += "\n\n\n\n"; 
+                    str += "\n\n\n\n";
                 }
-                
-                
                 str += `
 uint GetNextShort(uint idx) { return (img[(idx + 1u) >> 1] >> ((idx & 1u) << 4)) & 0xFFFFu; }
 uint GetShort(uint idx) { return (img[idx >> 1] >> (((idx + 1u) & 1u) << 4)) & 0xFFFFu; }
@@ -3865,12 +3666,8 @@ vec4 ImagePixel(in vec2 fragCoord) {
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     fragColor = iFrame == 0 ? ImagePixel(fragCoord) : texelFetch(iChannel0, ivec2(fragCoord.xy), 0);
 }
-`                
-                
+`
                 downloadTextAs(str, "ShaderToyImage_" + img.desc.name, "txt");
-                
-                
-                
                 return true;
             }
         },
@@ -4043,7 +3840,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                     d[ii + 0] = 0;
                                     d[ii + 1] = 0;
                                     d[ii + 2] = 0;
-
                         }
                         x1 = Math.round(xx - x);
                         y1 = Math.round(yy - y);
@@ -4055,21 +3851,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                     d[ii + 1] = 0;
                                     d[ii + 2] = 0;
                         }
-
-
-
                     }
                     i++;
-
-
-
                 }
                 setPixelData(img,data);
                 img.processed = true;
                 img.lastAction = "Cleaned edge";
                 img.update();
                 return true;
-
             }
         },
         findImageDifference(imgA, imgB, amp = 1, gridSize = 16, useMask = false, useValue = true, calcVariance = false){
@@ -4135,10 +3924,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 						c.__y = 0
 					}
 				}
-
 				c.restore();
 			}*/
-
 			const dat = ctxB.getImageData(0, 0, w, h).data;
 			var sum = 0,sumShape = 0, count = 0,i,j,t;
 			const size2 = size * size * 4;
@@ -4199,7 +3986,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 				API.findImageDifference.sumShape = sumShape;
 				API.findImageDifference.variance = v;
 				return sum;
-
 			}
 			if(!linear){
 				if(ampDif) {
@@ -4235,7 +4021,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     workingCanvas.w = workingCanvas.width = size;
                     workingCanvas.h = workingCanvas.height = size;
                 }
-
                 ctx.globalAlpha = 1;
                 ctx.imageSmoothingEnabled = true;
                 ctx.globalCompositeOperation = "copy";
@@ -4246,7 +4031,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 const dataB = ctx.getImageData(0,0,size,size);
                 const datB = dataB.data;
                 ctx.globalCompositeOperation = "source-over";
-
                 var i = 0, sum = 0, count = 0;
                 var minC, maxC, dif, h, l, s,ha,sa,la,min, max, r, g, b;
                 const loged = 255 * 255;
@@ -4301,7 +4085,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         sum  += compHue ? (count ++, hh*hh*gain): 0;
                         sum  += compSat ? (count ++, s*s*gain): 0;
                         sum  += compLum ? (count ++, l*l*gain): 0;
-
                     }
                     i += 4;
                 }
@@ -4319,14 +4102,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     if (rotater) {
                         minSize = 16;
                     }
-
                     ctx.imageSmoothingEnabled = true;
                     var mins = Math.min(imgA.width,imgA.height)
                     var w = imgA.width;
                     var h = imgA.height;
                     var w1 = imgA.width;
                     var h1 = imgA.height;
-
                     while(mins > minSize){
                         ctx.globalCompositeOperation = "lighter";
                         ctx.drawImage(workingCanvas,0, 0, w, h, 0, 0, w, h);
@@ -4345,11 +4126,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         ctx.globalCompositeOperation = "destination-in";
                         ctx.drawImage(mask,0,0,w,h);
                     }
-
                     if (rotater) {
                        // ctx.globalCompositeOperation = "destination-in";
                        // ctx.drawImage(circleMask,0,0,w,h);
-
                     }
                     ctx.globalCompositeOperation = "source-over";
                     var data = ctx.getImageData(0,0,w,h);
@@ -4367,7 +4146,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                 if(xx * xx + yy * yy > 0.25) {
                                     i = ii;
                                     val = dat[i + 3] > 0 ? (count ++, dat[i] * dat[i] * dat[i++] + dat[i] * dat[i] * dat[i++] + dat[i] * dat[i] * dat[i++]) : 0;
-
                                      sum += val;
                                      if(xx < cx) {
                                          if(yy < cy) {s1 += val; c1 ++}
@@ -4409,7 +4187,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         if (!circleMask) { createCircleMask() }
                         minSize = 16;
                     }
-
                     ctx.imageSmoothingEnabled = true;
                     ctx.globalCompositeOperation = "difference";
                     ctx.globalAlpha  = 1;
@@ -4419,7 +4196,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     var h = imgA.height;
                     var w1 = imgA.width;
                     var h1 = imgA.height;
-
                     while(mins > minSize){
                         ctx.globalCompositeOperation = "lighter";
                         ctx.drawImage(workingCanvas,0, 0, w, h, 0, 0, w, h);
@@ -4440,8 +4216,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         ctx.drawImage(mask,0,0,w,h);
                     }
                     if (rotater) {
-
-
                     }
                     ctx.globalCompositeOperation = "source-over";
                     var data = ctx.getImageData(0,0,w,h);
@@ -4453,7 +4227,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         const cx = w / 2;
                         const cy = h / 2;
                         s1 = s2 = s3 = s4 = c1 = c2 = c3 = c4 = 0;
-
                         for(y = 0; y < h; y++) {
                             for(x = 0; x < w; x++) {
                                 xx = (x - cx) / cx;
@@ -4473,7 +4246,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                          if(yy < cy) {s4 += val; c4 ++}
                                          else {s3 += val; c3++}
                                      }
-
                                 }
                                 ii += 4;
                             }
@@ -4482,7 +4254,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         info.s2 = (s2 / (c2 * 3)) ** (1/6);
                         info.s3 = (s3 / (c3 * 3)) ** (1/6);
                         info.s4 = (s4 / (c4 * 3)) ** (1/6);
-
                     }else {
                         while(ii < dat.length) {
                             i = ii;
@@ -4538,20 +4309,16 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         p3.x = x;
                         p3.y = y * mat[4] + z * mat[7]
                         p3.z = y * mat[5] + z * mat[8]
-
                     }
-
                     const getIdxMecator = (lon, lat) => {
                         return (
                             (w1 - Math.floor(lon * w2 / Math.PI + w) % w) +
                             (h1 - Math.floor(lat * h / Math.PI + h) % h) * w
                         ) * 4;
                     }
-
                     for(y = 0; y < h; y += 1){
                         for(ay = 0; ay < alias; ay ++){
                             const lat = Math.acos((y + ay / alias) / (h - (1 / alias)) * 2 - 1);
-
                             const tw = Math.abs( Math.sin(lat) * w2) * 2 * alias;
                             for(x = 0; x < tw; x += 1) {
                                 const idx = Math.floor(w2 - tw / alias / 2 + x / alias) * 5;
@@ -4561,7 +4328,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                 to3D();
                                 rotateX()
                                 toLonLat();
-
                                 idxs =  getIdxMecator(p3.lon , p3.lat);
                                 cols[idx + 0] += 1;
                                 cols[idx + 1] += d[idxs] * d[idxs++];
@@ -4623,12 +4389,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         if (d32[x + y * w] !== 0) { return false; }
                         i++;
                         x += dx;
-                        y += dy;                        
+                        y += dy;
                     }
                     return true;
                 }
-                        
-                    
                 var p1 = utils.point;
                 var p2 = utils.point;
                 var p3 = utils.point;
@@ -4654,8 +4418,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 var right = Math.max(p1.x, p2.x, p3.x, p4.x);
                 var top = Math.min(p1.y, p2.y, p3.y, p4.y);
                 var bot = Math.max(p1.y, p2.y, p3.y, p4.y);
-                
-                
                 var locating = true;
                 var cc = 0;
                 while (locating && cc++ < 100) {
@@ -4664,36 +4426,33 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     if (!isLineEmpty(left, top, 0, 1, bot - top)) {
                         left -= 1;
                         while (left > -1 && !isLineEmpty(left, top, 0, 1, bot - top)) { left -= 1; }
-                    } else {                
+                    } else {
                         while (left < right && isLineEmpty(left, top, 0, 1, bot - top)) { left += 1; }
                         if (left === right) { log.warn("Empty location"); return; }
                         left -= 1;
                     }
-                    
                     if (!isLineEmpty(right, top, 0, 1, bot - top)) {
                         right += 1;
                         while (right < w && !isLineEmpty(right, top, 0, 1, bot - top)) { right += 1; }
-                    } else {                 
+                    } else {
                         while (left < right && isLineEmpty(right, top, 0, 1, bot - top)) { right -= 1; }
-                        if (left === right) { log.warn("Empty location"); return; }   
+                        if (left === right) { log.warn("Empty location"); return; }
                         right += 1;
                     }
-                    
                     if (!isLineEmpty(left, top, 1, 0, right - left)) {
                         top -= 1;
                         while (top > -1 && !isLineEmpty(left, top, 1, 0, right - left)) { top -= 1; }
-                    } else {  
+                    } else {
                         while (top < bot && isLineEmpty(left, top, 1, 0, right - left)) { top += 1; }
-                        if (top === bot) { log.warn("Empty location"); return; }  
-                        top -= 1;    
+                        if (top === bot) { log.warn("Empty location"); return; }
+                        top -= 1;
                     }
-                    
                     if (!isLineEmpty(left, bot, 1, 0, right - left)) {
                         bot += 1;
                         while (bot < h && !isLineEmpty(left, bot, 1, 0, right - left)) { bot += 1; }
-                    } else {  
+                    } else {
                         while (top < bot && isLineEmpty(left, bot, 1, 0, right - left)) { bot -= 1; }
-                        if (top === bot) { log.warn("Empty location"); return; }    
+                        if (top === bot) { log.warn("Empty location"); return; }
                         bot += 1;
                     }
                     if (bot !== b || top !== t || l !== left || r !== right) {
@@ -4709,11 +4468,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 top = Math.max(0, top);
                 bot = Math.min(h, bot);
                 right = Math.min(w, right);
-                    
-                imgSpr.key.toWorldPoint(left, top, r1);    
-                imgSpr.key.toWorldPoint(right, top, r2);    
-                imgSpr.key.toWorldPoint(right, bot, r3);    
-                imgSpr.key.toWorldPoint(left, bot, r4);    
+                imgSpr.key.toWorldPoint(left, top, r1);
+                imgSpr.key.toWorldPoint(right, top, r2);
+                imgSpr.key.toWorldPoint(right, bot, r3);
+                imgSpr.key.toWorldPoint(left, bot, r4);
                 left  = Math.min(r1.x, r2.x, r3.x, r4.x);
                 right = Math.max(r1.x, r2.x, r3.x, r4.x);
                 top   = Math.min(r1.y, r2.y, r3.y, r4.y);
@@ -4731,7 +4489,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 sprite.key.update();
                 return true;
             }
-            
         },
         packSprites(img, {
             locateOnly, markType, spacing = 1,
@@ -4750,7 +4507,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                             str = "    \"height\": " + img.h + ",\n";
                             str = "    \"animationCount\": " + 0 + ",\n";
                             str = "    \"sprites\": [\n"
-							
                             for(const spr of sprites){
                                 str += ("        { \"x\": " + spr.x + ", ").padEnd(22," ");
                                 str += ("\"y\": " + spr.y + ", ").padEnd(12," ");
@@ -4765,7 +4521,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                     str += "wo: " + spr.wo + ", ";
                                     str += "ho: " + spr.ho;
                                 }
-
                                 str +=  "},\n";
                             }
                             str += "];\n";
@@ -4793,7 +4548,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         const markColor = d32[0];
                         if (markColor === 0) {
                             log.warn("Could not complete extraction. Sprite sheet image top left most pixel must have mark color.");
-                            return;                            
+                            return;
                         }
                         marked = true;
                         for(xx = 0; xx < data.width; xx++){
@@ -4810,11 +4565,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                     }
                                 }
                                 yPos.push(data.height);
-
                             }
                         }
                         xMarks.push([data.width]);
-
                         if(xMarks.length > 1){
                             for(i = 0; i < xMarks.length-1; i++){
                                 const px = xMarks[i][0];
@@ -4862,7 +4615,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                         pixels += count;
                                         area += rect.area;
                                         areaSpaced += rect.areaSpaced;
-
                                     }
                                 }
                             }
@@ -4870,7 +4622,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                             log.warn("Could not complete extraction. Requier marks on top and left");
                             return;
                         }
-
                     } else {
                         while(i < d32.length) {
                             if(d32[i] !== 0){
@@ -4897,7 +4648,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                         }
                                     }
                                 }
-
                                 rect.area = boxed ?  (rect.w + 4) * (rect.h + 4)  : rect.w * rect.h;
                                 rect.areaSpaced = boxed ? (rect.w + 4) * (rect.h + 4) + rect.w + 4 + rect.h + 4 + 2 : rect.w * rect.h + rect.w + rect.h + 2;
                                 rect.x = rect.left;
@@ -4917,7 +4667,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                             i++;
                         }
                     }
-
 					if(!boxed) {
 						var iy;
 						const isYNotClear = y => rects.some(rect => rect.top <= y && rect.bottom >= y);
@@ -4930,7 +4679,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 									rows[rows.length] = iy;
 								}
 							}
-
 						}
 						const rowRects = [];
 						for(iy = 0; iy < rows.length; iy ++){
@@ -4944,18 +4692,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								rects.push(rect);
 							})
 						});
-
 					}
-
                     log("Found " + rects.length + " sprites.");
                     if(warn) { log.warn(warn) }
                     rects.sort((a,b)=> {
                         if(a.area === b.area) { return b.w - a.w };
                         return b.area - a.area;
                     })
-
 					;
-
                     var boxes;
                     const createBoxer = (width, height) => new BoxArea({
                             x: 0,  // x,y,width height of area
@@ -4973,7 +4717,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     }
                     //var fitting = true;
                     var iterations = 0, lCount;
-
                     const fittingBoxes = () => {
 						var sName = img.desc.name;
                         //fitting = false;
@@ -5003,7 +4746,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                     bCount ++
                                 }
                             }
-
                         }
                         lCount = bCount;
                         if (bCount < rects.length) {
@@ -5050,22 +4792,17 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                             box.y -= spacing + 2;
                                             box.w += 4;
                                             box.h += 4;
-
 											canvas.ctx.fillStyle = boxColor;
 											canvas.ctx.beginPath();
 											canvas.ctx.rect(box.x, box.y, box.w, box.h);
 											canvas.ctx.rect(box.x + 1, box.y + 1, box.w - 2, box.h - 2);
 											canvas.ctx.fill("evenodd");
-
-
                                         }
-
 										const rows = [];
                                         for(const box of boxes.boxes){
 											let foundRow = false;
 											for (const row of rows) {
 												if (box.top > row.bot || box.bot < row.top) {
-
 												} else {
 													foundRow = true;
 													row.boxes.push(box);
@@ -5095,14 +4832,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 										for (const row of rows) {
 											for(const b of row.boxes) {
 												spritesArr.push(createSprite(b));
-
 											}
 										}
-
-
-
-
-
                                     }else{
                                         for(const box of boxes.boxes){
                                             ctx.floodFillKeep(box.px - box.left, box.py - box.top, mctx.getImageData(box.left, box.top, box.w, box.h), rect);
@@ -5119,10 +4850,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                     }
 									canvas.desc.sprites = spritesArr;
                                     canvas.desc.subSprCount = spritesArr.length;
-
                                     saveSpriteList(spritesArr, canvas);
                                     canvas.update();
-
 									if(addToWorkspace) {
 										let idx = 0;
 										for(const spr of spritesArr) {
@@ -5147,7 +4876,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                         sprites.add(spr1);
                                         addedSprites.push(spr1);
                                     }
-
                                     log("Completed in "+iterations+ " iterations.")
                                     log("Fitting to " + w + " by " + h + " image.");
                                     log("Efficency of " + (((w * h) / areaSpaced)*100).toFixed(2) + "%.");
@@ -5169,7 +4897,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								rect.h += 4;
 							}
 						}
-
                         extraRenders.addOneTime(fittingBoxes);
                     } else {
 						const spritesArr = [];
@@ -5181,7 +4908,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                             spritesArr.push(createSprite(rect))
                         }
                         img.addSubSprites(spritesArr);
-
                         if(extract || addToWorkspace) {
                             var sName = img.desc.name;
 							var idx = 0;
@@ -5210,9 +4936,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                             setTimeout(()=>{issueCommand(commands.edSprUpdateUI)},100);
                             log("Completed sprite extract");
                             return;
-
                         }
-
                         saveSpriteList(spritesArr, img);
                         onDone && onDone([]);
                         setTimeout(()=>{issueCommand(commands.edSprUpdateUI)},100);
@@ -5227,8 +4951,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 				if(colours.alpha === 0) {
 					log.warn("Did not add overlay as main alpha is set to 0!");
 					return;
-
-
 				}
 				var w = img.w;
 				var h = img.h;
@@ -5248,8 +4970,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 				img.ctx.strokeStyle = colours.mainColor.css;
 				img.ctx.fillStyle = colours.secondColor.css;
 				img.ctx.globalAlpha = colours.alpha;
-
-
 				for(y = 0; y < ySteps; y++) {
 					for(x = 0; x < xSteps; x++) {
 						const xx = x * sw + 2;
@@ -5257,8 +4977,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 						img.ctx.strokeText(""+idx, xx, yy);
 						img.ctx.strokeText(""+idx, xx, yy);
 						img.ctx.fillText(""+idx, xx, yy);
-
-
 						idx ++;
 					}
 				}
@@ -5266,11 +4984,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 img.processed = true;
                 img.lastAction = "Grid # overlay";
                 img.update();
-
             }
         },
 		extractGridSprites(img, xSteps, ySteps, fromSprite, addToWorkspace = fromSprite !== undefined, dontAddEmpty = false, addUnique = false ) {
-
             var w = img.w;
             var h = img.h;
             var sw = w / xSteps | 0;
@@ -5287,7 +5003,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 				} else {
 					log.warn("Working canvas is currently locked, can not check if grid tiles are empty or unique");
 					dontAddEmpty = false;
-				}				
+				}
 			}
 			const isEmpty = (x, y, w, h) => {
 				var i, j, idx;
@@ -5331,9 +5047,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 					}
 				}
 				return true;
-			}			
+			}
             const addedSprites = [];
-
 			img.desc.sprites = [{id:0, x:0, y: 0, w: sw, h: sh}];
 			img.desc.gridSubSprites = true;
             for(y = 0; y < ySteps; y++) {
@@ -5379,18 +5094,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								addedSprites.push(spr);
 							}
 						}
-
-
 					}
                     idx ++;
                 }
             }
-
             return addedSprites;
         },
         normalMap(img, type = "detailed") {
             if(img.isDrawable){
-
                 var w = img.w;
                 var h = img.h;
 				var w4 = w * 4;
@@ -5417,13 +5128,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								d[i++] = 128;
 								d[i++] = 255;
 								i++;
-
-
 							} else {
 								const dir = (hsl.h / 240) * Math.PI * 2 +  Math.PI * 1.5;
 								var slope = ((hsl.l < 20 ? 20 : hsl.l > 80 ? 80 : hsl.l) - 50) / 30;
 								slope = (slope * slope) * Math.sign(slope) * Math.PI + Math.PI / 2 ;
-
 								const zz = Math.cos(slope);
 								const xx = Math.cos(dir) * Math.sin(slope);
 								const yy = -Math.sin(dir) * Math.sin(slope);
@@ -5448,8 +5156,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 							const x3 = 1;
 							const z3 = buf[idx - w - 1] === undefined ? 0 : buf[idx - w - 1] - buf[idx];
 							const y3 = -1;
-
-
 							xx = y3 * z2 - z3 * y2
 							yy = z3 * x2 - x3 * z2
 							zz = x3 * y2 - y3 * x2
@@ -5457,16 +5163,13 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 							xx /= dist;
 							yy /= dist;
 							zz /= dist;
-
 							xx1 = y1 * z3 - z1 * y3
 							yy1 = z1 * x3 - x1 * z3
 							zz1 = x1 * y3 - y1 * x3
 							dist = (xx1 * xx1 + yy1 * yy1 + zz1 * zz1) ** 0.5;
-
 							xx += xx1 / dist;
 							yy += yy1 / dist;
 							zz += zz1 / dist;
-
 							if (type !== "detailed") {
 								const x1 = 2;
 								const z1 = buf[idx - 2] === undefined ? 0 : buf[idx - 2] - buf[idx];
@@ -5484,42 +5187,31 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								xx2 /= dist;
 								yy2 /= dist;
 								zz2 /= dist;
-
 								xx1 = y1 * z3 - z1 * y3
 								yy1 = z1 * x3 - x1 * z3
 								zz1 = x1 * y3 - y1 * x3
 								dist = (xx1 * xx1 + yy1 * yy1 + zz1 * zz1) ** 0.5 * 2;
-
 								xx2 += xx1 / dist;
 								yy2 += yy1 / dist;
 								zz2 += zz1 / dist;
-
 								xx += xx2;
 								yy += yy2;
 								zz += zz2;
-
 							}
 							dist = (xx * xx + yy * yy + zz * zz) ** 0.5;
-
 							d[i++] = ((xx / dist) + 1.0) * 128;
 							d[i++] = ((yy / dist) + 1.0) * 128;
 							d[i++] = 255  - ((zz / dist) + 1.0) * 128;
-
 							i++;
 						}
 					}
 				}
-
-
                 setPixelData(img,data);
                 img.processed = true;
                 img.lastAction = "NormalMap";
                 img.update();
                 return true;
-
-
             }
-
         },
 		greenScreen(img) {
             if(img.isDrawable){
@@ -5573,7 +5265,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     var y = 0;
                     while (y < h && d32[x + y * w] === 0) { y++ }
                     return y;
-                    
                 }
                 const heights = [];
                 var w = spr.image.w;
@@ -5606,7 +5297,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         const rhAt = heights[x + i];
                         if (rhAt.col !== hAt.col) {
                             prx = 1;
-                            pry = 0;                            
+                            pry = 0;
                             break;
                         } else if (rhAt.col === hAt.col && rhAt.h !== hAt.h) {
                             const rrx = i;
@@ -5641,7 +5332,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     const x = lSpr.key.x - spr.key.x;
                     const y = lSpr.key.y - spr.key.y;
                     const d = (x * x + y * y) ** 0.5;
-                    const col = {r: lSpr.rgb.r / 255, g: lSpr.rgb.g  / 255,  b: lSpr.rgb.b  / 255}; 
+                    const col = {r: lSpr.rgb.r / 255, g: lSpr.rgb.g  / 255,  b: lSpr.rgb.b  / 255};
                     lights[i] = {
                         col,
                         x: x / d,
@@ -5661,8 +5352,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         //const lxs = hAt.lx;
                         //const lys = hAt.ly;
                         const rxs = hAt.rx;
-                        const rys = hAt.ry;                        
-                        
+                        const rys = hAt.ry;
                         var rr = 0, gg = 0, bb = 0;
                         i = 0;
                         while (i < lights.length) {
@@ -5672,7 +5362,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                             //const v = (vl + vr) * 0.5
                             rr += l.col.r * v;
                             gg += l.col.g * v;
-                            bb += l.col.b * v;                            
+                            bb += l.col.b * v;
                             i++;
                         }
                         rr = (Math.min(1, Math.max(0, rr)) * 255) & 0xFF;
@@ -5681,7 +5371,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         const c = 0xFF000000 + rr + gg + bb;
                         y = 0;
                         if (hAt) {
-
                             while (y < sSpr.image.h) {
                                 sD32[x + y * W] = c;
                                 y++;
@@ -5692,14 +5381,11 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     sSpr.image.ctx.putImageData(sImgDat, 0, 0);
                     sSpr.image.processed = true;
                     sSpr.image.lastAction = "Shader profile";
-                    sSpr.image.update();                    
+                    sSpr.image.update();
                 }
-                
-                
                 return true;
             }
             log.warning("Could not shade image that is not drawable.");
-            
         },
         RGB2HSL(img) {
             if(img.isDrawable){
@@ -5751,14 +5437,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                 if (Math.abs(vD8[i + 1] - y) < 2) {
                                     if (Math.abs(vD8[i + 2] - z) < 2) {
                                         cords[cCount++] = i;
-                                        
                                     }
                                 }
                             }
                         }
                         i += 4;
                     }
-                    
                 }
                 media.createImage(view.w, view.h, "testView", can => {
                     const imgData =  getPixelData8Bit(can);
@@ -5796,7 +5480,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                             pxD8[idx2 + 1] = pxData[idx1 + 1];
                                             pxD8[idx2 + 2] = pxData[idx1 + 2];
                                             pxD8[idx2 + 3] = pxData[idx1 + 3];
-                         
                                         }
                                     }
                                 }
@@ -5809,14 +5492,11 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     can.processed = true;
                     can.lastAction = "ISOView";
                     can.update();
-                    
 					var nSpr = new Sprite(API.ISO.view.spr.x , API.ISO.view.spr.y, API.ISO.view.spr.w, API.ISO.view.spr.h);
 					nSpr.changeImage(can);
                     sprites.add(nSpr);
 					API.ISO.addedSpr.push(nSpr);
-                    
                 });
-                
             } else {
                 log.warn("Selected sprite must be drawable image.");
                 return false;
@@ -5848,18 +5528,15 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
             const s2 = spr2.image.w * spr2.image.h;
             const spr = s1 >= s2 ? spr1 : spr2;
             const mask = s1 >= s2 ? spr2 : spr1;
-
             const W = spr.w;
             const H = spr.h;
             const ps = API.imgPackScan;
-
             if (spr.attachers) {
                 nextSub = true;
                 const subTrys = Math.min(mask.image.w, fails);
                 const subs = [];
                 while (failCount < fails) {
                     subs.length === 0 && subs.push(...spr.attachers.values(), ...spr.attachers.values(), ...spr.attachers.values());
-
                     const sub = $randPick(subs);
                     if (sub.type.image) {
                         const scale = Math.randR(scaleMin, scaleMax);
@@ -5888,17 +5565,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                                 }
                                 const offX = Math.abs(Math.cos(r) * w2) + Math.abs(Math.sin(r) * w2);
                                 const offY = Math.abs(Math.cos(r + Math.PI90) * h2) + Math.abs(Math.sin(r + Math.PI90) * h2);
-
                                 x = ps.x | 0;
                                 y = ps.y | 0;
-
                                 nextRow = false;
                                 let found;
                                 while ((found = API.addToImage(false, true, spr.image, mask.image, sub, x + pxOffX + offX, y + pxOffY + offY, sx, r, sy)) === false) {
                                     subFails += 1;
                                     x += 1;
                                     if (x + pxOffX + offX * 2 >= right) {
-
                                         x = 0;
                                         y += 1;//ps.rowMinY !== Infinity ? ps.rowMinY : 1 ;
                                         nextRow = true;
@@ -5946,10 +5620,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                             }
                         }
                     }
-
                 }
                 ps.progress = 1- ps.y / H;
-
             }
         },
         imgPackScan: { pastBottom: false, x: 0, y: 0,  rowMinY: 2, height: 2, fromTopLeft: true,  reset() {API.height = API.imgPackScan.x =  API.imgPackScan.x = 0; API.imgPackScan.fromTopLeft = true }},
@@ -5961,10 +5633,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 const axy = Math.sin(rx) * sx;
                 const ayx = Math.cos(ry) * sy;
                 const ayy = Math.sin(ry) * sy;
-
-
                 if (scan) {
-
                     const l = -spr.w / 2, t = -spr.h / 2;
                     const r = l + spr.w, b = t + spr.h;
                     const xx1 = l * axx + t * ayx + x;
@@ -5976,23 +5645,15 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     if (xx1 < 0 || xx2 < 0 || yy1 < 0 || yy2 < 0 || xx1 > R || xx2 > R || yy1 > B || yy2 > B) {
                         return false;
                     }
-
-
-
                 }
-
                 var height;
                 const ss = spr.type.subSprite && (spr.subSprite);
                 var w = spr.w * sx, h = spr.h * sy;
-
                 const is = Math.min(mask.w / w, mask.h / h);
                 const iaxx = Math.cos(-rx) * is;
                 const iaxy = Math.sin(-rx) * is;
                 const iayx = Math.cos(-rx + Math.PI90) * is;
                 const iayy = Math.sin(-rx + Math.PI90) * is;
-
-
-
                 mask.ctx.imageSmoothingEnabled = false;
                 mask.ctx.clearRect(0, 0, mask.w, mask.h)
                 mask.ctx.setTransform(iaxx, iaxy, iayx, iayy, mask.w / 2, mask.h / 2);
@@ -6002,7 +5663,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 ss ?
                     mask.ctx.drawImage(spr.image, ss.x, ss.y, ss.w, ss.h, -w / 2, -h / 2, w, h) :
                     mask.ctx.drawImage(spr.image, -w / 2, -h / 2, w, h);
-
                 mask.ctx.setTransform(1,0,0,1,0,0);
                 mask.ctx.globalCompositeOperation = "copy";
                 mask.ctx.imageSmoothingEnabled = true;
@@ -6025,7 +5685,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         break;
                     }
                 }
-
                 if (!over) {
                     ps.rowMinY = Math.min(ps.rowMinY, height);
                     ctx.setTransform(axx, axy, ayx, ayy, x, y);
@@ -6052,7 +5711,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     scaleX = spr.sx;
                     scaleY = spr.sy;
                 }
-
                 const data = getPixelData8Bit(img);
                 const d = data.data;
                 const paths = [];
@@ -6126,11 +5784,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     return {x, y, path: path.join("")};
                 }
                 var pxc = 0, rr, gg, bb
-
-
                 const hsl1 = {h:0,s:0,l:0}, hsl2 = {h1: 0, h:0,s:0,l:0};
                 RGBToHSLQuick(color.r, color.g, color.b, hsl1);
-
                 if (hsl1.s < 60 || hsl1.l < 32 || hsl1.l > 180) {
                     const R = color.r ** 2, G = color.g ** 2, B = color.b ** 2;
                     const lum = (R + G + B) / 3;
@@ -6166,7 +5821,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         } else { d32[idx++] = off }
                         idx4 += 4;
                     }
-
                 } else {
                     hsl1.h1 = hsl1.h + 255;
                     while(idx < size) {
@@ -6195,7 +5849,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         idx4 += 4;
                     }
                 }
-
                 const getPixOn = (i, edge) => {
                     if (i < 0 || i >= size || (edge === R && (i % w) === 0) || (edge === L && (i % w) === wR)) { return edge }
                     return d32[i] !== off ? 0 : edge;
@@ -6249,7 +5902,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     path.length = path.path.length ;
                     path.path = str.join("");
                 }
-
                 return {
                     isPathStr : true,
                     renderAsSVG : false,
@@ -6273,7 +5925,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 const eId = busy.start("Quantizing");
                 const workers = {};
                 EZWebWorkers.namedWorker(quantWorker,{obj : workers});
-
                 workers.quantWorker({call : "getColorPalette", args : [data, count, quality, sort]})
                     .then(qPallet => {
                         pallet.length = 0;
@@ -6282,7 +5933,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         }
                         pallet.update();
                         busy.end(eId);
-
                     })
                     .catch(error => { log.warn("Could not complete task."); busy.end(eId) });
                 resourceClean();
@@ -6310,12 +5960,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         img.unlock();
                         busy.end(eId)
                     });
-
                 return eId;
-
             }
         },
-        applyPallet(img,pallet,dither = false){
+        applyPallet(img, pallet, dither = false){
             if(canProcess(img)){
                 var w = img.w;
                 var h = img.h;
@@ -6323,6 +5971,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 const data = img.lock(0); //getPixelData8Bit(img);
                 const eId = busy.start("Quantizing");
                 const workers = {};
+                debugger
                 EZWebWorkers.namedWorker(quantWorker,{obj : workers, onprogress : (progress) => {img.progress = progress}});
                 workers.quantWorker({call : "applyPaletteToImageData", args : [pallet.asArray(),data,dither]})
                     .then(data => {
@@ -6336,7 +5985,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         img.unlock();
                         busy.end(eId)
                     });
-
                 return eId;
             }
         },
@@ -6363,16 +6011,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         img.unlock();
                         busy.end(eId)
                     });
-
                 return eId;
             }
         },
         applyPalletToImage(img, pallet, ditherType){
             if(canProcess(img)){
-
-
                 const data = img.lock();
-
                 const eId = busy.start("Quantizing");
                 const workers = {};
                 EZWebWorkers.namedWorker(ProcessImageWorker,{obj : workers, onprogress : (progress) => {img.progress = progress}});
@@ -6388,9 +6032,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         img.unlock();
                         busy.end(eId)
                     });
-
                 return eId;
-
             }
         },
         subSpriteRadialCollisionMap(img, {steps = 16, showResults = false, saveResults = false}){
@@ -6433,7 +6075,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								edgeFound = true;
 								spr.edges[i] = minDist;
 								if (showResults) { dat[idx] = dat[idx + 1] = dat[idx + 2] = dat[idx + 3] = 255 }
-
 								break;
 							}
 						}
@@ -6442,8 +6083,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 					str += "    \"" + j + "\": [" + spr.edges.join(", ") + "],\n";
 					j++;
 					delete spr.edges;
-
-
 				}
 				str += "}\n";
 				if(saveResults) {
@@ -6478,7 +6117,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                         }
                         idx += 4;
                         x++;
-                        
                     }
                     y++;
                 }
@@ -6495,9 +6133,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     img.lastAction = "Center of Mass";
                     img.update();
                 }
-                return true;    
-            }                
-            
+                return true;
+            }
         },
         countPixels(img){
             if(img.isDrawable){
@@ -6513,8 +6150,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                     let idx = y * w * 4;
                     x = 0;
                     while (x < w) {
-                        if (dat[idx + 3] > 0) { 
-                            pixelCount += 1; 
+                        if (dat[idx + 3] > 0) {
+                            pixelCount += 1;
                             pixelHash[0] += dat[idx];
                             pixelHash[1] += dat[idx + 1];
                             pixelHash[2] += dat[idx + 2];
@@ -6527,10 +6164,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 img.desc.pixelChkSum = (pixelHash[0] + pixelHash[1] + pixelHash[2]) | 0;
                 img.desc.pixelCount = pixelCount;
                 log("Img pixels: " + pixelCount + " w: " + w + " h: " + h + " chkSum: " + img.desc.pixelChkSum);
-                return true;    
-            }                
-            
-        },        
+                return true;
+            }
+        },
         alphaCutOff(img, smoothAlpha = true, setTop = false){
             if(img.isDrawable){
                 var w = img.w;
@@ -6540,7 +6176,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 const alpha = Math.round(colours.alpha * 255);
                 const aBot = alpha > 16 ? (alpha - 8) : alpha;
                 const aDist = alpha - aBot;
-
                 var i = 0;
                 if (smoothAlpha) {
                     while(i < dat.length) {
@@ -6591,7 +6226,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 						const flowB = new Array(W * H * 4);
 						const levsB =  new Array(W * H * 4);
 						const work =  new Array(W * H * 4);
-
 						flow.fill(0);
 						levs.fill(0);
 						flowB.fill(0);
@@ -6605,7 +6239,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 							work,
 							step: 0,
 						}
-
 					}
 					//const rain = 1;
 					const data = getPixelData8Bit(img);
@@ -6629,9 +6262,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 						const L = img.flowData.levs;
 						const Om = img.flowData.flowB;
 						const Lm = img.flowData.levsB;
-
 						const K = img.flowData.work;
-
 						if (img.flowData.step === 0) {
 							while (y < H1) {
 								x = 1;
@@ -6660,7 +6291,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								const ir = i + 4;
 								const iu = i - W4;
 								const id = i + W4;
-
 								L[i + 1] += rain;
 								h =  L[i];
 								hl = L[il];
@@ -6678,9 +6308,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 										O[i+2] = Math.PI - Math.acos(1 / ((1 + Math.max(drX * drX, drY * drY)) ** 0.5));
 									} else {
 										const dif = (Math.max(hl,hr,hu,hd) - min) / 2;
-
 										O[i+2] = Math.PI - Math.acos(1 / ((1 +dif * dif) ** 0.5));
-
 									}
 								} else {
 									O[i] = 0;
@@ -6710,15 +6338,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								const whr = L[ir+1];
 								const whu = L[iu+1];
 								const whd = L[id+1];
-
 								const mean =  (hl + whl + hr + whr + hu + whu + hd + whd) / 4;
 								const hw =  h + wh;
 								const tMean =  (hw + mean) / 2;
 								if (O[i + 2] === 0 || hw < tMean) {
 									L[i+3] = 1;
 									O[i+1] = tMean;
-
-
 								} else {
 									L[i+3] = 0;
 								}
@@ -6730,7 +6355,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 							}
 							y++;
 						}
-
 						y = 1
 						while (y < H1) {
 							x = 1;
@@ -6741,7 +6365,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 									const dy = Math.sin(O[i]) * O[i+1];
 									const ii = i + (dx < -EPSOLON ? -4 : dx > EPSOLON ? 4 : 0) + (dy < -EPSOLON ? -W4 : dy > EPSOLON ? W4 : 0);
 									if (ii !== i) {
-
 										const move = Math.sin(O[i+2]);
 										Lm[i+3] = Math.max(move,Lm[i+3]);
 										const fw = L[i+1] * move;
@@ -6762,7 +6385,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 									const id = i + W4;
 									const mean = O[i+1];
 									if (mean < L[i] + L[i+1]) {
-
 										h = Math.max(mean- (L[i] + L[i+1]) , -L[i+1]);
 										if(!(h < 0)) { throw new Error("Water from hell!") }
 										let sedMove = (h / L[i+1]) * L[i+2];
@@ -6780,7 +6402,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 										Lm[id+2] -= sedMove;
 									}
 								}
-
 								x++;
 							}
 							y++;
@@ -6794,8 +6415,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								if(L[i] < 0) { L[i] = 0 }
 								L[i+1] += Lm[i+1];
 								L[i+2] += Lm[i+2];
-
-
 								x++;
 							}
 							y++;
@@ -6825,14 +6444,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 								} else {
 									L[i+1] -= evap;
 								}
-
-
 								x++;
 							}
 							y++;
 						}
-
-
 						img.flowData.step++
 					}
 					{
@@ -6854,7 +6469,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 									const v = L[i + 0];
 									const v1 = L[i + 1];
 									const v2 = L[i + 2];
-
 								}else{
 									const v = L[i];
 									const w = L[i+1];
@@ -6880,7 +6494,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 									dat[i] = L[i ] / 3;
 									dat[i+1] =  ((L[i + 1] - mg) / rmg) * 255;
 									dat[i+2] =  ((L[i + 2] - mb) / rmb) * 255;
-
 								} else if(range){
 									dat[i] = dat[i + 1] = dat[i + 2] = ((L[i] - m) / rm) * 255;
 									//dat[i + 2] = ((L[i + 2] + L[i + 3]- m) / rm) * 255;
@@ -6904,8 +6517,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 					return true;
 				}
 			}
-
-
 		},*/
         processCornersSprite(spr, applyFuncs) { return false },  // stub see backup before 10/10/19
         processCorners(img, corners, staticCorners, applyFuncs) { }, // stub see backup before 10/10/19
@@ -6924,8 +6535,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
                 var w = img.w;
                 var h = img.h - 1;
                 const data = getPixelData8Bit(img);
-                const d8 = data.data;			
-                const d32 = new Uint32Array(data.data.buffer);			
+                const d8 = data.data;
+                const d32 = new Uint32Array(data.data.buffer);
 				var l = w * h;
 				const head = "GMap";
 				const byteBuf = new ArrayBuffer(l * 2 + 10)
@@ -6944,7 +6555,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 					cols.set(d32[i], i + 1);
 					i++;
 				}
-				
 				i = 0;
 				while (i < l) {
 					shorts[5 + i] = cols.get(d32[w + i]) ?? 0;
@@ -6956,9 +6566,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 				anchor.dispatchEvent(new MouseEvent("click", {view: window, bubbles: true, cancelable : true} ));
 				setTimeout(() => URL.revokeObjectURL(url) , 1000);
 				log.info("Saved bin map '" + spr.name + ".bin' " + w + " by " + h + " " + (w * h * 2 + 10) + " bytes");
-			}				
-				
-			
+			}
 		},
 		imageToBinary(img){
             if(img.isDrawable){
@@ -7033,7 +6641,6 @@ const hexImage = ${hexArr}
                 var id = 0;
                 var idx = 0;
                 while(len--){
-
                     const pix = d[idx] + (d[idx+1] << 8) + (d[idx+2] << 16);
                     if(!pixels.has(pix)){
                         pixels.set(pix, id++);
@@ -7055,7 +6662,6 @@ const hexImage = ${hexArr}
                 var hasSpace = 0;
                 idx = 0
                 while(len--){
-
                     const pix = d[idx] + (d[idx+1] << 8) + (d[idx+2] << 16);
                     const xx = (idx / 4) % w;
                     const yy = (idx / 4) / w | 0;
@@ -7102,7 +6708,6 @@ const pixelMap = {
     charAt(x, y) { return this.str[x + y * ${w}] },
 };
 // End!
-
 //Pacman convert
     const map = [
 ${strPM} ];
@@ -7121,8 +6726,6 @@ ${strPM} ];
     })
     str += "];\\n";
     downloadText(str,"map.txt")
-
-
 `
                 downloadText(map,"pixelMap_"+img.desc.name+".js");
             }
@@ -7242,7 +6845,7 @@ ${strPM} ];
         bodyPartsAPI(img, type) {
             API.bodyParts.locateBodyParts(img, type);
             return true;
-        },      
+        },
         mapTileSet(spr) {
             const img = spr.image;
             if (img === undefined || img.desc.tileMapRender) { return; }
@@ -7251,17 +6854,15 @@ ${strPM} ];
                 var w = img.w;
                 var h = img.h;
                 var wt = w / tS.tMPxW | 0;
-                var ht = h / tS.tMPxH | 0;   
+                var ht = h / tS.tMPxH | 0;
                 var gw = tS.tW / tS.tMPxW;
                 var gh = tS.tH / tS.tMPxH;
-                var isZero;       
-                const mapPx = [];   
+                var isZero;
+                const mapPx = [];
                 const found = [];
                 found._size = 0;
-                
-                const imgData = getPixelData8Bit(img);            
-                const d32 = new Uint32Array(imgData.data.buffer);            
-                
+                const imgData = getPixelData8Bit(img);
+                const d32 = new Uint32Array(imgData.data.buffer);
                 const setTilePx = (ctx, x, y, tpx) => {
                     var i = 0;
                     var yy = 0;
@@ -7287,7 +6888,7 @@ ${strPM} ];
                             xx++;
                         }
                         yy++;
-                    }            
+                    }
                 }
                 const getTilePx = (x, y, tpx = []) => {
                     var nn = 0, i = 0;
@@ -7305,14 +6906,12 @@ ${strPM} ];
                     }
                     isZero = nn === 0;
                     return tpx;
-                    
                 }
                 const BAD_TILE = 0xFFFF00;
                 const BAD_TILE_1 = 0xFFFF01;
                 const BAD_TILE_2 = 0xFFFF02;
                 const BAD_TILE_3 = 0xFFFF03;
                 const BAD_TILE_4 = 0xFFFF04;
-                
                 const getTileAt = (can, x, y) => {
                     if (x >= 0 && x < wt && y >= 0 && y < ht) {
                         const tM = can.desc.tilesetMap;
@@ -7331,14 +6930,14 @@ ${strPM} ];
                 const isCandidateTile = (a0, found, a1, a2, a3) => {
                     var aBits = (a1 ? 1: 0) + (a2 ? 2: 0) + (a3 ? 4: 0);
                     a0.forEach(tile => {
-                        if (!foundHas(tile)) { 
+                        if (!foundHas(tile)) {
                             const idx = tile.idx;
                             var f = 0;
                             if (a1 && a1.some(t => t.idx === idx)) { f |= 1 }
                             if (a2 && a2.some(t => t.idx === idx)) { f |= 2 }
                             if (a3 && a3.some(t => t.idx === idx)) { f |= 4 }
                             if (f === aBits) {
-                                found[found._size++] = tile; 
+                                found[found._size++] = tile;
                             }
                         }
                     });
@@ -7356,10 +6955,9 @@ ${strPM} ];
                             i = badTileQueue.pop();
                             const idx = tM[i];
                             const cc = BAD_TILE_4 - idx;
-                            const x = (i % wt); 
+                            const x = (i % wt);
                             const y = (i / wt | 0);
                             getTilePx(x * tS.tMPxW, y * tS.tMPxH, mapPx);
-                            
                             above = getTileAt(can, x,     y - 1);
                             below = getTileAt(can, x,     y + 1);
                             right = getTileAt(can, x + 1, y);
@@ -7370,7 +6968,6 @@ ${strPM} ];
                             //        tM[i] += 1;
                              //       queue2.push(i);
                             //    } else {
-                                    
                                    // can.ctx.fillRect(x * tS.tW, y * tS.tH, tS.tW, tS.tH);
                              //   }
                             //} else {
@@ -7383,12 +6980,11 @@ ${strPM} ];
                                     //can.ctx.fillRect(x * tS.tW, y * tS.tH, tS.tW, tS.tH);
                                     //can.ctx.globalAlpha = col / 16;
                                     const tile = found[Math.random() * found._size | 0];
-                                    
-                                    tM[i] = tile.idx;     
-                                    //can.ctx.globalAlpha = 1; 
+                                    tM[i] = tile.idx;
+                                    //can.ctx.globalAlpha = 1;
                                     can.ctx.clearRect(x * tS.tW, y * tS.tH, tS.tW, tS.tH);
                                     can.ctx.drawImage(tile.spr.image, x * tS.tW, y * tS.tH, tS.tW, tS.tH);
-                                    //can.ctx.globalAlpha = 0.3;  
+                                    //can.ctx.globalAlpha = 0.3;
                                     if(tile.idx) {
                                         setTilePx(can.ctx, x, y, tile.px);
                                     }
@@ -7412,7 +7008,6 @@ ${strPM} ];
                     while (y < ht) {
                         x = 0;
                         const yy = y * tS.tMPxH;
-              
                         while (x < wt) {
                             getTilePx(x * tS.tMPxW, yy, mapPx);
                             if (!isZero) {
@@ -7430,7 +7025,7 @@ ${strPM} ];
                                 const idx = x + y * wt;
                                 const tile = tS.tiles[0];
                                 can.ctx.drawImage(tile.spr.image, x * tS.tW, y * tS.tH, tS.tW, tS.tH);
-                                tM[idx] = tile.idx;  
+                                tM[idx] = tile.idx;
                             }
                             x ++;
                         }
@@ -7445,8 +7040,6 @@ ${strPM} ];
                     img.processed = true;
                     img.lastAction = "TileGrid";
                     img.update();
-                    
-                    
                 }
                 badTileQueue.length = 0;
                 if (spr.tileSetSpr) {
@@ -7466,10 +7059,9 @@ ${strPM} ];
                         tS.addedSpr.push(nSpr);
                         can.desc.tileMapRender = true;
                         tS.createMapDependency(nSpr, spr)
-                        
-                    });        
+                    });
                 }
-                return true;    
+                return true;
             }
         },
         tileSets: {
@@ -7482,16 +7074,15 @@ ${strPM} ];
             tMPxW: 1,  // tile map px width and height
             tMPxH: 1,
             addedSpr: [],
-
             getTileMatches(px, found = []) {
                 var i = 0;
                 const match = (a, i) => a === px[i];
                 for (const tile of API.tileSets.tiles) {
                     if (tile.px.every(match)) {
                         found[i++] = tile;
-                    } 
-                }   
-                found._size = i;                
+                    }
+                }
+                found._size = i;
                 return found;
             },
             getTilesExtent(tiles) {
@@ -7504,15 +7095,14 @@ ${strPM} ];
                     const spr = tile.spr;
                     tW = Math.min(spr.image.w, tW);
                     tH = Math.min(spr.image.h, tH);
-                    
                     x = Math.min(spr.x - spr.cx, x);
                     y = Math.min(spr.y - spr.cy, y);
                     mX = Math.max(spr.x - spr.cx, mX);
-                    mY = Math.max(spr.y - spr.cy, mY);                    
-                }   
+                    mY = Math.max(spr.y - spr.cy, mY);
+                }
                 var tCX = ((mX - x) / tW | 0) + 1;
                 var tCY = ((mY - y) / tH | 0) + 1;
-                return {tW, tH, tCX, tCY, x, y, mX, mY};             
+                return {tW, tH, tCX, tCY, x, y, mX, mY};
             },
             createTileMappings() {
                 if (API.tileSets.mapping.length === 0) { log("No mapping tiles processed"); return }
@@ -7531,130 +7121,122 @@ ${strPM} ];
                 const tS = API.tileSets;
                 var eXm = tS.getTilesExtent(API.tileSets.mapping);
                 var x = eXm.x, mX = eXm.mX;
-                var y = eXm.y, mY = eXm.mY;           
+                var y = eXm.y, mY = eXm.mY;
                 var t, xx, yy;
-                const tileByTileSpr = (t) => tS.tiles.find(tile => tile.spr.image === t.spr.image);                   
+                const tileByTileSpr = (t) => tS.tiles.find(tile => tile.spr.image === t.spr.image);
                 const tileAtLoc = (xx, yy, tile, mt, loc) => {
                     const l = locs[loc];
                     addTileLocs(tile, tileAt(xx + l.x, yy + l.y), loc)
                 }
                 const addTileLocs = (tA, tB, loc, reverse = true) => {
-                    if (tB) { 
+                    if (tB) {
                         const l = locs[loc];
                         const a = tA[l.aName];
                         const b = tB[l.bName];
                         if (a.indexOf(tB) === -1) { a.push(tB); /*log(tB.idx + " " + l.aName + " " + tA.idx) */}
                         if (reverse && b.indexOf(tA) === -1) { b.push(tA);/* log(tA.idx + " " + l.bName + " " + tB.idx) */}
                     }
-                }            
+                }
                 const tileAt = (xx, yy) => {
                     for (const mt of API.tileSets.mapping) {
                         const spr = mt.spr;
                         let tx = ((spr.x - spr.cx) - x) / tS.tW | 0;
-                        let ty = ((spr.y - spr.cy) - y) / tS.tH | 0; 
+                        let ty = ((spr.y - spr.cy) - y) / tS.tH | 0;
                         if (tx === xx && ty === yy) {
                             const tile = tileByTileSpr(mt);
-                            return tile;    
+                            return tile;
                         }
-                    }                            
+                    }
                 }
-                
                 var i = 0;
                 while (i < tS.mapping.length) {
                     const spra = tS.mapping[i].spr;
                     const xa = ((spra.x - spra.cx) - x) / tS.tW | 0;
-                    const ya = ((spra.y - spra.cy) - y) / tS.tH | 0;                      
+                    const ya = ((spra.y - spra.cy) - y) / tS.tH | 0;
                     let j = i +  1;
                     while (j < tS.mapping.length) {
                         const sprb = tS.mapping[j].spr;
                         const xb = ((sprb.x - sprb.cx) - x) / tS.tW | 0;
-                        const yb = ((sprb.y - sprb.cy) - y) / tS.tH | 0;                      
+                        const yb = ((sprb.y - sprb.cy) - y) / tS.tH | 0;
                         if (xb === xa && ya === yb) {
                             const atA = tileByTileSpr(tS.mapping[i]);
                             const atB = tileByTileSpr(tS.mapping[j]);
                             if (atA.idx !== atB.idx) {
                                 if (atA.same.indexOf(atB) === -1) { atA.same.push(atB); /*log("Same " + atA.idx + " as " + atB.idx);*/ }
-                                if (atB.same.indexOf(atA) === -1) { atB.same.push(atA); /*log("Same " + atB.idx + " as " + atA.idx); */}                                
+                                if (atB.same.indexOf(atA) === -1) { atB.same.push(atA); /*log("Same " + atB.idx + " as " + atA.idx); */}
                             }
                         }
                         j++;
                     }
                     i++;
                 }
-                    
-                    
                 for (const tile of API.tileSets.tiles) {
-                    tile.same.push(tile);    
+                    tile.same.push(tile);
                     for (const mt of API.tileSets.mapping) {
                         const spr = mt.spr;
                         const at = tileByTileSpr(mt);
                         const xx = ((spr.x - spr.cx) - x) / tS.tW | 0;
-                        const yy = ((spr.y - spr.cy) - y) / tS.tH | 0;                            
+                        const yy = ((spr.y - spr.cy) - y) / tS.tH | 0;
                         if (tile.spr.image === mt.spr.image) {
                             tileAtLoc(xx, yy, tile, mt, ABOVE);
                             tileAtLoc(xx, yy, tile, mt, RIGHT);
                             tileAtLoc(xx, yy, tile, mt, BELOW);
                             tileAtLoc(xx, yy, tile, mt, LEFT);
                         }
-                        
-                    }                        
+                    }
                 }
                 log("Find infered");
-
-                
                 for (const tile of API.tileSets.tiles) {
                     for (const tileR of tile.right) {
                         if (tile.idx === tileR.idx) {
                             for (const sTile of tile.same) {
-                                for (const tileRR of sTile.right) { 
-                                    for (const tileL of sTile.left) { 
-                                        addTileLocs(tileRR, tileL, LEFT); 
+                                for (const tileRR of sTile.right) {
+                                    for (const tileL of sTile.left) {
+                                        addTileLocs(tileRR, tileL, LEFT);
                                     }
-                                    for (const tileL of tileRR.left) { 
-                                        addTileLocs(sTile, tileL, LEFT); 
+                                    for (const tileL of tileRR.left) {
+                                        addTileLocs(sTile, tileL, LEFT);
                                     }
                                 }
-                                for (const tileLL of sTile.left) { 
-                                    for (const tileR of tileLL.right) { 
-                                        addTileLocs(sTile, tileR, RIGHT); 
+                                for (const tileLL of sTile.left) {
+                                    for (const tileR of tileLL.right) {
+                                        addTileLocs(sTile, tileR, RIGHT);
                                     }
                                 }
                             }
                         }
-                    }     
+                    }
                     for (const tileB of tile.below) {
                         if (tile.idx === tileB.idx) {
                             for (const sTile of tile.same) {
-                                for (const tileBB of sTile.below) { 
-                                    for (const tileA of sTile.above) { 
-                                        addTileLocs(tileBB, tileA, ABOVE); 
+                                for (const tileBB of sTile.below) {
+                                    for (const tileA of sTile.above) {
+                                        addTileLocs(tileBB, tileA, ABOVE);
                                     }
-                                    for (const tileA of tileBB.above) { 
-                                        addTileLocs(sTile, tileA, ABOVE); 
-                                    }                               
+                                    for (const tileA of tileBB.above) {
+                                        addTileLocs(sTile, tileA, ABOVE);
+                                    }
                                 }
-                                for (const tileAA of sTile.above) { 
-                                    for (const tileB of tileAA.below) { 
-                                        addTileLocs(sTile, tileB, BELOW); 
+                                for (const tileAA of sTile.above) {
+                                    for (const tileB of tileAA.below) {
+                                        addTileLocs(sTile, tileB, BELOW);
                                     }
-                                }      
-                            }                            
+                                }
+                            }
                         }
-                    }                       
+                    }
                 }
             },
             createTiles() {
                 if (API.tileSets.tiles.length === 0) { log.info("No tile sprites have been defined"); return; }
                 if (!API.tileSets.tilePx) { log.info("Tile pixels image has not been defined"); return; }
                 if (!API.tileSets.mapping) { API.tileSets.mapping = []; }
-                
                 for (const spr of sprites) {
                     if (spr.tileSetSpr) {
                         spr.image.removeDependent(spr.tileSetSpr, updateTileMap);
-                        spr.tileSetSpr = undefined;                        
+                        spr.tileSetSpr = undefined;
                     }
                 }
-
                 const tS = API.tileSets;
                 const px = new Uint32Array(tS.tilePx.ctx.getImageData(0, 0, tS.tilePx.w, tS.tilePx.h).data.buffer);
                 var eXt = tS.getTilesExtent(API.tileSets.tiles);
@@ -7662,30 +7244,24 @@ ${strPM} ];
                 tS.tH = eXt.tH;
                 var x = eXt.x, mX = eXt.mX;
                 var y = eXt.y, mY = eXt.mY;
-  
                 var tCX = tS.tCX = eXt.tCX;
                 var tCY = tS.tCY = eXt.tCY;
                 var tMPxW = tS.tMPxW = tS.tilePx.w / tCX | 0;
                 var tMPxH = tS.tMPxH = tS.tilePx.h / tCY | 0;
-                
                 log("--------------------------------------");
-                log("Starting tile create");                
+                log("Starting tile create");
                 log("Using " + tS.tiles.length + " tiles");
                 log("Tile Size: " + tS.tW + " by "  + tS.tH + "px");
                 log("Tiles area: " + tCX + " by "  + tCY + "tiles");
                 log("Tile px: " + tMPxW + " by "  + tMPxH + "px");
-                
-                
-                
                 for (const tile of API.tileSets.tiles) {
                     const spr = tile.spr;
                     tile.x = ((spr.x - spr.cx) - x) / tS.tW | 0;
                     tile.y = ((spr.y - spr.cy) - y) / tS.tH | 0;
                     tile.idx = tile.x + (tile.y * tCX);
-                    spr.image.desc.name = "T" + tile.idx; 
+                    spr.image.desc.name = "T" + tile.idx;
                     const ppx = tile.x * tMPxW;
                     const ppy = tile.y * tMPxH;
-                    
                     let yy = 0;
                     while (yy < tMPxH) {
                         let xx = 0;
@@ -7696,7 +7272,6 @@ ${strPM} ];
                         yy++;
                     }
                     //log("Tile pos: " + tile.x  + ", "  + tile.y + " [" + tile.px.map(px=> px === 0 ? "_" : px === 4284440415 ? "#" : "^").join("") + "]");
-                            
                 }
                 tS.tiles.sort((a, b) => a.idx - b.idx);
                 mediaList.selected.clear();
@@ -7707,14 +7282,12 @@ ${strPM} ];
                 queueCommand(commands.mediaReorder, 100);
                 queueCommand(commands.sysCommandManagerQueueCallback, 100, () => {
                     mediaList.selected.clear();
-                    tS.tiles.forEach(tile => mediaList.selected.add(tile.spr.image));                    
+                    tS.tiles.forEach(tile => mediaList.selected.add(tile.spr.image));
                     queueCommand(commands.edSprUpdateUI, 100);
                 });
-
-                
             },
             createMapDependency(tileSetSpr, tileMap) {
-                const updateTileMap = () => {         
+                const updateTileMap = () => {
                     if (!API.tileSets.busy) {
                         API.tileSets.busy = true;
                         API.mapTileSet(tileMap);
@@ -7722,16 +7295,15 @@ ${strPM} ];
                     }
                 };
                 tileMap.image.addDependent(tileSetSpr.image, updateTileMap);
-
                 tileSetSpr.addEvent("ondeleting", () => {
                     tileMap.image.removeDependent(tileSetSpr.image, updateTileMap);
                     tileMap.tileSetSpr = undefined;
                     tileSetSpr = undefined;
-                    log.info("Removed dependency"); 
+                    log.info("Removed dependency");
                 });
-                log.info("Added dependency");           
+                log.info("Added dependency");
             },
-        },        
+        },
         get extras() {
             function createSprites(markType) {
                 if(selection.length > 0){
@@ -7758,8 +7330,6 @@ ${strPM} ];
                             })
                             .catch(() => log.warn("Sprite extract canceled by user!"));
                         return;
-
-
                     }
                     const setupPackSprites = {
                         locateOnly: true,
@@ -7784,30 +7354,26 @@ ${strPM} ];
                         xCount: "Select horizontal count|OK,Cancel|{,1,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,17,18,19,20,21,22,23,24,},{,25,26,27,28,29,30,31,32,33,}",
                         yCount: "Select vertical count|OK,Cancel|{,1,2,3,4,5,6,7,8,},{,9,10,11,12,13,14,15,16,},{,17,18,19,20,21,22,23,24,},{,25,26,27,28,29,30,31,32,33,},{,Square?Use same size as width,Half?Use same size as half width,Quater?Use same size as quater width,},"
                     }
-
                     if(markType === "grid" || markType === "gridoverlay") {
                         setupPackSprites.markType = markType;
                         const dialogTree = {
                             gridSize: {
-                                Pixels: { 
-									xSize: "option", 
-									ySize: "option", 
+                                Pixels: {
+									xSize: "option",
+									ySize: "option",
 									addToWorkspace: {
 										Add: { dontAddEmpty: "", addUniqueOnly: "", },
 										//["Don't add"]: {}
-										
 									}
 								},
-                                Counts: { 
-									xCount: "option", 
+                                Counts: {
+									xCount: "option",
 									yCount: "option",
 									addToWorkspace: {
 										Add: { dontAddEmpty: "", addUniqueOnly: "",  },
 										//["Don't add"]: {}
-										
 									}
 								},
-								
                             },
                         };
                         /*markType !== "gridoverlay" && (
@@ -7824,7 +7390,6 @@ ${strPM} ];
                             log.obj(res);
                             log.info("Extracting sprites...........");
                             const newSprites = []
-
                             selection.processImages((img, i) => {
                                 var ys, _xCount;
                                 if (xCount === undefined) {
@@ -7858,12 +7423,8 @@ ${strPM} ];
                             }
                         }).catch(()=> log.warn("Sprite extract dialog terminated by user"));
                         return;
-
                         return;
                     }
-
-
-
                     const dialogTree = {
                         locateOnly: {
                             Locate: {addToWorkspace: "", save: ""},
@@ -7874,7 +7435,6 @@ ${strPM} ];
                     buttons.dialogTree(dialogs, dialogTree).then(res => {
                         log.info("Sprite extract dialog results");
                         log.obj(res);
-
 						const markLocs = res.locateOnly === "Mark";
 						if (markLocs) {
                             log.warn("This function has been disabled.");
@@ -7898,15 +7458,14 @@ ${strPM} ];
 										addedSprites.push(spr);
 										idx++;
 									}
-								}									
+								}
 							}, "image");
                             selection.clear();
                             selection.add(addedSprites);
 							utils.tidyWorkspace();
 							return;
- 							
 						}
-                        log.info("Extracting sprites...........");                       
+                        log.info("Extracting sprites...........");
                         const locateOnly = res.locateOnly === "Locate";
                         const spacing = res.spacing === "Pad" ? 1 : 0;
                         const addToWorkspace = res.addToWorkspace === "Add";
@@ -7960,14 +7519,12 @@ ${strPM} ];
 							const id = spr.image.desc.guid + "_" + spr.subSpriteIdx;
 							if(!subSprites.has(spr.subSprite)) {
 								const s = spr.image.desc.sprites[spr.subSpriteIdx];
-
 								s.y -= t;
 								s.x -= l;
 								s.w += l + r;
 								s.h += t + b;
 								subSprites.add(spr.subSprite);
 							}
-
 						}
 					},"image"
 				);
@@ -7982,19 +7539,15 @@ ${strPM} ];
                 spriteList.updateInfo();
                 guides.update();
             }
-
 			function callHelp(name, helpFor) {
 				log.info("==================================================");
 				log("Help: '" + name + "'");
 				helpFor();
 				log.info("--------------------------------------------------");
-				
 			}
             var randomPackBusy = false;
             function randomPack(rotate, scale, failLimit, method) {
-
                 if (randomPackBusy) { log.warn("Image packing is busy"); return }
-
                 if (selection.length === 2) {
                     const spr1 = selection[0];
                     const spr2 = selection[1];
@@ -8004,7 +7557,6 @@ ${strPM} ];
                         API.imgPackScan.pastBottom = false;
                         const [sprA, sprB] = spr1.image.w * spr1.image.h > spr2.image.w * spr2.image.h ?  [spr1, spr2] : [spr2, spr1];
                         sprA.image.restore(false);
-
                         var count = 120;
                         var stopped = false;
                         const id = Math.random() * 100000 + 10000 | 0;
@@ -8023,7 +7575,6 @@ ${strPM} ];
                             sprA.image.lastAction = "Added image";
                             sprA.image.update();
                             system.removeEvent("globalescape", stop);
-
                         }
                         function timed() {
                             !stopped && API.spacedImages(sprA, sprB, rotate, 1 / scale, scale, failLimit, scan);
@@ -8041,8 +7592,6 @@ ${strPM} ];
                     }
                 }
             }
-
-
             var RGBsColorEl;
             var YIQColorEl;
             var wfc;
@@ -8051,7 +7600,6 @@ ${strPM} ];
 					help: "All things image processing. Filters, Gif, Image Animation, Sprite sheets, WebGl filters",
 					foldClass: "extrasImageProcessing",
 				},
-                
                /* tileExperiments: {
                     autoDefine: {
                         help : "Uses sprite names to automate tile sets.\nTile sprites are named 'Tiles'\nand tile px named `Tiles_px`",
@@ -8067,7 +7615,6 @@ ${strPM} ];
                                     left: [],
                                     same: [],
                                     px: [],
-                                    
                                 }));
                             if (API.tileSets.tiles.length === 0) { log.warn("Could not locate tiles"); return; }
                             API.tileSets.tilePx = undefined;
@@ -8076,22 +7623,22 @@ ${strPM} ];
                                     API.tileSets.tilePx = spr.image;
                                     return true;
                                 }
-                            });      
+                            });
                             if (!API.tileSets.tilePx) { log.warn("Could not locate tile px set"); return; }
                             API.tileSets.mapping = [...sprites].filter(spr => spr.type.image && spr.name === "Mapping").map(spr => ({spr}));
-                            API.tileSets.createTiles();   
-                            log.info("Tile setter ready.");    
+                            API.tileSets.createTiles();
+                            log.info("Tile setter ready.");
                             if (API.tileSets.mapping.length > 0) {
                                 const collection = collections.getByName("TileSet_Mapping");
                                 if (collection) { collections.delete(collection) }
                                 collections.create(API.tileSets.mapping.map(({spr}) => spr), undefined, "TileSet_Mapping")
-                                log.info("Created collection to hold tile relative mapping 'TileSet_Mapping'");    
+                                log.info("Created collection to hold tile relative mapping 'TileSet_Mapping'");
                             }
                             if (API.tileSets.tiles.length) {
                                 const collection = collections.getByName("TileSet_Tiles");
                                 if (collection) { collections.delete(collection) }
-                                collections.create(API.tileSets.tiles.map(({spr}) => spr), undefined, "TileSet_Tiles")                                
-                                log.info("Created collection to hold tiles sprites 'TileSet_Tiles'");    
+                                collections.create(API.tileSets.tiles.map(({spr}) => spr), undefined, "TileSet_Tiles")
+                                log.info("Created collection to hold tiles sprites 'TileSet_Tiles'");
                             }
                         }
                     },*/
@@ -8102,7 +7649,7 @@ ${strPM} ];
                             const spr = selection[0];
                             if (!spr.type.image || !spr.image.isDrawable) {  log.warn("Selected spr must have a drawble image"); return; }
                             API.tileSets.tilePx = spr.image;
-                            API.tileSets.createTiles();  
+                            API.tileSets.createTiles();
                         }
                     },
                     defineTiles: {
@@ -8117,16 +7664,15 @@ ${strPM} ];
                                     below: [],
                                     left: [],
                                     px: [],
-                                    
                                 }));
-                             API.tileSets.createTiles();   
+                             API.tileSets.createTiles();
                         }
                     },
                     defineTileMapping: {
                         help : "Select tiles positioned to represent links",
                         call() {
                             API.tileSets.mapping = [...selection].filter(spr => spr.type.image).map(spr => ({spr}));
-                            API.tileSets.createTiles();  
+                            API.tileSets.createTiles();
                         }
                     },  */
                     /*createTileView: {
@@ -8156,7 +7702,6 @@ ${strPM} ];
                                             log.warn("Tiles setter timed out");
                                             API.tileSets.busy = false;
                                         }
-                                    
                                     }
                                     isDone();
                                 } else {
@@ -8165,10 +7710,9 @@ ${strPM} ];
                             } else {
                                 log.warn("Tile sets definision is not complete.");
                             }
-
                         }
-                    },                        
-                },  */ 
+                    },
+                },  */
                 render : {
                     fillTransparent : {
                         help : "Fills all transparent pixels with current main color for selected drawable images.",
@@ -8179,62 +7723,69 @@ ${strPM} ];
                         call(){  utils.processSelectedImages(API.fillWithColor, colours.current)   },
                     },
                     randomImagePack: {
-                        showUsageHelp: {
-                            help: "Displays usage help in log display",
-                            call() {
-                                log("-------------------------------------");
-                                log("- Random Image Pack                 -");
-                                log("-------------------------------------");
-                                log("> Attach sprites to draw to a drawable sprite");
-                                log("> Select the drawable sprite and a second ");
-                                log("> drawable sprite. Then click one of ");
-                                log(">");
-                                log("> [Random Images No Rotate No Scale]");
-                                log("> [Random Images Rotate No Scale]");
-                                log("> [Random Images No Rotate Scale]");
-                                log("> [Random Images Rotate Scale]");
-                                log(">");
-                                log("> The smaller of the two will be used as the");
-                                log("> overlap mask. Higher resolution will will");
-                                log("> result in closer better fits. The mask sprite");
-                                log("> image content will be lost.");
-                                log(">");
-                                log("> To stop the process hit [ESCAPE] ");
-                                log("-------------------------------------");
+                        foldInfo: {
+                            showExtraHelp() {
+                                log.info(
+                                    "-------------------------------------",
+                                    "- Random Image Pack                 -",
+                                    "-------------------------------------",
+                                    "> Attach sprites to draw to a drawable sprite",
+                                    "> Select the drawable sprite and a second ",
+                                    "> drawable sprite. Then click one of ",
+                                    ">",
+                                    "> [Random Images No Rotate No Scale]",
+                                    "> [Random Images Rotate No Scale]",
+                                    "> [Random Images No Rotate Scale]",
+                                    "> [Random Images Rotate Scale]",
+                                    ">",
+                                    "> The smaller of the two will be used as the",
+                                    "> overlap mask. Higher resolution will will",
+                                    "> result in closer better fits. The mask sprite",
+                                    "> image content will be lost.",
+                                    ">",
+                                    "> To stop the process hit [ESCAPE] ",
+                                    "-------------------------------------",
+                                );
                             }
-
                         },
                         randomImagesNoRotateNoScale: {
                             help: "Fills selected image with images. Uses image linked to selected\nNo rotation, no scaling",
+                            extraHelp() { extras.render.randomImagePack.foldInfo.showExtraHelp(); },
                             call() { randomPack(false, 1, 32, false) }
                         },
                         randomImagesRotateNoScale: {
                             help: "Fills selected image with images. Uses image linked to selected\nRotation, no scaling",
-                            call() { randomPack(true, 1, 32, false) }
+                             extraHelp() { extras.render.randomImagePack.foldInfo.showExtraHelp(); },
+                           call() { randomPack(true, 1, 32, false) }
                         },
                         randomImagesNoRotateScale: {
                             help: "Fills selected image with images. Uses image linked to selected\nNo rotation, add Scaling",
+                            extraHelp() { extras.render.randomImagePack.foldInfo.showExtraHelp(); },
                             call() { randomPack(false, 1.5, 32, false) }
                         },
                         randomImagesRotateScale: {
                             help: "Fills selected image with images. Uses image linked to selected\nRotation and scaling",
+                            extraHelp() { extras.render.randomImagePack.foldInfo.showExtraHelp(); },
                             call() { randomPack(true, 1.5, 32, false) }
                         },
                         randomImagesNoRotateNoScaleScan: {
                             help: "Fills selected image with images. Uses image linked to selected\nNo rotation, no scaling",
+                            extraHelp() { extras.render.randomImagePack.foldInfo.showExtraHelp(); },
                             call() { randomPack(false, 1, 32,"scan") }
                         },
                         randomImagesRotateNoScaleScan: {
                             help: "Fills selected image with images. Uses image linked to selected\nRotation, no scaling",
+                            extraHelp() { extras.render.randomImagePack.foldInfo.showExtraHelp(); },
                             call() { randomPack(true, 1, 32, "scan") }
                         },
                         randomImagesNoRotateScaleScan: {
                             help: "Fills selected image with images. Uses image linked to selected\nNo rotation, add Scaling",
+                            extraHelp() { extras.render.randomImagePack.foldInfo.showExtraHelp(); },
                             call() { randomPack(false, 1.5, 32, "scan") }
                         },
-
                         randomImagesRotateScaleScan: {
                             help: "Fills selected image with images. Uses image linked to selected\nRotation and scaling",
+                            extraHelp() { extras.render.randomImagePack.foldInfo.showExtraHelp(); },
                             call() { randomPack(true, 1.5, 32, "scan") }
                         },
                     },
@@ -8246,17 +7797,15 @@ ${strPM} ];
                                 if (img.isDrawable) {
                                     API.createJob("circleStyle", img);
                                     count++;
-
                                 }
                             });
                             if (count === 0) { log.warn("No drawable images selected") }
                         }
-
                     },
                     countPixels : {
                         help : "Count number of non transparent pixels in an image.",
                         call(){  utils.processSelectedImages(API.countPixels)   },
-                    },                    
+                    },
                     centerOfMass : {
                         help : "Locates and marks visual center of mass",
                         call(){  utils.processSelectedImages(API.centerOfMass)   },
@@ -8275,7 +7824,6 @@ ${strPM} ];
                                 if (img.isDrawable) {
                                     API.createJob("applyStretchValue", img);
                                     count++;
-
                                 }
                             });
                             if (count === 0) { log.warn("No drawable images selected") }
@@ -8298,7 +7846,6 @@ ${strPM} ];
 										const bytes = new ArrayBuffer(l * 2 + 10)
 										const byteBuf = new Uint8Array(bytes);
 										const shortBuf = new Uint16Array(bytes);
-										
 										byteBuf[0] = "GMap".charCodeAt(0);
 										byteBuf[1] = "GMap".charCodeAt(1);
 										byteBuf[2] = "GMap".charCodeAt(2);
@@ -8311,7 +7858,6 @@ ${strPM} ];
 											shortBuf[5 + i] = map[i];
 											i++;
 										}
-												 
 										const anchor = document.createElement('a');
 										const url = anchor.href = URL.createObjectURL(new Blob([bytes] ,{type: "application/octet-stream"}));
 										anchor.download = spr.name + "_TileMap.bin";
@@ -8323,9 +7869,7 @@ ${strPM} ];
 								if (count === 0) {
 									log.warn("No tile maps found in selected sprites");
 								}
-
                             }
-
                         },
 						dependentTileMapV2: {
                             help: "Same as next renderer [Tile Mapper] but keeps tile generation dependancy active",
@@ -8358,19 +7902,18 @@ ${strPM} ];
 										const updateTileMap = () => API.tileMapperV2(spr, colMap, mapSpr, mapped);
 										mapSpr.image.addDependent(tiledImage, updateTileMap);
 										colMap.image.addDependent(tiledImage, updateTileMap);
-										spr.image.addDependent(tiledImage, updateTileMap);									
+										spr.image.addDependent(tiledImage, updateTileMap);
 										log.info("Added dependency");
 									}
 							    });
 							    if (tiles.length) {
 								    selection.clear();
 								    selection.add(tiles);
-								    utils.tidyWorkspace();								  
+								    utils.tidyWorkspace();
 									log("Tile mapper completed task");
 							    } else {
 									log.warn("No mapping sprites selected");
 								}
-								   
 							}
 						},
 						HelpForMapppingHelpAndBuildTileMap: {
@@ -8429,7 +7972,6 @@ ${strPM} ];
 								log("- Note 3: Map tile max unique tiles is 16bit ");
 								log("=================================================");
 							}
-							
 						},
 						tileMappping: {
 							help: "Creates a tile shapes map",
@@ -8437,12 +7979,10 @@ ${strPM} ];
 								const map = selection[0];
 								if (map && map.type.image && map.image.isDrawable) {
 									if (map.image.desc.gridSubSprites) {
-
 										API.createTileConnectMap.mapping = API.createTileMapping(map);
 										log.info("Created mapping");
 									} else { log.warn("Select at least one image must be a tile sheet") }
 								} else { log.warn("Select at least one drawable image sprite") }
-								
 							}
 						},
 						buildTileMap: {
@@ -8458,34 +7998,177 @@ ${strPM} ];
 													if (sheet.image?.desc?.gridSubSprites) {
 														const mappedImgSpr = sheet.linkers?.size === 1 ? ([...sheet.linkers.values()])[0] : undefined
 														const m = API.buildConnectedMap(map, sheet, API.createTileConnectMap.mapping, mappedImgSpr)[0];
-														
-														
-														
 														const updateTileMap = () => API.buildConnectedMap(map, sheet, API.createTileConnectMap.mapping, m);
 														const tiledImage = m.image;
 														map.image.addDependent(tiledImage, updateTileMap);
 														sheet.image.addDependent(tiledImage, updateTileMap);
-																							
-														log.info("Added dependency");														
-														
-														
+														log.info("Added dependency");
 													} else { log.warn("Attached tile sheet must have grid defined.") }
 												} else { log.warn("Map must have attached tile sheet image.") }
 											} else { log.warn("Map must be tile sheet.") }
 										} else { log.warn("Map must be drawable.") }
 									} else { log.warn("Select one map at a time.") }
 								} else { log.warn("No set defined. Use tileMappping to define tile mapping") }
-								
 							}
-						},							
+						},
                         removeIdenticalTiles : {
                             help : "Removes duplicated tiles",
                             call(){   utils.processSelectedImages(API.removeIdenticalTiles)    }
                         },
 					},
 					pixels: {
+                        foldInfo: {
+                            findReplaceHelp() {
+                                log.info(
+                                    "-------------------------------------------", 
+                                    "- Pixel Art Find Replace Sub Image        -",
+                                    "- Pixel Art Find Replace Image No Rot Mir -",
+                                    "-------------------------------------------", 
+                                    "> Replaces match images [B] with",
+                                    "> new image [C] in selected image [A]",
+                                    "> Attach match images [B] to selected [A]",
+                                    "> Attach replacement images [C] ",
+                                    "> to match images to replace [B]",
+                                    ">",
+                                    "> FindReplaceSubImage will find ",
+                                    "> each instance of attached match",
+                                    "> image [B] in selected image with",
+                                    "> one of the randomly selected",
+                                    "> replacement images [C] attached",
+                                    "> to the match image [B]",                                    
+                                    ">",
+                                    "> Match images can be rotate and or",
+                                    "> mirrored to determin a match", 
+                                    "> Replacement images will be aligned",
+                                    "> to matching orientation.",
+                                    ">",                                    
+                                    ">  Selected image [A]",                                    
+                                    "> +----------------+   [B1]",
+                                    "> |   ww    w      |---+--+   [C1]",
+                                    "> |    w   ww   p  |   |ww|---+--+",
+                                    "> |             p  |   | W|   |EE|",
+                                    "> |        pp      |   +--+   | E|",
+                                    "> |                |          +--+ ",
+                                    "> |                |   [B2]",
+                                    "> |   pp           |---+--+   [C2]   [C3]",
+                                    "> +----------------+   |PP|---+--+---+--+",
+                                    ">                      +--+   |QZ|   |TR|",
+                                    ">                             +--+   +--+",
+                                    ">",                                    
+                                    ">In image [A]",                                    
+                                    ">Find all [B1] and replace with [C1]",                                    
+                                    "> and all [B2] and replace with randomly selected [C2] or [C3]",                                    
+                                    "> Result may look like",
+                                    "> +----------------+ ",
+                                    "> |   EE    E      |",
+                                    "> |    E   EE   T  |",
+                                    "> |             R  |",
+                                    "> |        QZ      |",
+                                    "> |                |",
+                                    "> |                | ",
+                                    "> |   TR           |",
+                                    "> +----------------+",
+                                    ">",                                                              
+                                    "-------------------------------------------"
+                                );
+                            },
+                            async workerReplaceSubImageCall(mir, rot, randReplace) {
+                                let update = false;
+                                const messages = [];
+                                async function doSet(spr, find) {
+                                    if (find.type.image) {
+                                        if (find.attachers) {
+                                            const replace = [...find.attachers.values()].filter(spr => spr.type.image && spr.image.isDrawable);
+                                            if (replace.length) {
+                                                if (replace.every(rep => rep.image.w === find.image.w && rep.image.h === find.image.h)) {
+                                                    update = await API.pixelArtSubImageReplaceWorker(spr, mir, rot, randReplace, find, ...replace);
+                                                } else { messages.push("Replacement images must be same size aas search images") }
+                                            } else { messages.push("No Attached replacements ") }
+                                        } else { messages.push("Attached missing attached replacement spr") }
+                                    } else { messages.push("Attached not an image") }
+                                    return update;
+                                }
+                                if (selection.length === 1) {
+                                    const spr = selection[0];
+                                    if (spr.type.image) {
+                                        spr.image.restore(false);
+                                        if (spr.attachers) {
+                                            messages.length = 0;
+                                            const matchers = [...spr.attachers.values()];
+                                            const first = matchers.shift();
+                                            
+                                            spr.image.canUndo = true;
+                                            var ok = await doSet(spr, first);
+                                            if (ok) {
+                                                spr.image.canUndo = false;
+                                                for (const find of matchers) { 
+                                                    ok = await doSet(spr, find); 
+                                                    if (!ok) { break; }
+                                                }
+                                            }
+                                            !ok && messages.push("There was a problem processing images");
+                                            spr.image.canUndo = true;
+                                            
+                                            if (messages.length) {
+                                                while (messages.length) { log.warn(messages.shift()); }
+                                            }
+                                        } else { log.warn("Selected sprite does have attached sprites") }
+                                    } else { log.warn("Selected sprite does not contain an image") }
+                                } else if (selection.length > 1) {
+                                    log.warn("Find replace only 1 selected sprite at a time");
+                                } else {
+                                    log.warn("Can not find replace nothing selected");
+                                }
+                            },
+                            useMirror: false,
+                            useRotate: false,
+                            useRandReplace: false,
+                        },
+                        useMirrorOff: {
+                            help : "Toggles find mirrored in search replace sub images",
+                            call(item) {
+                                const state = extras.render.pixels.foldInfo.useMirror = !extras.render.pixels.foldInfo.useMirror;
+                                item.element.textContent = "Use mirror: " + (state ? "ON" : "off");
+                            }
+                        },
+                        useRotateOff: {
+                            help : "Toggles find rotated in search replace sub images",
+                            call(item) {
+                                const state = extras.render.pixels.foldInfo.useRotate = !extras.render.pixels.foldInfo.useRotate;
+                                item.element.textContent = "Use rotate: " + (state ? "ON" : "off");
+                            }
+                        },
+                        useRandomReplaceOff: {
+                            help : "Toggles select random replacement (if possible) in search replace sub images",
+                            call(item) {
+                                const state = extras.render.pixels.foldInfo.useRandReplace = !extras.render.pixels.foldInfo.useRandReplace;
+                                item.element.textContent = "Use random replace: " + (state ? "ON" : "off");
+                            }
+                        },
+ 					    replaceSubImage: {
+                            help : "Finds sub images and replaces with new sub image",
+                            extraHelp() { extras.render.pixels.foldInfo.findReplaceHelp(); },
+                            async call() { await extras.render.pixels.foldInfo.workerReplaceSubImageCall(extras.render.pixels.foldInfo.useMirror, extras.render.pixels.foldInfo.useRotate, extras.render.pixels.foldInfo.useRandReplace) }
+                        },                      
+ 					    /*workerReplaceSubImageMir: {
+                            help : "finds sub images and replaces with new sub image\nSearch includes mirrored",
+                            extraHelp() { extras.render.pixels.foldInfo.findReplaceHelp(); },
+                            async call() { await extras.render.pixels.foldInfo.workerReplaceSubImageCall(true, false) }
+                        },                      
+ 					    workerReplaceSubImageRot: {
+                            help : "finds sub images and replaces with new sub image\nSearch includes rotated",
+                            extraHelp() { extras.render.pixels.foldInfo.findReplaceHelp(); },
+                            async call() { await extras.render.pixels.foldInfo.workerReplaceSubImageCall(false, true) }
+                        },                      
+ 					    workerReplaceSubImageRotMir: {
+                            help : "finds sub images and replaces with new sub image\nSearch includes rotated and mirrored",
+                            extraHelp() { extras.render.pixels.foldInfo.findReplaceHelp(); },
+                            async call() { await extras.render.pixels.foldInfo.workerReplaceSubImageCall(true, true) }
+                        },   */
+/*                        
 					   pixelArtFindReplaceSubImage: {
                             help : "finds sub images and replaces with new sub image",
+                            extraHelp() { extras.render.pixels.foldInfo.findReplaceHelp(); },
                             async call() {
                                 let update = false;
                                 async function doSet(spr, find) {
@@ -8497,14 +8180,11 @@ ${strPM} ];
                                                 await utils.processImageNoUpdateAsync(API.pixelArtSubImageReplace, spr, true, true, find, ...replace);
                                                 update = true;
                                             } else { messages.push("No Attached replacements ") }
-
                                         } else { messages.push("Attached missing attached replacement spr") }
-
-                                    } else { messages.push("Attached not an image") }      
+                                    } else { messages.push("Attached not an image") }
                                     return update;
                                 }
                                 if (selection.length === 1) {
-                                    
                                     const spr = selection[0];
                                     if (spr.type.image) {
                                         spr.image.restore(false);
@@ -8553,11 +8233,8 @@ ${strPM} ];
                                                             utils.processImageNoUpdate(API.pixelArtSubImageReplace, spr, false, false, find, ...replace);
                                                             update = true;
                                                         } else { messages.push("No Attached replacements ") }
-
                                                     } else { messages.push("Attached missing attached replacement spr") }
-
                                                 } else { messages.push("Attached not an image") }
-
                                             }
                                             if (messages.length) {
                                                 while (messages.length) {
@@ -8579,7 +8256,7 @@ ${strPM} ];
                                     log.warn("Can not find replace nothing selected");
                                 }
                             }
-                        },                        
+                        },*/
                         pixelArtLines : {
                             help : "Reduces low color transparent images to single pixel lines",
                             call(){   utils.processSelectedImages(API.fixPixelArtLinesV2 )    }
@@ -8600,10 +8277,11 @@ ${strPM} ];
                             help : "Randomly shuffles pixels",
                             call(){   utils.processSelectedImages(API.pixelShuffle)    }
                         },
-                        pixelMap : {
+                        /*pixelMap : {
                             help : "Map pixels",
                             call(){   utils.processSelectedImages(API.pixelMap, selection[1].image)    }
-                        },
+                        },*/
+                        
                     },
                     RGBA_Functions: {
                         channels : {
@@ -8648,7 +8326,6 @@ ${strPM} ];
                             help : "Creates HSL normal map. Red 45deg up 60CW 90deg steps. Lum 30-50, 90deg to  45Deg, Lum 50-70 45deg to flat",
                             call() {  utils.processSelectedImages(API.normalMap, "HSL")   },
                         },
-
                         heightToNormalMapSmooth: {
                             help : "Converts height map to normal map\nNormal computed from 2 pixel square",
                             call(){  utils.processSelectedImages(API.normalMap, "smooth")   },
@@ -8668,7 +8345,7 @@ ${strPM} ];
                                 utils.processSelectedImages(API.defineISOView );
                                 API.ISO.view.spr = selection[0];
                             }
-                        },  
+                        },
                         createISOView: {
                             help : "Creates view from sprite over iso plan",
                             call() {
@@ -8681,7 +8358,6 @@ ${strPM} ];
                                         API.createISOView(spr);
                                         count ++;
                                     }
-                                    
                                 }
                                 const cleanUp = () => {
                                     if (API.ISO.addedSpr.length >= count) {
@@ -8690,8 +8366,6 @@ ${strPM} ];
                                         API.ISO.addedSpr.length = 0;
                                         issueCommand(commands.edSprClip);
                                         API.ISO.busy = false;
-                                        
-                                        
                                         return;
                                     }
                                     log("!");
@@ -8699,7 +8373,7 @@ ${strPM} ];
                                 }
                                 setTimeout(cleanUp, 100);
                             }
-                        },                        
+                        },
                     },
                     applyPallets : {
                         applyPallet : {
@@ -8724,21 +8398,17 @@ ${strPM} ];
                                                 if (data[1]) {
                                                     pallet.sortUsing(data[1]);
                                                     log.info("Counting complete");
-
                                                 } else {
                                                     log.warn("Pallet pixel count failed");
                                                 }
                                                 localProcessImage.removeEvent("workercomplete", done);
                                             }
-
                                         }
-
                                         localProcessImage.addEvent("workercomplete", done);
                                         const id = localProcessImage.createJobInspect("countPalletPixels", image.image, "RGB linear No Dither", palletLookup, "");
                                         log.info("Counting colors");
                                     }  else { log.warn("No drawable image selected") }
                                 } else { log.warn("No pallet selected") }
-
                             }
                         },
  /*                       applyPalletHue : {
@@ -8876,11 +8546,10 @@ ${strPM} ];
                     },
                     Load_EPS_mapped_data : {
                         help : "Doubles image size via mapped EPS (modified EPX) \nFor use with pixel art images.",
-                        call(listItem){  
-                            utils.processSelectedImages(API.EPSMapped, listItem.element);   
-                            
+                        call(listItem){
+                            utils.processSelectedImages(API.EPSMapped, listItem.element);
                         },
-                    },                   
+                    },
                    Double_EPX_soft_color_64 : {
                         help : "Doubles image size via modified EPX method\nFor use  photo like image.",
                         call(){  utils.processSelectedImages(API.doubleBitmapSoft, false, 64)   },
@@ -8929,7 +8598,6 @@ ${strPM} ];
                                         if (w <= spr.image.w * 0.5 && h <= spr.image.h * 0.5) {
                                             selection.clear();
                                             selection.add(spr);
-
                                             editSprites.copySelectedSprites(false, false, false);
                                             spr = selection[0];
                                             spr.sx  = 1;
@@ -8939,7 +8607,6 @@ ${strPM} ];
                                         } else {
                                             log.warn("Down sample sprite must be at least 1/2 the size of the image resolution");
                                         }
-
                                     } else {
                                         log.warn("Sprite is too small to fit any pixels");
                                     }
@@ -9015,7 +8682,6 @@ ${strPM} ];
                                     } else { log.warn("Sprite is too small to fit any pixels")  }
                                 } else { log.warn("first selected sprite is not an image") }
                             } else { log.warn("Currently Carve is limited to one sprite at a time") }
-
                         }
                     },*/
                 },
@@ -9118,7 +8784,7 @@ ${strPM} ];
                     tileSheet : {
                         help : "Creates a tile sheet from selected tile sheet images",
                         call(){ createSprites("grid") }
-                    },                      
+                    },
                     imageValue : {
                         help : (!LOCALS.LOCAL ? "DISABLED: " : "") + "Logs a metric of image brightness",
                         info: {disabled: !LOCALS.LOCAL},
@@ -9126,10 +8792,8 @@ ${strPM} ];
                             selection.eachOfType(spr => {
                                 if(spr.image.isDrawable){ log("Bright = " + API.calcImageValueMetric(spr.image)); }
                             },"image");
-
                         }
                     }
-
                 },
                 utilities : {
                     GIF_Creator : {
@@ -9140,18 +8804,16 @@ ${strPM} ];
                         help : "Opens dialog used to capture animations as a set of still frames",
                         call(){ setTimeout(()=>commandLine("run safe AnimationCapture",true),0) }
                     },
-
                     ProfileShader: {
                         help : "Create a shading map from an image representing profile",
                         info: {disabled: !LOCALS.LOCAL},
-                        call()  {                               
+                        call()  {
                             selection.eachOfType(spr => {
                                 if(spr.image.isDrawable){
                                     API.shadeProfile(spr);
                                 }
-                            }, "image");  
-                        }                        
-                        
+                            }, "image");
+                        }
                     },
                     Image_To_JS_Map : {
                         help : "Converts image to Javascript character map object (like tile map)",
@@ -9189,7 +8851,6 @@ ${strPM} ];
                                 });
                                 str += "]\n";
                                 downloadText(str,"spriteMap.js");
-
                             }else{
                                 log.info("No sprites selected");
                             }
@@ -9201,7 +8862,6 @@ ${strPM} ];
                         call(){
                             if(selection.length > 0){
                                 const spriteArr = [];
-
                                 selection.each(spr => {
                                     var type = spr.type.image ? "image" : "";
                                     type = spr.type.cutter ? "cutter" : type;
@@ -9225,8 +8885,6 @@ ${strPM} ];
                                     sprites : spriteArr,
                                 };
                                 storage.saveJSON(ss,"p3Sprites", "sprites");
-
-
                             }else{
                                 log.info("No sprites selected");
                             }
@@ -9240,7 +8898,6 @@ ${strPM} ];
                                 const imageStack = [];
                                 var pallet;
                                 var w = 0, h = 0, d;
-
                                 selection.each(spr => {
                                     if (spr.type.image && spr.image.isDrawable) {
                                         imageStack.push(spr);
@@ -9278,7 +8935,7 @@ ${strPM} ];
                                     y = 0;
                                     const hh = spr.image.h;
                                     const ww = spr.image.w;
-                                    while (y < hh) {                                        
+                                    while (y < hh) {
                                         x = 0;
                                         while (x < ww) {
                                             const idx = (x + y * w) * 4;
@@ -9297,7 +8954,6 @@ ${strPM} ];
                                 RIFF.setPos(xyziPos);
                                 RIFF.writeInts(voxCount);
                                 RIFF.popPos();
-                                
                                 RIFF.addBlock("RGBA");
                                 var i = 0;
                                 const RGB = utils.rgba;
@@ -9320,7 +8976,7 @@ ${strPM} ];
                         }
                     }
                 },
-                /*tensorFlow: {                    
+                /*tensorFlow: {
                     bodyParts: {
                         clickToLoadModels: {
                             help: "DISABLED: Load tensorFlow body detect scripts and models\nThis may take a moment or two depending on your setup.",
@@ -9331,7 +8987,6 @@ ${strPM} ];
                                 if (!ScriptLoader.canRun("bodyParts")) {
                                     item.element.textContent = "Installing BodyParts. This will take a moment...";
                                     ScriptLoader.addScript("bodyParts", "./tensorFlow/BodyParts.js" , () => typeof BodyParts !== "undefined").then(()=>{
-
                                         BodyParts.install(() => {
                                             API.bodyParts = BodyParts();
                                             API.bodyParts.loadModel(() => {
@@ -9340,7 +8995,6 @@ ${strPM} ];
                                                 const fold = extras.tensorFlow.bodyParts.load.owner.listItem.item.owner;
                                                 const loadItem = extras.tensorFlow.bodyParts.load.owner.listItem;
                                                 fold.close();
-
                                                 fold.addFoldObject({
                                                     removeBackground: {
                                                         help: "Remove non human parts from image",
@@ -9359,7 +9013,6 @@ ${strPM} ];
                                                         call() { utils.processSelectedImages(API.bodyPartsAPI, "mark") }
                                                     },
                                                 });
-
                                                 fold.removeItem(loadItem);
                                                 fold.toggle();
                                             });

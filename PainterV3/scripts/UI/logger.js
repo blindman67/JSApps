@@ -355,7 +355,11 @@ const logger = (()=>{
                 API.flash(API.flashTypes.error); heartBeat.addAlert("error"); addLog(data, "loggerError");
             }
         },
-        info(data) { API.flash(API.flashTypes.info);; heartBeat.addAlert("info"); addLog(data, "loggerInfo")},
+        info(...data) { 
+            API.flash(API.flashTypes.info);
+            heartBeat.addAlert("info"); 
+            for (const line of data) { addLog(line, "loggerInfo") }
+        },
         infoOnce(data) {
             if(dontRepeatInfo.has(data)) { return };
             dontRepeatInfo.add(data);

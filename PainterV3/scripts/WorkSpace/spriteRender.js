@@ -53,6 +53,8 @@ const spriteRender = (()=>{
     var shapeIconColor;
     var lightbox;
     var highlightAxis = false;
+    var smallLockIndicator = true;
+    var drawLockedInfo = drawLockedInfoBig;
     const wp1 = utils.point;
     const wp2 = utils.point;
     const wp3 = utils.point;
@@ -79,6 +81,8 @@ const spriteRender = (()=>{
         shapeIconColor = settings.shapeIconColor
         renderUISize = settings.Render_U_I_Size / 10;
         displayFont = "16px "  + settings.displayFont;
+        smallLockIndicator = settings.smallLockIndicator
+        drawLockedInfo = smallLockIndicator ? drawLockedInfoSmall : drawLockedInfoBig;
     }
     getSettings();
     settingsHandler.onchange=getSettings;
@@ -1004,7 +1008,7 @@ const spriteRender = (()=>{
         c.setTransform(1,0,0,1,0,0);
         c.stroke();
     }
-    function drawLockedInfo(spr, col, lWidth,alpha){
+    function drawLockedInfoBig(spr, col, lWidth,alpha){
         c.globalAlpha = alpha;
         c.strokeStyle = col;
         c.lineWidth = lWidth ;
@@ -1046,6 +1050,49 @@ const spriteRender = (()=>{
             }
         }
     }
+    function drawLockedInfoSmall(spr, col, lWidth,alpha){
+        c.globalAlpha = alpha;
+        c.strokeStyle = col;
+        c.lineWidth = lWidth ;
+        c.setTransform(m[0],m[1],m[2],m[3],m[4],m[5]);
+        const mat = spr.key.m;
+        c.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
+        if(spr.image.lockType === media.lockTypes.pixelSet){
+            c.beginPath();
+            c.rect(-spr.cx, -spr.cy, spr.w, spr.h);
+            //c.moveTo(-spr.cx, -spr.cy);
+            //c.lineTo(spr.cx, spr.cy);
+            //c.moveTo(spr.cx, -spr.cy);
+            //c.lineTo(-spr.cx, spr.cy);
+            c.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
+            c.stroke();
+            c.font = "16px Arial";
+            c.textAlign = "center";
+            c.textBaseline = "middle";
+            c.fillStyle = "white";
+            c.strokeStyle = "black";
+            c.lineWidth = 1;
+            var w = c.measureText("LOCKED").width;
+            var scale = 1;
+            c.transform(scale,0,0,scale,spr.x,spr.y + spr.cy + 10);
+            c.strokeText("LOCKED", 0,0);
+            c.fillText("LOCKED", 0,0);
+            if(spr.image.progress !== undefined){
+                c.fillStyle = "black";
+                c.fillRect(-spr.w / 2, 10, spr.w, 10);
+                c.fillStyle = "blue";
+                c.fillRect(-spr.w / 2 + 2, 12, (spr.w -4) * spr.image.progress, 6);
+            }
+        } else {
+            if(spr.image.progress !== undefined){
+                c.fillStyle = "black";
+                c.fillRect(-spr.cx + 4, -spr.cy + 4, (spr.w * 0.25 | 0), 8);
+                c.fillStyle = "blue";
+                c.fillRect(-spr.cx + 6, -spr.cy + 6, ((spr.w * 0.25 | 0)-4) * spr.image.progress, 4);
+            }
+        }
+    }
+    
     function drawMarked(spr) { // experimental displays corners and handles UI from tracking utils
         if(spr.hideCorners) { return }
         const nextCGroup = group => {

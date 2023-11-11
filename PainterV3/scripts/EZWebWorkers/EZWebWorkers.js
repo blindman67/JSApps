@@ -122,9 +122,9 @@ var EZWebWorkers = (function(){
     //
     //**************************************************************************
     // Post job to worker
-    function postJob(worker,job){
+    function postJob(worker, job){
         if(job.args.transfer !== undefined){
-            worker.postMessage({type : "Run", args : job.args},[job.args.transfer]);
+            worker.postMessage({type : "Run", args : job.args}, [job.args.transfer]);
         }else{
             worker.postMessage({type : "Run", args : job.args});
         }
@@ -227,8 +227,7 @@ var EZWebWorkers = (function(){
     // with the function createQueue and pass the queue as the second argument
     // for all workers you want to share jobs with.
     // Callbacks are optional
-    function createWorker(func,options = {}){
-    //function createWorker(func,jobQueue,completeCallback,progressCallback,errorCallback,closeCallback){
+    function createWorker(func,options = {}){    
         var URL, blob, BlobBuilder, functionStr, id, worker;
         options = Object.assign({ jobQueue : {queue : [], workers : []},}, options);
         id = getID();

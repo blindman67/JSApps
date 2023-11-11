@@ -519,6 +519,7 @@ const settings = {
     newSpriteLockScale: true,
     newSpriteLockRotate: true,
     gridSpriteDefaultSteps: 8,
+    smallLockIndicator: true,
    // renderUISize: 10,
 	showMouseInfo: true,            // Shows live info on mouse position and selected sprite
     nameOnCreate: true,
@@ -760,6 +761,7 @@ const settingsHandler = {
             viewLoaded: "When true loaded content is centered to workspace",
             zoomOnLoadedOn: "When true and view loaded is true loaded content is zoomed to fit workspace",
             addLoadedAsCollection: "When true loaded content is added as a collection given the name of the file",
+            smallLockIndicator: "When true the image locked (progress) graphic is reduced in size and not over the sprite",
         },
         sprites: {
             newSpriteLockScale: "If true new sprites have scale locked by default",

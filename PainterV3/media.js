@@ -127,17 +127,18 @@ const media = (()=>{
         can.dependacyFrame = 0;
 		can.ctx.imageSmoothingQuality = 'high';
         can._ID = 1;
+        can.canUndo = true;
         mirror._ID = 2;
         mirror.ctx = mirror.getContext("2d");
         mirror.ctx.imageSmoothingEnabled = false;
         mirror.ctx.buffer_Id = 0;;
 		mirror.ctx.imageSmoothingQuality = 'high';
         mirror.ctx.drawImage(can, 0, 0);
-        can.update = function(flagsOnly, putInUndoBuff = true){
+        can.update = function(flagsOnly, putInUndoBuff = true) {
             if (can.isLocked) { log.warn("Locked drawable can not be updated") } 
             else {
                 if (!flagsOnly){
-                    if (can.processed && can.pushUndo && putInUndoBuff) { can.pushUndo() }
+                    if (can.processed && can.pushUndo && putInUndoBuff && can.canUndo) { can.pushUndo() }
                     mirror.ctx.imageSmoothingEnabled = false;
                     mirror.ctx.clearRect(0, 0, can.w, can.h);
                     mirror.ctx.drawImage(can, 0, 0);
@@ -259,9 +260,7 @@ const media = (()=>{
                         can.ctx.buffer_Id = 0;
                         can.processed = true;
                     }
-                } else {
-                    can.processedData = imgData;  // for example is imgData holds indexed pixels
-                }
+                } else {  can.processedData = imgData; }  // for example is imgData holds indexed pixels
             }
             if (can.pendingLocks === 0){
                 can.isLocked = false;

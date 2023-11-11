@@ -313,6 +313,8 @@ const widget = (() => {
     var selectingAxisId; // 1 x, 2 y, 3 both
     var selectingAxisEdges;  // bit field bits 3,2,1 for left,center, right, or top, center, bottom
     var widgetColor = "yellow";
+    var widgetDrawColor = "yellow";
+    var imageLockedColor = "#28C";
     var selectorColor = "white";
     var audioLevelColor = "#0AF";
     var selectorDashSize = 10;
@@ -680,7 +682,7 @@ const widget = (() => {
         c.setTransform(vm[0], vm[1], vm[2], vm[3], vm[4], vm[5]);
         c.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         c.lineWidth = invS * lineWidth;
-        c.strokeStyle = widgetColor;
+        c.strokeStyle = widgetDrawColor;
         c.beginPath();
         const SX = invLSx * invS;
         const SY = invLSy * invS;
@@ -787,7 +789,7 @@ const widget = (() => {
         c.setTransform(vm[0], vm[1], vm[2], vm[3], vm[4], vm[5]);
         c.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         c.lineWidth = invS * 3;
-        c.strokeStyle = widgetColor;
+        c.strokeStyle = widgetDrawColor;
         c.beginPath();
         if (part === top) {
             c.lineTo(-cx, -cy);
@@ -2225,6 +2227,7 @@ const widget = (() => {
             viewDiagonal = Math.sqrt(w * w + h * h);
         },
         draw() {
+            widgetDrawColor = singleSprite && selection[0]?.image?.isLocked ? imageLockedColor : widgetColor; 
             invS = v.invScale;
             API.updateViewSize();
             if (draggingType !== none && mouse.captured !== id) { draggingType = none }
@@ -2376,6 +2379,8 @@ const widget = (() => {
                 locks.scaleY = spr.locks.scale || spr.locks.scaleY;
                 locks.positionX = spr.locks.position || spr.locks.positionX;
                 locks.positionY = spr.locks.position || spr.locks.positionY;
+                
+                
                 if(spr.type.ISO){
                     const i = spr.iso;
                     mx = i.isx < 0;
@@ -2408,6 +2413,7 @@ const widget = (() => {
                 updateTransform();
 
             } else if (selection.length > 0) {
+                widgetDrawColor = widgetColor;
                 singleSprite = false;
                 active = true;
                 extent = selection.getLocksAndExtent(extent,locks);
@@ -2449,7 +2455,8 @@ const widget = (() => {
     });
     function getSettings(){
         limitModify = settings.limitModify;
-        widgetColor = settings.widgetColor;
+        widgetDrawColor = widgetColor = settings.widgetColor;
+        // imageLockedColor = ???
         selectorColor = settings.selectorColor;
         audioLevelColor = settings.audioLevelColor;
         selectorDashSize = Number(settings.selectorDashSize);

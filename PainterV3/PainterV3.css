@@ -1124,6 +1124,10 @@ td {
     color: #A99;
     cursor: not-allowed;
 }
+.listItem.extraHelp {
+    cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAcCAYAAABh2p9gAAAAAXNSR0IArs4c6QAAAWVJREFUSEu1lj1OxEAMhV96xE9NAUqa3IEDICUlZ03BNShQKBItQojtFgT9IJvxyGtmkpkI0mykjb/45/lNKpRfzodcAHi34VUhz03TxCFN09DPNYBnzSgBumEY0Pc9xxM4Bl0C2tLOARwA3AK4V8AbAI9SfgronPvhVRU/IqVdATgF8KCA9IInKT0XKG2iQRwU7A7AHsBrEZAA4zhy/0xmXwA+AbwUlUzlz/PMQzDANw3jFiVkc9TDBWDonXCKgT7wV+82A1Ny2QykQC1wu4bFJROsbVsekO6taLUYqCEGyBvzl0DemH8DWiOI6pC2pes6Frm+964TMowZwU7MYc0vZYO8C3HJbJp1XWt34QnmXDEg+5yG5oDkmRiQ/iOf222BpoCboAoWdtvKpihTkx1bWUyH2VBbLrl2StgBujQgr78jK1s69Ri6MnGBhWNg7Vwm6CWAkwQ4+0zR8aTTs4VMP/QnyTeeUk9EkFxV4AAAAABJRU5ErkJggg==') 7 4, pointer;    
+}
+
 
 .foldItem {
     text-align : left;
