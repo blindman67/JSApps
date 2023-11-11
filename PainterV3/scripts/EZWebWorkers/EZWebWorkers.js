@@ -123,11 +123,8 @@ var EZWebWorkers = (function(){
     //**************************************************************************
     // Post job to worker
     function postJob(worker, job){
-        if(job.args.transfer !== undefined){
-            worker.postMessage({type : "Run", args : job.args}, [job.args.transfer]);
-        }else{
-            worker.postMessage({type : "Run", args : job.args});
-        }
+        if (job.args.transfer !== undefined) { worker.postMessage({type : "Run", args : job.args}, [job.args.transfer]); }
+        else { worker.postMessage({type : "Run", args : job.args}); }
         worker.completeCallback = job.completeCallback;
         worker.progressCallback = job.progressCallback;   
         worker.errorCallback = job.errorCallback;
@@ -193,11 +190,8 @@ var EZWebWorkers = (function(){
                 }
                 nextJob();         // check for another job
             } else if(type === "Progress"){ // progress message
-                if(typeof worker.progressCallback === "function"){  // is there a progress callback
-                    worker.progressCallback(e.data.progress); // call it
-                }else if(typeof worker.callbacks.progress === "function"){
-                    worker.callbacks.progress(e.data.progress);
-                }
+                if (typeof worker.progressCallback === "function") { worker.progressCallback(e.data.progress) }
+                else if (typeof worker.callbacks.progress === "function") { worker.callbacks.progress(e.data.progress) }
             }
         }
     }

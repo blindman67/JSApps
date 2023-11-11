@@ -1028,6 +1028,7 @@ const utils = (()=>{
             var count = 0;
 
             selection.processImages((img, i, spr) => {
+                spr.prepDrawOn();
                 if (idx > -1) { args[idx] = spr }
                 img.restore(false);
                 const processed = callback(call(img,...args), img, spr); //localProcessImage.halfSizeBitmap(img);
@@ -1047,8 +1048,8 @@ const utils = (()=>{
             call(image,...args);
         },
         processImage(call, image, ...args){
+            sprites.each(spr => { if(spr.type.image && spr.image === image) { spr.prepDrawOn(); return true; } });
             lastProcessingCall = [call,...args];
-
             image.restore(false);
             const processed = call(image,...args);
             sprites.each(spr => { if(spr.type.image && spr.image === image) {  spr.imageResized(true) } });

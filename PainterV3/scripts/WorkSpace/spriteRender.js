@@ -105,7 +105,7 @@ const spriteRender = (()=>{
                 c.lineTo(xx + w * 0.1, y + h - hh);
                 c.lineTo(xx + w * 0.1, y + hh);
                 c.lineTo(xx + w * 0.25, y);
-            } else {            
+            } else {
                 const yy = y + h / 2;
                 const ww = w > 40 ? 20 : w * 0.25
                 c.moveTo(x,                yy - h * 0.25);
@@ -171,7 +171,6 @@ const spriteRender = (()=>{
             c.moveTo(x - 6, y - 3);
             c.lineTo(x,  y);
             c.lineTo(x - 6, y + 3);
-
         },
         [8](spr, x, y, w, h) { // cameraSpr
             c.rect(x,y,w,h);
@@ -250,7 +249,7 @@ const spriteRender = (()=>{
             c.strokeStyle = st;
             c.lineWidth = lw;
             return 0;
-        }        
+        }
     }
     const gridSpecialNames = {
         default: 0,
@@ -703,7 +702,7 @@ const spriteRender = (()=>{
             c.setTransform(1,0,0,1,0,0);
             c.stroke();
         }
-    }	
+    }
     function drawAttached(spr){
         var dx = spr.attachedTo.x - spr.x
         var dy = spr.attachedTo.y - spr.y
@@ -767,14 +766,12 @@ const spriteRender = (()=>{
 				if (spr.fLink.type === "A") {
 					c.save();
             c.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
-            c.transform(1,0,0,1, mat[4], mat[5]);					
+            c.transform(1,0,0,1, mat[4], mat[5]);
 					const txt = spr.fLink.inFrom === "An" ?"@" + spr.name : "*";
 					c.strokeStyle = "black";
 					c.strokeText(txt, -spr.cx, 0);
 					c.fillText(txt, -spr.cx, 0);
-					
 					c.restore();
-										
 				} else {
                     if (Array.isArray(spr.fLink.value )) {
                         let i = 0;
@@ -794,7 +791,7 @@ const spriteRender = (()=>{
                         } else {
                             const str = spr.name + (spr.name[spr.name.length-1] === "#" ? "[" + vStr + "]" : "");
                             c.fillText(str,  -spr.cx,0);
-                        }                        
+                        }
                     } else {
                         if (isNaN(spr.fLink.value) && spr.fLink.value.text && spr.fLink.value.value !== undefined) {
                             if (spr.selected) {
@@ -806,7 +803,6 @@ const spriteRender = (()=>{
                                 const str = (spr.name[spr.name.length-1] === "#" ? ("output." + spr.fLink.value.text + " = " + spr.fLink.value.value?.toFixed(3)) : spr.name );
                                 c.fillText(str,  -spr.cx,0);
                             }
-                            
                         } else {
                             const val = isNaN(spr.fLink.value) ? "" : spr.fLink.value.toFixed(3);
                             if (spr.selected) {
@@ -869,13 +865,12 @@ const spriteRender = (()=>{
         c.stroke();
     }
 	function drawSoundInfo(spr) {
-        
         spr.image.desc.renderPosition(spr);
         c.setTransform(m[0],m[1],m[2],m[3],m[4],m[5]);
         const mat = spr.key.m;
-        c.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);        
+        c.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
         const xx = -spr.cx, yy = -spr.cy;
-        const w = spr.w, h = spr.h, hw = w * 0.5;		
+        const w = spr.w, h = spr.h, hw = w * 0.5;
 		var pos = 0;
 		if (currentAudioTime === 0) { currentAudioTime = Audio.getTime() }
 		const desc = spr.image.desc;
@@ -1016,14 +1011,14 @@ const spriteRender = (()=>{
         const mat = spr.key.m;
         c.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
         if(spr.image.lockType === media.lockTypes.pixelSet){
-            c.beginPath();
-            c.rect(-spr.cx, -spr.cy, spr.w, spr.h);
-            c.moveTo(-spr.cx, -spr.cy);
-            c.lineTo(spr.cx, spr.cy);
-            c.moveTo(spr.cx, -spr.cy);
-            c.lineTo(-spr.cx, spr.cy);
-            c.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
-            c.stroke();
+            //c.beginPath();
+            //c.rect(-spr.cx, -spr.cy, spr.w, spr.h);
+            //c.moveTo(-spr.cx, -spr.cy);
+            //c.lineTo(spr.cx, spr.cy);
+            //c.moveTo(spr.cx, -spr.cy);
+            //c.lineTo(-spr.cx, spr.cy);
+            //c.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
+            //c.stroke();
             c.font = "32px Arial";
             c.textAlign = "center";
             c.textBaseline = "middle";
@@ -1032,25 +1027,35 @@ const spriteRender = (()=>{
             c.lineWidth = 3;
             var w = c.measureText("LOCKED").width;
             var scale = Math.min(spr.w * 0.8 / w, spr.h * 0.8 / 32);
-            c.transform(scale,0,0,scale,spr.x,spr.y);
+            c.transform(scale,0,0,scale, 0, 0);
             c.strokeText("LOCKED", 0,0);
             c.fillText("LOCKED", 0,0);
             if(spr.image.progress !== undefined){
+                var progress = spr.image.progress;
+                if (spr.image.progressInfo) {
+                    const pFrac = 1 / spr.image.progressInfo.totalCount;
+                    progress = spr.image.progressInfo.count  * pFrac + progress * pFrac
+                }
                 c.fillStyle = "black";
                 c.fillRect(-w / 2, 18, w, 10);
                 c.fillStyle = "blue";
-                c.fillRect(-w / 2 + 2, 20, (w -4) * spr.image.progress, 6);
+                c.fillRect(-w / 2 + 2, 20, (w -4) * progress, 6);
             }
         } else {
             if(spr.image.progress !== undefined){
+                var progress = spr.image.progress;
+                if (spr.image.progressInfo) {
+                    const pFrac = 1 / spr.image.progressInfo.totalCount;
+                    progress = spr.image.progressInfo.count  * pFrac + progress * pFrac
+                }
                 c.fillStyle = "black";
                 c.fillRect(-spr.cx + 4, -spr.cy + 4, (spr.w * 0.25 | 0), 8);
                 c.fillStyle = "blue";
-                c.fillRect(-spr.cx + 6, -spr.cy + 6, ((spr.w * 0.25 | 0)-4) * spr.image.progress, 4);
+                c.fillRect(-spr.cx + 6, -spr.cy + 6, ((spr.w * 0.25 | 0)-4) * progress, 4);
             }
         }
     }
-    function drawLockedInfoSmall(spr, col, lWidth,alpha){
+    function drawLockedInfoSmall(spr, col, lWidth, alpha){
         c.globalAlpha = alpha;
         c.strokeStyle = col;
         c.lineWidth = lWidth ;
@@ -1058,33 +1063,39 @@ const spriteRender = (()=>{
         const mat = spr.key.m;
         c.transform(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
         if(spr.image.lockType === media.lockTypes.pixelSet){
-            c.beginPath();
-            c.rect(-spr.cx, -spr.cy, spr.w, spr.h);
-            //c.moveTo(-spr.cx, -spr.cy);
-            //c.lineTo(spr.cx, spr.cy);
-            //c.moveTo(spr.cx, -spr.cy);
-            //c.lineTo(-spr.cx, spr.cy);
-            c.setTransform(m[0], m[1], m[2], m[3], m[4], m[5]);
-            c.stroke();
             c.font = "16px Arial";
             c.textAlign = "center";
             c.textBaseline = "middle";
             c.fillStyle = "white";
             c.strokeStyle = "black";
-            c.lineWidth = 1;
-            var w = c.measureText("LOCKED").width;
-            var scale = 1;
-            c.transform(scale,0,0,scale,spr.x,spr.y + spr.cy + 10);
-            c.strokeText("LOCKED", 0,0);
-            c.fillText("LOCKED", 0,0);
-            if(spr.image.progress !== undefined){
+            c.lineWidth = 2;
+            const text = "LOCKED";
+            if (spr.image.progress === undefined) {
+                c.transform(1, 0, 0, 1, 0, spr.cy + 8);
+                c.strokeText(text, 0,0);
+                c.fillText(text, 0,0);
+            } else {
+                var progress = spr.image.progress;
+                if (spr.image.progressInfo) {
+                    const pFrac = 1 / spr.image.progressInfo.totalCount;
+                    progress = spr.image.progressInfo.count  * pFrac + progress * pFrac;
+                }
+                var w = c.measureText(text).width;
+                c.transform(1, 0, 0, 1, 0, spr.cy + 8);
+                c.strokeText(text, 0,0);
+                c.fillText(text, 0,0);
                 c.fillStyle = "black";
-                c.fillRect(-spr.w / 2, 10, spr.w, 10);
+                c.fillRect(-spr.w / 2, 8, spr.w, 10);
                 c.fillStyle = "blue";
-                c.fillRect(-spr.w / 2 + 2, 12, (spr.w -4) * spr.image.progress, 6);
+                c.fillRect(-spr.w / 2 + 2, 10, (spr.w -4) * progress, 6);
             }
         } else {
             if(spr.image.progress !== undefined){
+                var progress = spr.image.progress;
+                if (spr.image.progressInfo) {
+                    const pFrac = 1 / spr.image.progressInfo.totalCount;
+                    progress = spr.image.progressInfo.count  * pFrac + progress * pFrac
+                }
                 c.fillStyle = "black";
                 c.fillRect(-spr.cx + 4, -spr.cy + 4, (spr.w * 0.25 | 0), 8);
                 c.fillStyle = "blue";
@@ -1092,7 +1103,6 @@ const spriteRender = (()=>{
             }
         }
     }
-    
     function drawMarked(spr) { // experimental displays corners and handles UI from tracking utils
         if(spr.hideCorners) { return }
         const nextCGroup = group => {
@@ -2019,8 +2029,6 @@ const spriteRender = (()=>{
                                     if (spr.image.desc.highlight) {drawBorder(spr, "Yellow", 1 , highlightOccilator, 4*iScale)}
 									if (spr.type.sound) {  drawSoundInfo(spr);  }
                                 }
-
-
                                 //if(spr.image.desc.corners) {drawMarked(spr)}
                             } else if (spr.type.cutter) {
                                 if (spr.type.gradient) { drawGradient(spr) }
@@ -2048,8 +2056,8 @@ const spriteRender = (()=>{
                                 holdRenderEvent = true;
                                 if (spr.shape.isCompound && !hideOutline) { drawShapeIcon(spr , spr.rgb.css, iScale) }
                             }
-                            else if (spr.type.functionLink) { 
-                                drawFunctionLink(spr); 
+                            else if (spr.type.functionLink) {
+                                drawFunctionLink(spr);
                             }
                         }
                         if (spr.type.renderable && spr.hasEvent("onrender")) {
@@ -2065,7 +2073,6 @@ const spriteRender = (()=>{
                             if (spr.type.hasLocators) { drawLocators(spr) }
                             if (spr.locates) { for(const s of spr.locates) { drawLocators(s) } }
                             if (spr.locks.locX || spr.locks.locY) { drawAxisLocks(spr) }
-							
                         }
                         if (spr.type.animated && spr.animation.atKey && spr.selected && !hideOutline) { drawAtKey(spr, onAnimationKeyColor, 1, 1) }
                         if (spr.highlightSelecting || spr.highlight || (spr.shadowedBy && spr.shadowedBy.highlight && spr.shadowedBy.cast.type.openGroup)) {

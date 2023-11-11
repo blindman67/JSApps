@@ -2750,9 +2750,7 @@ const localProcessImage = (()=>{
                                 if (data[1] === false) {
                                     log.warn("Local Process Image worker had problems completing the job!");
                                     done(false);
-                                } else {
-                                    done(true);
-                                }
+                                } else { done(true) }
                             }
                         }
                         API.addEvent("workercomplete", completeEvent);
@@ -8093,32 +8091,35 @@ ${strPM} ];
                                     if (spr.type.image) {
                                         spr.image.restore(false);
                                         if (spr.attachers) {
+                                            spr.prepDrawOn();
                                             messages.length = 0;
                                             const matchers = [...spr.attachers.values()];
+                                            spr.image.progressInfo = {
+                                                count: 0,
+                                                totalCount: matchers.length,
+                                            };
                                             const first = matchers.shift();
-                                            
                                             spr.image.canUndo = true;
                                             var ok = await doSet(spr, first);
                                             if (ok) {
+                                                spr.image.progressInfo.count ++;
                                                 spr.image.canUndo = false;
                                                 for (const find of matchers) { 
                                                     ok = await doSet(spr, find); 
                                                     if (!ok) { break; }
+                                                    spr.image.progressInfo.count ++;
                                                 }
                                             }
+                                            spr.image.progressInfo = undefined;
                                             !ok && messages.push("There was a problem processing images");
                                             spr.image.canUndo = true;
-                                            
                                             if (messages.length) {
                                                 while (messages.length) { log.warn(messages.shift()); }
                                             }
                                         } else { log.warn("Selected sprite does have attached sprites") }
                                     } else { log.warn("Selected sprite does not contain an image") }
-                                } else if (selection.length > 1) {
-                                    log.warn("Find replace only 1 selected sprite at a time");
-                                } else {
-                                    log.warn("Can not find replace nothing selected");
-                                }
+                                } else if (selection.length > 1) { log.warn("Find replace only 1 selected sprite at a time") }
+                                else { log.warn("Nothing selected to work on!") }
                             },
                             useMirror: false,
                             useRotate: false,

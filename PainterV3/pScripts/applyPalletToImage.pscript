@@ -39,15 +39,14 @@ $palletLookup = $palletSpr.pallet.getLookup()
 $matrixSpread = ""
 if localProcessImage.palletApplyValues === "FloydSteinberg" {
 
-
+    $res = $imgSpr.prepDrawOn()
     $res = localProcessImage.createJob("applyPalletToImageFloydSteinberg", $imgSpr.image, $palletLookup)
     jump completed
 
 }
 
 if localProcessImage.palletApplyValues !== "FloydSteinberg" {
-    //$colorSpace = "RGB linear " + localProcessImage.palletApplyValues
-    //$colorSpace = "YIQ " + localProcessImage.palletApplyValues
+    $res = $imgSpr.prepDrawOn()
     $colorSpace = localProcessImage._palletModel + localProcessImage.palletApplyValues
     log $colorSpace
     $res = localProcessImage.createJob("applyPalletToImage", $imgSpr.image, $colorSpace, $palletLookup, $matrixSpread)
