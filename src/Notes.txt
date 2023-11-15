@@ -1,4 +1,4 @@
 Bug and notes for content of ./src
 
 8/2/2020 Name of file ./webGL/texture.jsm should be ./webGL/Texture.jsm to match export name Texture;
-16/112023 Done. Renamed references from ./webGL/texture.jsm to ./webGL/Texture.js
+16/112023 Done. Renamed references from ./webGL/texture.jsm to ./webGL/Texture.js. Renamed all references.
