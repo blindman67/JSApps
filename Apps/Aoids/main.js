@@ -10,7 +10,7 @@ import {media} from "../../src/utils/media.js";
 import {startMouse} from "../../src/DOM/mouse.js";
 import {simpleKeyboard} from "../../src/DOM/keyboard.js";
 import {glUtils} from "../../src/webGL/glUtils.js";
-import {Texture, SpriteSheet} from "../../src/webGL/texture.js";
+import {Texture, SpriteSheet} from "../../src/webGL/Texture.js";
 import {View} from "../../src/View.js";
 import {simpleFrameRate} from "../../src/utils/frameRate.js";
 import {renderer} from "../../src/webGL/renderer.js";

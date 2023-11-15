@@ -1,6 +1,6 @@
 import {} from "../../utils/MathExtensions.js";
 import {glUtils} from "../glUtils.js";
-import {Texture} from "../texture.js";
+import {Texture} from "../Texture.js";
 
 export {spriteShader};
 

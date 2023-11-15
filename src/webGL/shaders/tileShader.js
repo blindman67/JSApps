@@ -1,4 +1,4 @@
-import {Texture} from "../code/texture.js";
+import {Texture} from "../code/Texture.js";
 import {glUtils} from "../code/glUtils.js";
 
 const BIT_VALS = [

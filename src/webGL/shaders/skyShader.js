@@ -1,6 +1,6 @@
 import {} from "../../utils/MathExtensions.js";
 import {glUtils} from "../glUtils.js";
-import {TextureCube} from "../texture.js";
+import {TextureCube} from "../Texture.js";
 
 export {skyShader};
 
