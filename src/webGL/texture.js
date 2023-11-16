@@ -1,4 +1,4 @@
-/* texture V0.92 Beta */
+/* texture V0.93 Beta */
 function textureSetup(gl, texture, target, min, mag, wraps, wrapt = wraps) {
 	gl.bindTexture(target, texture);
 	gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, min);
