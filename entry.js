@@ -1,24 +1,18 @@
 import {$,$$} from "./src/DOM/geeQry.js";
-
-var darkMode = matchMedia('(prefers-color-scheme: dark)').matches;
-const colorSchemes = {dark: null, light: null}
-const setColorScheme = () => schemeCSSLink && (schemeCSSLink.href = darkMode ? colorSchemes.dark : colorSchemes.light);
+import {ColorScheme} from "./src/DOM/ColorScheme.js";
 
 const padder = className => (count) => $.setOf(count, () => $("li",{className}));    
 const addProperty = (name, value) => (value === undefined || value === null || value?.trim() === "") ? {} : {[name]: value};
-
-;setTimeout(async () => {
+setTimeout(async () => {
     const Page = (await import(entryScript.dataset.page)).Page;
     if (Page) {
-        colorSchemes.dark = Page.schemes.dark;
-        colorSchemes.light = Page.schemes.light;
-        
+        ColorScheme.setCSS(Page.schemes.dark, Page.schemes.light);        
         $$($("?head", 0),
             $("title", {textContent: Page.title}),
             ...Page.css.map(href => $("link", {rel: "stylesheet", type: "text/css", href})),
-            $("link", {rel: "stylesheet", type: "text/css", id: "schemeCSSLink", href: (darkMode ? colorSchemes.dark : colorSchemes.light)}),
+            ColorScheme.schemeLink = $("link", {rel: "stylesheet", type: "text/css", id: "schemeCSSLink", href: (ColorScheme.darkMode ? ColorScheme.schemes.dark : ColorScheme.schemes.light)}),
         );
-        matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => ((darkMode = e.matches ? "dark" : "light"), setColorScheme()));   
+        ColorScheme.listen();
 
         const pad = padder(Page.rules.linePad);
         $$(document.body, 
@@ -62,16 +56,12 @@ const addProperty = (name, value) => (value === undefined || value === null || v
                         );
                         res.push(...pad(2));
                         return res;
-                        
                     }).flat())
                 )
             ),
             $("script", {type: "module", src: Page.renderPage})
         );
-        
-        $$(document.body, 
-            $$($("div", {id: "imageOverlayEl", className: Page.rules.imageOverlay, style: {display: "none"}}))
-        );
+        $$(document.body, $$($("div", {id: "imageOverlayEl", className: Page.rules.imageOverlay, style: {display: "none"}})));
     }
 }, 0);
 
