@@ -55,3 +55,26 @@ body {
     margin-top: initial;
 }
 
+#root > ul > li > img {
+    margin: 10px;
+}
+.imageOverlay {
+    position: fixed;
+    top: 0px;    
+    left: 0px;    
+    bottom: 0px;
+    right: 0px;
+    background: #000D;
+    margin: 0px;
+    padding: 0px;
+}
+#overlayImageEl {
+    cursor: pointer;
+    position: absolute;
+    border: 2px solid;
+}
+.overlayImageInfo {
+    font-size: large;
+    position: absolute;
+
+}

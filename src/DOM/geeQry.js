@@ -18,7 +18,7 @@ function $(com, props) {
 			props = Number(props);
 			if (Number(props) < 0) { props = qry.length - props }
 			props = props < 0 ? 0 : props > qry.length - 1 ? qry.length - 1 : props;
-			return qry[prop]
+			return qry[props]
 		}
 		com = com.toLowerCase();
 		com = com === "text" ? document.createTextNode(props) : document.createElement(com);
@@ -46,6 +46,7 @@ $.isObj = val => typeof val === "object" && !Array.isArray(val) && val !== null;
 $.isArr = val => Array.isArray(val);
 $.isNum = val => !isNaN(val);
 $.isStr = val => typeof val === "string";
+$.setOf = (count, cb, i = 0, a = []) => {while (i < count) { a.push(cb(i++)) } return a;}
 $$.INSERT = 0;
 $$.APPEND = 1;
 
