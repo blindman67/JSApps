@@ -32,6 +32,10 @@ const [tableName, sGuides, sGuideComplex] = [setup.split("_")[0], setup.includes
 const SHOW_GUIDES = sGuides;  // Show detailed guide
 const SHOW_FIRST_CONTACT_ONLY = !sGuideComplex; // if SHOW_GUIDS then only to first contact ball. Else traces first ball as well
 const POCKET_ROLL_IN_HELP = 0.2;   
+const GAME_POOL = 1;
+//const GAME_SNOKE = 2;
+const GAME_TYPE = GAME_POOL;
+
 
 /*
 console.log("URL options: underscore seperated options.");
@@ -41,16 +45,17 @@ console.log("Render options `render[noshade_noreflect]`");
 */
 
 const tables = {
-    small: {w: 38, h: 19}, 		// 7ft
-    medium: {w: 44, h: 22}, 		// 8ft
-    standard: {w: 47, h: 23.5}, 	// 8.5ft
-    large: {w: 49, h: 24.5}, 	// 9ft
-    huge: {w: 64, h: 32}, 		// 11ft
-	super: {w: 88, h: 44}, 		// 16FT
+    small: {w: 38, h: 19, d: -26}, 		// 7ft
+    medium: {w: 44, h: 22, d: -26}, 		// 8ft
+    standard: {w: 47, h: 23.5, d: -26}, 	// 8.5ft
+    large: {w: 49, h: 24.5, d: -28}, 	// 9ft
+    huge: {w: 64, h: 32, d: -36}, 		// 11ft
+	super: {w: 88, h: 44, d: -26}, 		// 16FT
 }
 
 const CUSH_W = tables[tableName]?.w ?? tables.standard.w;
 const CUSH_H = tables[tableName]?.h ?? tables.standard.h;
+const D_POS = tables[tableName]?.d ?? tables.standard.d;
 const CUSH_REFERENCE_SIZE = 24;
 const CUSH_SIZE_X = 20;
 const CUSH_SIZE_Y = 20;
@@ -84,7 +89,6 @@ const BAD_BOUNCE_SPREAD = BALL_SIZE * 1;  // Angle width in pixels of bad bounce
 
 const TABLE_COLOR = "#080";  // Must short CSS hash color.
 const TABLE_COLORS = ["#2A3","#293","#283","#273", "#263"];
-//const WHITE_BALL = "#D8D6D4";
 const WHITE_BALL = "#D8D6D4";
 const WHITE_BALL_SCUFF = "#D4D6D8";
 const SHADOW_COLOR = "#0004";
@@ -99,7 +103,7 @@ const VEL_MIN = 1;
 const VEL_MAX = 5;
 const SHADE_X = Math.cos(-Math.PI * 0.25) * BALL_SIZE;
 const SHADE_Y = Math.sin(-Math.PI * 0.25) * BALL_SIZE;
-const rack = [  //  x, y, id start positions and id (id AKA type)
+const rack_POOL = [  //  x, y, id start positions and id (id AKA type)
    10, 1, 0,
    -4, 0, 2,
    -2, 1, 9,  -2,-1, 3,
@@ -107,9 +111,40 @@ const rack = [  //  x, y, id start positions and id (id AKA type)
    2, 3, 11,  2, 1, 5,   2,-1, 12,   2, -3, 8,
    4, 4, 7,   4, 2, 14,  4, 0, 13,   4, -2, 6,  4,-4,15,
 ];
+
+/*const rack_SNOOK = [  //  x, y, id start positions and id (id AKA type)
+   10, 1, 0,
+   
+    D_POS,  6, 1,
+    D_POS,  0, 2,
+    D_POS, -6, 3,
+    -17,  0, 4,
+    -10,  0, 5,
+   
+   -4, 0, 6,
+   -2, 1, 7,  -2,-1, 8,
+   0, 2, 9,   0, 0, 10,   0,-2, 11,
+   2, 3, 12,  2, 1, 13,   2,-1, 14,   2, -3, 15,
+   4, 4, 16,   4, 2, 17,  4, 0, 18,   4, -2, 19,  4,-4, 20,
+   
+   8, 0, 21
+];*/
+const rack = rack_POOL; //GAME_TYPE === GAME_SNOKE ? rack_SNOOK : rack_POOL;
+
 const rackCenter = {x: 0, y: 0}; // value is set when table is created
 const head = {x: 0, y: 0, Dr: 0}; // value is set when table is created. Dr is D radius
-const BALL_COLORS = {
+/*const BALL_COLORS_SNOOK = {
+    white:  WHITE_BALL,
+    red:    "#C21",
+    yellow: "#CC2",
+    green:  "#3A1",
+    brown:  "#851",
+    blue:   "#00E",
+    pink:   "#B66",
+    black:  "#000",
+};*/
+
+const BALL_COLORS_POOL = {
     white:  WHITE_BALL,
     yellow: "#CC2",
     blue:   "#12D",
@@ -120,12 +155,30 @@ const BALL_COLORS = {
     orange: "#D73",
     black:  "#000",
 };
-const colors = [ // by ball idx in rack order
+/*const colors_SNOOK = [ // by ball idx in rack order
    WHITE_BALL,
-   BALL_COLORS.black,
-   BALL_COLORS.yellow, BALL_COLORS.blue, BALL_COLORS.red, BALL_COLORS.purple,  BALL_COLORS.green, BALL_COLORS.brown,   BALL_COLORS.orange,
-   BALL_COLORS.yellow, BALL_COLORS.blue, BALL_COLORS.red, BALL_COLORS.purple,  BALL_COLORS.green, BALL_COLORS.brown,   BALL_COLORS.orange,
+   BALL_COLORS_SNOOK.green,
+   BALL_COLORS_SNOOK.brown,
+   BALL_COLORS_SNOOK.yellow,
+   BALL_COLORS_SNOOK.blue,
+   BALL_COLORS_SNOOK.pink,
+   BALL_COLORS_SNOOK.red,
+   BALL_COLORS_SNOOK.red, BALL_COLORS_SNOOK.red, BALL_COLORS_SNOOK.red, BALL_COLORS_SNOOK.red,  BALL_COLORS_SNOOK.red, BALL_COLORS_SNOOK.red,   BALL_COLORS_SNOOK.red,
+   BALL_COLORS_SNOOK.red, BALL_COLORS_SNOOK.red, BALL_COLORS_SNOOK.red, BALL_COLORS_SNOOK.red,  BALL_COLORS_SNOOK.red, BALL_COLORS_SNOOK.red,   BALL_COLORS_SNOOK.red,
+   BALL_COLORS_SNOOK.black,
+];*/
+const colors_POOL = [ // by ball idx in rack order
+   WHITE_BALL,
+   BALL_COLORS_POOL.black,
+   BALL_COLORS_POOL.yellow, BALL_COLORS_POOL.blue, BALL_COLORS_POOL.red, BALL_COLORS_POOL.purple,  BALL_COLORS_POOL.green, BALL_COLORS_POOL.brown,   BALL_COLORS_POOL.orange,
+   BALL_COLORS_POOL.yellow, BALL_COLORS_POOL.blue, BALL_COLORS_POOL.red, BALL_COLORS_POOL.purple,  BALL_COLORS_POOL.green, BALL_COLORS_POOL.brown,   BALL_COLORS_POOL.orange,
 ];
+
+const colors = colors_POOL;//GAME_TYPE === GAME_SNOKE ? colors_SNOOK : colors_POOL;
+
+
+
+
 const BALL_COUNT = colors.length;
 const PW = POCKET_SIZE * 1.4, PW1 = POCKET_SIZE * 1.2, PW11 = POCKET_SIZE * 1.1, PW2 = POCKET_SIZE;
 const PC = CUSH_W / 2, PI = 0.1, PI1 = 0.3, PI11 = 0.45, PI3 = 0.6;
@@ -612,6 +665,8 @@ Line.prototype = {
     }
     
 };*/
+
+const colConvert = {"0": "0", "1": "0", "2": "1", "3": "2", "4": "3", "5": "4", "6": "5", "7": "6", "8": "7", "9": "8", "A": "9", "B": "A", "C": "B", "D": "C", "E": "D", "F": "E", "a": "9", "b": "A", "c": "B", "d": "C", "e": "D", "f": "E"};
 function Ball(x, y, id) {
     this.x = x;
     this.y = y;
@@ -620,6 +675,14 @@ function Ball(x, y, id) {
     this.vy = 0;
     this.id = id;
     this.col = colors[id];
+    /*if (GAME_TYPE === GAME_SNOKE) {
+        if (this.col.length === 4) {
+            this.scufCol = "#" + colConvert[this.col[1]] + colConvert[this.col[2]] + colConvert[this.col[3]];
+        } else if (this.col.length === 7) {
+            this.scufCol = "#" + colConvert[this.col[1]] + colConvert[this.col[2]] + colConvert[this.col[3]] + colConvert[this.col[4]] + colConvert[this.col[5]] + colConvert[this.col[6]];
+        }
+    }*/
+        
     this.center = {x:0, y:0, z:1};  // center of stripe
     this.centerS = {x:1, y:0, z:0}; // center of circle
     this.roll = {x:0, y: Math.rand(0,Math.TAU), z: Math.rand(0,Math.TAU)};
@@ -881,17 +944,23 @@ Ball.prototype = {
         ctx.beginPath();
         ctx.arc(0, 0, BALL_SIZE, 0, Math.PI * 2);
         ctx.fill();
-        if (this.id) {
-            if (this.id > 8) {
-                this.drawSection(c.x,c.y,c.z, MARK_SIZE)
-                this.drawSection(cS.x,cS.y,cS.z, MARK_SIZE_S)
-            } else {
-                this.drawSection(c.x,c.y,c.z, MARK_SIZE_S)
+        /*if (GAME_TYPE !== GAME_SNOKE) {*/
+            if (this.id) {
+                if (this.id > 8) {
+                    this.drawSection(c.x,c.y,c.z, MARK_SIZE)
+                    this.drawSection(cS.x,cS.y,cS.z, MARK_SIZE_S)
+                } else {
+                    this.drawSection(c.x,c.y,c.z, MARK_SIZE_S)
+                }
+            } else if (allowSpinControl){
+                this.drawSection(c.x,c.y,c.z, BALL_SIZE * 0.2, WHITE_BALL_SCUFF);
+                this.drawSection(cS.x,cS.y,cS.z, BALL_SIZE * 0.2, WHITE_BALL_SCUFF);
             }
-        } else if (allowSpinControl){
-            this.drawSection(c.x,c.y,c.z, BALL_SIZE * 0.2, WHITE_BALL_SCUFF);
-            this.drawSection(cS.x,cS.y,cS.z, BALL_SIZE * 0.2, WHITE_BALL_SCUFF);
-        }
+            
+        /*} else {
+            this.drawSection(c.x,c.y,c.z, BALL_SIZE * 0.15, this.scufCol);
+            this.drawSection(cS.x,cS.y,cS.z, BALL_SIZE * 0.1, this.scufCol);            
+        }*/
 		
 		const OVER_SCALE = 1.1;
 		if (RENDER_COMPLEX_BALLS) {

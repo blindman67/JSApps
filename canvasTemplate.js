@@ -26,6 +26,7 @@ import {ImageOverlay} from "./src/DOM/ImageOverlay.js";
     }
     $("?#root", 0).style.display = null;
     centreElement(root);
+    addEventListener("resize", () => { centreElement(root) });
 
 })();
 
