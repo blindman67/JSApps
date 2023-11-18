@@ -38,11 +38,13 @@ body {
 	cursor: default;
     white-space: pre;
     min-height: 12px;
+
 }
 #root > ul > li.ignore.head {
     font-size: xx-large;
     text-align: center;
     margin-top: 50px;
+    border-top: 2px solid;
 }
 #root > ul > li.ignore.bigHead {
     font-size: xxx-large;
@@ -61,7 +63,7 @@ body {
 }
 
 #root > .pageHeader {
-    border-bottom: 2px solid;
+    border-bottom: 1px solid;
     position: fixed;
     top: 0px;
     left: 0px;
@@ -77,14 +79,16 @@ body {
 }
 .externLink {
     text-decoration: none;
-    margin: 20px;
     position: absolute;
-    top: -14px;    
+    top: 8px;    
+    padding-left: 10px;
+    padding-right: 10px;
 }
-/*.hide {
-    opacity: 0;
-    display: none;
-}*/
+.externImgLink {
+    text-decoration: none;
+    position: absolute;
+    top: 8px;    
+}
 .imageOverlay {
     position: fixed;
     top: 0px;    
@@ -103,9 +107,7 @@ body {
 .overlay.info {
     font-size: x-large;
     position: absolute;
+    padding-left: 20px;
+    padding-right: 20px;    
+   
 }
-/*
-@keyframes fadeIn {  
-   from { opacity: 0; }  
-   to { opacity:1; }  
-}*/

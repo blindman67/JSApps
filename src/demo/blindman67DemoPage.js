@@ -31,6 +31,7 @@ const css = {  // CSS class names
     linePad: "ignore",
     imageWrap: "ignore help",
     extern: "externLink",
+    externImg: "externImgLink",
     header: "pageHeader",
     image: "",
     imageOverlay: "imageOverlay",
@@ -43,22 +44,28 @@ const extras = {
 };
 
 const Page = FZ({
+    extras: FZ(extras),
     title: "Blindman67 Demos",
     icon: "./media/BlindmanLogo.png",
-    schemes: FZ({
-        dark: "darkScheme.css",
-        light: "lightScheme.css",
-    }),
+    schemes: FZ({dark: "darkScheme.css", light: "lightScheme.css"}),
     css: FZ(["canvasTemplate.css"]),
     rules: FZ({...css}),
     renderPage: "canvasTemplate.js",
-    external: FZ([
-        {name: "CodePen", title: "Open in new TAB\nBlindman67 at CodePen", link: "https://codepen.io/Blindman67", className: css.extern},
-        {name: "Shadertoy", title: "Open in new TAB\nBlindman67 at Shadertoy", link: "https://www.shadertoy.com/user/Blindman67", className: css.extern},
-        {name: "Github", title: "Open in new TAB\nBlindman67 at Github", link: "https://github.com/blindman67", className: css.extern},
-        {name: "StackOverflow", title: "Open in new TAB\nBlindman67 at StackOverflow", link: "https://stackexchange.com/users/4801111", image: sizeImage("https://stackexchange.com/users/flair/4801111.png", undefined, 208, 58), className: css.extern },
+    description: FZ([ /* Meta page description */
+        "Applications written by Blindman67 as javascript experiments.",
+        "This page contains links to a set of JavaScript games and utility apps",
+        "2D Image editing, animation, and content creation application called PainterV3.",
+        "JavaScript and WebGL space base building and arcade action game.",
+        "Verlet intergation simulator and scene editor call Sticks. Online example includes several example scenes.",
+        "High quality billards (AKA pool) simulation, render using only 2D canvas API.",        
     ]),
-    extras: FZ(extras),
+    external: FZ([
+        {name: "CodePen", title: "Blindman67 at CodePen\nOpens in new TAB", link: "https://codepen.io/Blindman67", className: css.extern},
+        {name: "Shadertoy", title: "nBlindman67 at Shadertoy\nOpens in new TAB", link: "https://www.shadertoy.com/user/Blindman67", className: css.extern},
+        {name: "Github", title: "Blindman67 at Github\nOpens in new TAB", link: "https://github.com/blindman67", className: css.extern},
+        {name: "StackOverflow", title: "Blindman67 at StackExchange\nOpens in new TAB", link: "https://stackexchange.com/users/4801111", className: css.externImg, image: sizeImage("https://stackexchange.com/users/flair/4801111.png", "Open in new TAB\nBlindman67 at StackOverflow", 208, 58) },
+    ]),
+
     content: FZ({        
         heading: FZ({
             title: content("JavaScript experiments by Blindman67", css.bigHead),

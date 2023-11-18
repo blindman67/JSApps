@@ -1,42 +1,59 @@
+:root {
+  --bgColorA: #FFF;
+  --bgColorB: #EEE;
+  --bgColorC: #DDD;
+  
+  --linkBorderColor: #AAF;
+  --borderColor: #BBB;
+  --linkHoverBG: #FDB;
+  --linkHoverColor: #00A;
+}
 body {
-    background: #EEE;
+    background: var(--bgColorB);
 }
 #root {
-    background: #FFF;
+    background: var(--bgColorA);
 }
 #root > ul > li {
-    color: #00A;
+    color: var(--linkHoverColor);
 }
 #root > ul > .links {
-    border-bottom-color: #AAF;
+    border-bottom-color: var(--linkBorderColor);
 }
 #root > ul > li.link {
-    border-bottom-color: #AAF;
+    border-bottom-color: var(--linkBorderColor);
 }
 #root > ul > li > span.link {
-    border-bottom-color: #AAF;
+    border-bottom-color: var(--linkBorderColor);
 }
 #root > ul > li > span.link:hover {
-	color: #00A;
-	background-color: #FDB;
+	color: var(--linkHoverColor);
+	background-color: var(--linkHoverBG);
 }
 #root > ul > li.link:hover {
-	color: #00A;
-	background-color: #FDB;
+	color: var(--linkHoverColor);
+	background-color: var(--linkHoverBG);
 }
 #root > ul > li.ignore {
     color: black;
 }
 #root > ul > li.ignore.head {
     border-top-color: black;
-    border-top: 2px solid;
 } 
 #root > ul > li > img {
     border: 3px solid #000;
 }
 #root > .pageHeader {
-    background: #DDD;
+    background: var(--bgColorC);
+    box-shadow: 0px 5px 5px #0006;    
 }
 .externLink {
-    color:  #00A;
+    color:  var(--linkHoverColor);
+}
+.externLink:hover {
+	background-color: #BBD;
+	color: #322;
+}
+.overlay.info {
+    background: #FFF8;
 }

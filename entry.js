@@ -10,10 +10,12 @@ setTimeout(async () => {
         ColorScheme.setCSS(Page.schemes.dark, Page.schemes.light);        
         $$($("?head", 0),
             $("title", {textContent: Page.title}),
+            $("meta", {name: "description", content: Page.description.join("\n")}),
             ...Page.css.map(href => $("link", {rel: "stylesheet", type: "text/css", href})),
             ColorScheme.schemeLink = $("link", {rel: "stylesheet", type: "text/css", id: "schemeCSSLink", href: (ColorScheme.darkMode ? ColorScheme.schemes.dark : ColorScheme.schemes.light)}),
         );
         ColorScheme.listen();
+
 
         const pad = padder(Page.rules.linePad);
         document.body._extras = Page.extras;
@@ -26,12 +28,13 @@ setTimeout(async () => {
                             return $$($("a", {
                                         href: extern.link, 
                                         target: "_blank", 
-                                        ...addProperty("title", extern.title), 
+                                        //...addProperty("title", extern.title), 
                                         ...addProperty("className", extern.className),
-                                        style: { left: "-17px", top: "-17px" }
+                                        style: { left: "4px", top: "3px" }
                                     }),
                                     $("img", {
                                         src: extern.image.src + (ColorScheme.darkMode ? "?theme=dark" : ""),
+                                        ...addProperty("title", extern.title), 
                                         ...addProperty("width", extern.image.width),
                                         ...addProperty("height", extern.image.height),
                                     })
@@ -44,7 +47,7 @@ setTimeout(async () => {
                                 target: "_blank", 
                                 ...addProperty("title", extern.title), 
                                 ...addProperty("className", extern.className),
-                                style: { right: idx * 100 + "px" }
+                                style: { right: (idx * 100 + 20) + "px" }
                             }
                         )
                     })

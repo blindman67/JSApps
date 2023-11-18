@@ -2352,6 +2352,14 @@ function doMouseInterface() {
 }
 var paused = false;
 
+var resizeDebounce;
+addEventListener("resize", () => {
+    clearTimeout(resizeDebounce);
+    resizeDebounce = setTimeout(() => {
+        location.reload();
+    }, 500);
+    
+});
 
 
 function mainLoop() {
