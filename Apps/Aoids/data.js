@@ -193,9 +193,9 @@ const data = {
 		bonusColorAccent: 0xFFFF77FF,
 		orbits: {
             start: [{
-				minDist: 7000,
-				maxDist: 12000,
-				count: 200,
+				minDist: 8000,
+				maxDist: 22000,
+				count: 600,
                 scales: [1.75,1.5],    // randomly selected scales
                 hpScale: 2,           // per scale point
 				colors: [0xFF778877, 0xFF667766, 0xFF556655],

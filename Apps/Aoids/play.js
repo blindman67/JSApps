@@ -59,6 +59,15 @@ function showInstructionsLevel1(e, data) {
         }
         gamePlayState.instructions.pos = gamePlayState.instructions.length;
     }
+    if (gamePlayState.instructions === undefined) {
+        if (gamePlayState.levelInstructions) {
+            gamePlayState.levelInstructions.stop();
+            gamePlayState.levelInstructions = undefined;                
+        }
+        VIEW_MODES.viewLocked = false;
+        createRocks();            
+        return;        
+    }
     if (gamePlayState.instructions.pos === gamePlayState.instructions.length) {
         gamePlayState.levelInstructions.stop();
         gamePlayState.levelInstructions = undefined;

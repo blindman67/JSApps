@@ -34,3 +34,9 @@ body {
 #root > ul > li > img {
     border: 3px solid #000;
 }
+#root > .pageHeader {
+    background: #DDD;
+}
+.externLink {
+    color:  #00A;
+}

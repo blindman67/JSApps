@@ -362,8 +362,6 @@ Rock.prototype = {
     },
 	init(dontScale = false) {
 		if(!this.fixed) {
-
-
             this.alive = true;
 			this.changed = 2;
             this.otherHalf = undefined;
@@ -489,7 +487,7 @@ Rock.prototype = {
 		this.rock = 0;
 		this.alive = true;
         this.countDown = 0;
-		const sunDist = Math.random() * (orbit.maxDist - orbit.minDist) + orbit.minDist;
+		const sunDist = Math.random() * Math.random() * (orbit.maxDist - orbit.minDist) + orbit.minDist;
 		const ang = (Math.TAU / orbit.maxCount) * orbit.count;
 		this.x = Math.cos(ang) * sunDist;
 		this.y = Math.sin(ang) * sunDist;
@@ -1510,7 +1508,7 @@ function Rocks() {
             }
             while(idx < orbits.length) {
                 const o = orbits[idx];
-                while(o.count < o.maxCount) {
+                while(o.count < o.maxCount && size < o.maxCount) {
                     rocks.newItem().random(idx).init().asMemberOfCurrentTeam()
                 }
                 idx ++;

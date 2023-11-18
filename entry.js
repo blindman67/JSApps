@@ -1,8 +1,9 @@
 import {$,$$} from "./src/DOM/geeQry.js";
 import {ColorScheme} from "./src/DOM/ColorScheme.js";
+import {simpleKeyboard} from "./src/DOM/keyboard.js";
 
 const padder = className => (count) => $.setOf(count, () => $("li",{className}));    
-const addProperty = (name, value) => (value === undefined || value === null || value?.trim() === "") ? {} : {[name]: value};
+const addProperty = (name, value) => (value === undefined || value === null || value?.trim?.() === "") ? {} : {[name]: value};
 setTimeout(async () => {
     const Page = (await import(entryScript.dataset.page)).Page;
     if (Page) {
@@ -15,13 +16,45 @@ setTimeout(async () => {
         ColorScheme.listen();
 
         const pad = padder(Page.rules.linePad);
+        document.body._extras = Page.extras;
         $$(document.body, 
             $$($("div", {id: "root", style: {display: "none"}}),
+                $$($("div", {className: Page.rules.header}),
+                    $("H2", Page.content.heading.title),
+                    ...Page.external.map((extern, idx) => {
+                        if (extern.image) {
+                            return $$($("a", {
+                                        href: extern.link, 
+                                        target: "_blank", 
+                                        ...addProperty("title", extern.title), 
+                                        ...addProperty("className", extern.className),
+                                        style: { left: "-17px", top: "-17px" }
+                                    }),
+                                    $("img", {
+                                        src: extern.image.src + (ColorScheme.darkMode ? "?theme=dark" : ""),
+                                        ...addProperty("width", extern.image.width),
+                                        ...addProperty("height", extern.image.height),
+                                    })
+                            );
+                            
+                        }
+                        return $("a", {
+                                href: extern.link, 
+                                textContent: extern.name, 
+                                target: "_blank", 
+                                ...addProperty("title", extern.title), 
+                                ...addProperty("className", extern.className),
+                                style: { right: idx * 100 + "px" }
+                            }
+                        )
+                    })
+                ),
                 $$($("ul", {}),
-                    $("li", Page.content.heading.title),
+                    ...pad(4),
+                    //$("li", Page.content.heading.title),
                     $("li", Page.content.heading.copyright),
-                    $("li", Page.content.heading.desc),
-                    ...pad(2),
+                    ...Page.content.heading.desc.map(desc => $("li", desc)),
+                    //...pad(2),
                     ...(Page.content.apps.map(app => {
                         var dat, res = [];
                         app.name && res.push($("li", app.name));
@@ -44,10 +77,12 @@ setTimeout(async () => {
                         app.images && res.push(
                             $$($("li", {className: Page.rules.imageWrap}),
                                 ...app.images.map(img => $("img", {
-                                        src: img.ref, 
+                                        src: img.src, 
                                         width: Page.extras.imageSize, 
                                         ...addProperty("className", Page.rules.image), 
-                                        ...addProperty("title", img.help),
+                                        ...addProperty("title", img.title),
+                                        ...addProperty("width", img.width),
+                                        ...addProperty("height", img.height),                                        
                                         _imgSet: app.images,
                                         _imgIdx: dat++,
                                     })
@@ -62,6 +97,15 @@ setTimeout(async () => {
             $("script", {type: "module", src: Page.renderPage})
         );
         $$(document.body, $$($("div", {id: "imageOverlayEl", className: Page.rules.imageOverlay, style: {display: "none"}})));
+        const keyboard = simpleKeyboard();
+        keyboard.addKey("KeyD", "KeyL");
+        keyboard.onKey = (keyCode) => {
+            if (keyCode === "KeyD") {
+                ColorScheme.useDark();
+            } else if (keyCode === "KeyL") {
+                ColorScheme.useLight();
+            }
+        };        
     }
 }, 0);
 

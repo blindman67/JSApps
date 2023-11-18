@@ -108,16 +108,21 @@ const keyboard = (()=>{
 function simpleKeyboard() {
 	const keys = {};
 	var downCount = 0;
+    var onKeyCB;
 	function keyEvent(e) {
-		const keyDown = e.type === "keydown"
+		const keyDown = e.type === "keydown";
+        var isDefinedKey = false;
 		if(keys[e.code] !== undefined) {
 			keys[e.code] = keyDown;
 			e.preventDefault();
+            isDefinedKey = true;
 		}
 		if(keys.anyKey !== undefined) {
 			downCount += keyDown ? 1 : -1;
 			keys.anyKey = keyDown > 0;
-		}
+            keyDown && onKeyCB && onKeyCB(e.code);
+            
+		} else if (isDefinedKey) { keyDown && onKeyCB && onKeyCB(e.code); }
 	}
 	const API = {
 		keys,
@@ -125,6 +130,7 @@ function simpleKeyboard() {
 			for(const name of Object.keys(keys)) { keys[name] = false }
 		},
 		addKey(...names) { for(const name of names) { keys[name] = false }; return keys },
+        set onKey(callback) { callback && callback instanceof Function && (onKeyCB = callback); }
 	};
 	document.addEventListener("keydown", keyEvent);
 	document.addEventListener("keyup", keyEvent);

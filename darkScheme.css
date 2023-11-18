@@ -38,3 +38,9 @@ body {
 #root > ul > li > img {
     border: 3px solid #BBB;
 }
+#root > .pageHeader {
+    background: #333;
+}
+.externLink {
+    color: #DDF;
+}

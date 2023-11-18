@@ -1,4 +1,5 @@
 body {
+    user-select: none;
 	font-family: arial;
 }
 #root {
@@ -41,7 +42,7 @@ body {
 #root > ul > li.ignore.head {
     font-size: xx-large;
     text-align: center;
-    margin-top: 120px;
+    margin-top: 50px;
 }
 #root > ul > li.ignore.bigHead {
     font-size: xxx-large;
@@ -58,23 +59,53 @@ body {
 #root > ul > li > img {
     margin: 10px;
 }
+
+#root > .pageHeader {
+    border-bottom: 2px solid;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    min-height: 64px;
+}
+#root > .pageHeader > h2.ignore.bigHead {
+    font-family: monospace;
+    font-size: xxx-large;
+    font-weight: 300;
+    text-align: center;
+    margin: 0px;    
+}
+.externLink {
+    text-decoration: none;
+    margin: 20px;
+    position: absolute;
+    top: -14px;    
+}
+/*.hide {
+    opacity: 0;
+    display: none;
+}*/
 .imageOverlay {
     position: fixed;
     top: 0px;    
     left: 0px;    
     bottom: 0px;
     right: 0px;
-    background: #000D;
+    background: #0008;
     margin: 0px;
     padding: 0px;
 }
-#overlayImageEl {
+.overlay.image {
     cursor: pointer;
     position: absolute;
-    border: 2px solid;
+    border: 3px solid;
 }
-.overlayImageInfo {
-    font-size: large;
+.overlay.info {
+    font-size: x-large;
     position: absolute;
-
 }
+/*
+@keyframes fadeIn {  
+   from { opacity: 0; }  
+   to { opacity:1; }  
+}*/
