@@ -37,9 +37,7 @@ function $$(el, ...sibs) {
 	return el;
 }
 function $R(fromEl, ...els){
-	for (const el of els) {
-		fromEl.removeChild(el);
-	}
+	for (const el of els) { fromEl.removeChild(el) }
 	return fromEl;
 }
 $.isObj = val => typeof val === "object" && !Array.isArray(val) && val !== null;
@@ -49,8 +47,4 @@ $.isStr = val => typeof val === "string";
 $.setOf = (count, cb, i = 0, a = []) => {while (i < count) { a.push(cb(i++)) } return a;}
 $$.INSERT = 0;
 $$.APPEND = 1;
-
- 
 export {$, $$, $R};
-        
-        

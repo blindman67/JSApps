@@ -608,7 +608,6 @@ function Line(x1, y1, x2, y2, isPocket) {
     y1 += INSET;
     x2 += INSET;
     y2 += INSET;
-
     this.x1 = x1;
     this.y1 = y1;
     this.x2 = x2;
@@ -629,24 +628,13 @@ Line.prototype = {
             const ny = ball.x - (this.x1 - y * rScale);
             const u1 = this.u = (ball.vx * nx - ball.vy * ny) / d;
             if (u1 >= 0 && u1 <= 1) {  return (x * nx - y * ny) / d }
-            let xe, ye;
-            if (u1 > -rScale && u1 < 0) {
-                xe = this.x1;
-                ye = this.y1;
-            }
-            if (u1 > 1 && u1 < 1 + rScale) {
-                xe = this.x2;
-                ye = this.y2;
-            }
-            if (xe!== undefined) { // if near ends of line check end point as vector intercept circle
-                const vx = ball.vx, vy = ball.vy, v1Sqr = vx * vx + vy * vy;
-                const xx = ball.x - this.x1, yy = ball.y - this.y1, blSqr = xx * xx + yy * yy;
-                var b = -2 * (xx * vx + yy * vy);
-                const c = 2 * v1Sqr;
-                const d = (b * b - 2 * c * (blSqr - BALL_SIZE_SQR)) ** 0.5;
-                if (isNaN(d)) { return }
-                return (b - d) / c;
-            }
+            const  [xe, ye] = u1 < 0 ? [this.x1, this.y1] : [this.x2, this.y2];
+            const vx = ball.vx, vy = ball.vy;
+            const xx = ball.x - xe, yy = ball.y - ye;
+            const b = -2 * (xx * vx + yy * vy);
+            const c =  2 * (vx * vx + vy * vy);
+            const dSqr = (b * b - 2 * c * (xx * xx + yy * yy - BALL_SIZE_SQR));
+            return dSqr > 0 ? (b - (dSqr ** 0.5)) / c : undefined;
         }
     }
 }
