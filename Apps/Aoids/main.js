@@ -108,7 +108,7 @@ const bgRGBA = {r: 0.02, g: 0.06, b: 0.1, a: 1};
 var animLoopFunction = loadingLoop;
 var pause = false;
 var imageCount = 3;
-requestAnimationFrame(animLoopFunction);
+
 
 media.loadImage("",data.spriteSheet.image)
 	.then(image => {
@@ -139,6 +139,61 @@ Aoids.shaders = {
 	sprites: spriteShader({maxLength: data.spriteSheet.maxSpriteCount, defaultSprite: {z: 0.1}}),
 	spritesOverlay: spriteShader({maxLength: 1024, defaultSprite: {z: 0.02}}),
 };
+
+const FrameRate = ((targetRate = 60) => {
+    const MAX_FRAME_TIME = 1000 / 15;
+    const Rate = (rate, skip = Math.round(rate / targetRate)) => ({rate, skip, delta: 1000 / rate});
+    var startTime, lastFrame, animLoop, minFrameTime = Infinity, polling, testTime;
+    const knownRates = [Rate(60), Rate(120), Rate(144), Rate(165), Rate(240)];
+    function findFrameRate(fTime) {
+        if (lastFrame) { 
+            const deltaTime = fTime - lastFrame;
+            if (deltaTime > MAX_FRAME_TIME) {  // somethings wrong
+                lastFrame = undefined;
+                minFrameTime = Infinity;
+                requestAnimationFrame(findFrameRate);
+                return;
+            }
+            minFrameTime = Math.min(minFrameTime, deltaTime) 
+        } else { startTime = fTime  }
+        lastFrame = fTime;
+        if (fTime - startTime < testTime) {
+            requestAnimationFrame(findFrameRate);
+        } else {
+            const rate = knownRates.find((rate, i) => i < knownRates.length - 2 ? (minFrameTime > knownRates[i + 1].delta) : true );
+            getRate.rate = rate.rate;
+            getRate.skip = rate.skip;
+            getRate.count = 0;
+            (window.log && log("FPS: " + getRate.rate)) ?? console.log("FPS: " + getRate.rate);
+            requestAnimationFrame(animLoop);
+        }
+    }
+    function getRate(animLoopCB, testCount) {
+        if (!polling) {
+            polling = true;
+            lastFrame = undefined;
+            animLoop = animLoopCB;
+            testTime = testCount * knownRates[0].delta;
+            minFrameTime = Infinity;
+            requestAnimationFrame(findFrameRate);
+        }
+    }
+    getRate.reset = () => { 
+        polling = false;
+        getRate.count = 0;
+        getRate.rate = 0;
+        getRate.skip = 1;
+    }
+    getRate.reset();
+    return getRate;
+})();
+
+requestAnimationFrame(startLoop);
+
+function startLoop(time) {
+    if (FrameRate.rate === 0) { return FrameRate(animLoopFunction, 15) }
+}
+
 function loadingComplete() {
 	new SpriteSheet(data.spriteSheet.sprites, data.spriteSheet.texture);
 	new SpriteSheet(data.overlaySpriteSheet.sprites, data.overlaySpriteSheet.texture);
@@ -186,7 +241,13 @@ function loadingLoop(time) {
 	requestAnimationFrame(animLoopFunction);
 }
 
+
+
+
 function mainLoop(time) {
+    FrameRate.count ++;
+    if (FrameRate.count % FrameRate.skip) { return requestAnimationFrame(animLoopFunction) }
+    
 	Aoids.frameStart(time);
 	var ticked = false;
 	if (debugCanvas) {

@@ -2417,9 +2417,60 @@ addEventListener("resize", () => {
     }, 500);
     
 });
+const FrameRate = ((targetRate = 60) => {
+    const MAX_FRAME_TIME = 1000 / 15;
+    const Rate = (rate, skip = Math.round(rate / targetRate)) => ({rate, skip, delta: 1000 / rate});
+    var startTime, lastFrame, animLoop, minFrameTime = Infinity, polling, testTime;
+    const knownRates = [Rate(60), Rate(120), Rate(144), Rate(165), Rate(240)];
+    function findFrameRate(fTime) {
+        if (lastFrame) { 
+            const deltaTime = fTime - lastFrame;
+            if (deltaTime > MAX_FRAME_TIME) {  // somethings wrong
+                lastFrame = undefined;
+                minFrameTime = Infinity;
+                requestAnimationFrame(findFrameRate);
+                return;
+            }
+            minFrameTime = Math.min(minFrameTime, deltaTime) 
+        } else { startTime = fTime  }
+        lastFrame = fTime;
+        if (fTime - startTime < testTime) {
+            requestAnimationFrame(findFrameRate);
+        } else {
+            const rate = knownRates.find((rate, i) => i < knownRates.length - 2 ? (minFrameTime > knownRates[i + 1].delta) : true );
+            getRate.rate = rate.rate;
+            getRate.skip = rate.skip;
+            getRate.count = 0;
+            (window.log && log("FPS: " + getRate.rate)) ?? console.log("FPS: " + getRate.rate);
+            requestAnimationFrame(animLoop);
+        }
+    }
+    function getRate(animLoopCB, testCount) {
+        if (!polling) {
+            polling = true;
+            lastFrame = undefined;
+            animLoop = animLoopCB;
+            testTime = testCount * knownRates[0].delta;
+            minFrameTime = Infinity;
+            requestAnimationFrame(findFrameRate);
+        }
+    }
+    getRate.reset = () => { 
+        polling = false;
+        getRate.count = 0;
+        getRate.rate = 0;
+        getRate.skip = 1;
+    }
+    getRate.reset();
+    return getRate;
+})();
 
 
-function mainLoop() {
+function mainLoop(time) {
+    if (FrameRate.rate === 0) { return FrameRate(mainLoop, 15) }
+    FrameRate.count ++;
+    if (FrameRate.count % FrameRate.skip) { return requestAnimationFrame(mainLoop) }
+
     var allStopped;
 	if (keys.KeyP) {
 		paused = !paused;
