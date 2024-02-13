@@ -130,7 +130,6 @@ const rack_POOL = [  //  x, y, id start positions and id (id AKA type)
    8, 0, 21
 ];*/
 const rack = rack_POOL; //GAME_TYPE === GAME_SNOKE ? rack_SNOOK : rack_POOL;
-
 const rackCenter = {x: 0, y: 0}; // value is set when table is created
 const head = {x: 0, y: 0, Dr: 0}; // value is set when table is created. Dr is D radius
 /*const BALL_COLORS_SNOOK = {
@@ -173,12 +172,7 @@ const colors_POOL = [ // by ball idx in rack order
    BALL_COLORS_POOL.yellow, BALL_COLORS_POOL.blue, BALL_COLORS_POOL.red, BALL_COLORS_POOL.purple,  BALL_COLORS_POOL.green, BALL_COLORS_POOL.brown,   BALL_COLORS_POOL.orange,
    BALL_COLORS_POOL.yellow, BALL_COLORS_POOL.blue, BALL_COLORS_POOL.red, BALL_COLORS_POOL.purple,  BALL_COLORS_POOL.green, BALL_COLORS_POOL.brown,   BALL_COLORS_POOL.orange,
 ];
-
 const colors = colors_POOL;//GAME_TYPE === GAME_SNOKE ? colors_SNOOK : colors_POOL;
-
-
-
-
 const BALL_COUNT = colors.length;
 const PW = POCKET_SIZE * 1.4, PW1 = POCKET_SIZE * 1.2, PW11 = POCKET_SIZE * 1.1, PW2 = POCKET_SIZE;
 const PC = CUSH_W / 2, PI = 0.1, PI1 = 0.3, PI11 = 0.45, PI3 = 0.6;
@@ -243,7 +237,6 @@ function DelayAudioStart() {
         soundFX.init();
     }, ... soundSettings.sounds);
 }
-
 var ctx;
 const canvas = $("canvas", {className: "mainCanvas", width: innerWidth, height: innerHeight});
 const gameCanvas = $("canvas", TABLE_CANVAS_SIZE);
@@ -258,7 +251,6 @@ const badBounceFill = ctx.createRadialGradient(0,0, 0, 0,0, BAD_BOUNCE_SIZE);
 badBounceFill.addColorStop(0,  "#F00F");
 badBounceFill.addColorStop(0.7,"#8008");
 badBounceFill.addColorStop(1,  "#8000");
-
 var pocketPos = 0;
 var pocketedBalls = [];
 sprites.layout = {};
@@ -2169,6 +2161,123 @@ function loadSaveBallPositions() {
 
     }
 }
+
+
+function Touch(forElement = window) {
+	const HANDLERS = {
+		touchmove: updatePoints,
+		touchstart: updatePoints,
+		touchend: removePoints,
+	};
+	const points = new Map();
+	function Point(touch) {
+		this.x = this.startX = touch.pageX;
+		this.y = this.startY = touch.pageY;
+		this.dy = this.dx = 0;
+		this.dist = 0;
+		this.direction = 0;
+		this.id = touch.identifier;
+        this.uid = uid++;
+	}
+	Point.prototype = {
+		update(touch) {
+			this.x = touch.pageX;
+			this.y = touch.pageY;
+			const dx = this.dx = this.x - this.startX;
+			const dy = this.dy = this.y - this.startY;
+			this.dist = (dx * dx + dy * dy) ** 0.5;
+			if (this.dist > 0) {
+				this.direction = Math.atan2(dx, dy);
+			} else {
+				this.direction = 0;
+			}
+		}
+	}
+    var preventDefault = false;
+    var hasTouched = false;
+    var uid = 0;
+	const API = {
+		get points() { return [...points.values()] },
+        get hasPoints() { return points.size > 0 },
+        set preventDefault(val) { if (val !== preventDefault) { preventDefault = val; defaultSet() } },
+        get hasTouched() { return hasTouched },
+        usingTouch: false,
+        offsetX: 0,
+        offsetY: 0,
+	};
+	function removePoints(updates) {
+		var idx = updates.length;
+		while (idx-- > 0) { points.delete(updates[idx].identifier) }
+	}
+	function updatePoints(updates) {
+		var p, idx = updates.length;
+		while (idx-- > 0) {
+			const touch = updates[idx];
+			const id = touch.identifier;
+			p = points.get(id);
+			!p && points.set(id, p = new Point(touch));
+			p.update(touch);
+		}
+	}
+	function defaultSet() {
+        if (document === forElement) {
+            forElement.body.style.touchAction = preventDefault ? "none" : null;
+        } else {
+            forElement.style.touchAction = preventDefault ? "none" : null;
+        }
+    }
+    async function ToFull() {
+        await document.documentElement.requestFullscreen();
+    }
+    var waitForFull = true;
+	function handleEvent(e) {
+        
+        if (!API.usingTouch) {
+            API.usingTouch = true;
+            const fullClick = $("Div", {textContent: "Fullscreen", id: "fullscreenClicker", zIndex: 10000});
+            fullClick.style.position = "absolute";
+            fullClick.style.top = "20px";
+            fullClick.style.left = "20px";
+            fullClick.style.background = "black";
+            fullClick.style.border = "2px solid white";
+            fullClick.style.padding = "12px";
+            fullClick.style.fontSize = "xxlarge";
+
+            $$(document.body, fullClick);
+            fullClick.addEventListener("click", () => {
+                ToFull().then(() => {;                
+                    waitForFull = false;
+                    // rgba(105,103,147,1) 27%, rgba(103,125,152,1) 63%, rgba(126,126,194,1) 100%);
+                    document.body.style.background = "radial-gradient(circle, rgba(105,103,147,1) 0%, rgba(103,125,152,1) 63%, rgba(126,126,194,1) 100%)";//ctxMain.canvas.style.background;
+                    ctxMain.canvas.style.position = "absolute";
+                    ctxMain.canvas.style.top = (API.offsetY =  ((innerHeight - canvas.height) * 0.5 | 0)) + "px";
+                    ctxMain.canvas.style.left = (API.offsetX =  ((innerWidth - canvas.width) * 0.5 | 0)) + "px";
+                    $R(document.body, fullClick);
+                });
+                
+            });
+        }
+        if (waitForFull) { return; }
+		HANDLERS[e.type](e.changedTouches);
+		e.preventDefault();
+        hasTouched = true;
+        if (points.size >= 1) {
+            const pt = [...points.values()][0];
+            mouse.button = 1;
+            mouse.x = pt.x - API.offsetX;
+            mouse.y = pt.y - API.offsetY;
+        } else if (points.size == 0) {
+            mouse.button = 0;
+        }
+            
+	}
+	forElement.addEventListener("touchstart", handleEvent, {passive: false});
+	forElement.addEventListener("touchend", handleEvent, {passive: false});
+	forElement.addEventListener("touchmove", handleEvent, {passive: false});
+	return API;
+}
+const touches = Touch(document);
+
 function doMouseInterface() {
     const B = balls[0];
     runToStop = 1;
@@ -2411,11 +2520,10 @@ var paused = false;
 
 var resizeDebounce;
 addEventListener("resize", () => {
-    clearTimeout(resizeDebounce);
-    resizeDebounce = setTimeout(() => {
-        location.reload();
-    }, 500);
-    
+    if (!touches.usingTouch) {
+        clearTimeout(resizeDebounce);
+        resizeDebounce = setTimeout(() => { location.reload(); }, 500);
+    } 
 });
 const FrameRate = ((targetRate = 60) => {
     const MAX_FRAME_TIME = 1000 / 15;
@@ -2464,8 +2572,6 @@ const FrameRate = ((targetRate = 60) => {
     getRate.reset();
     return getRate;
 })();
-
-
 function mainLoop(time) {
     if (FrameRate.rate === 0) { return FrameRate(mainLoop, 15) }
     FrameRate.count ++;
