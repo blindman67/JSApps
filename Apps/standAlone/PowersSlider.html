@@ -4,11 +4,9 @@
         <meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-8">
         <title>PowersSlider</title>
 		<style>
-			
 		</style>
     </head>
     <body style = "font-family:monospace">
-		
 		<script>
 			;(()=>{
 const eCurve = (v, p = 2) =>  v <= 0 ? 0 : v >= 1 ? 1 : v ** p / (v ** p + (1 - v) ** p);
@@ -17,12 +15,10 @@ const bCurve = (v, a, b) => v <= 0 ? 0 : v >= 1 ? 1 : 3*v*(1-v)*(a*(1-v)+b*v)+v*
 Math.PI90 = Math.PI / 2;
 Math.TAU = Math.PI * 2;
 Math.PI270 = Math.PI * (3 / 2);
-
 const randUI = (min, max) => (max !== undefined ? Math.random() * (max - min) + min : Math.random() * min) | 0;
 const randPick = arr => arr.splice(randUI(arr.length), 1)[0];
 const randItem = arr => arr[randUI(arr.length)];
 const setOf = (c, cb, a = [], i = 0) => {while (i < c) { a.push(cb(i++)) } return a};
-
 const qryEl = qryEl => typeof qryEl === "string" ? query(qryEl) : qryEl;
 const tag = (tag, props = {}) => Object.assign(document.createElement(tag), props);
 const style = (el, style) => (Object.assign(el.style, style), el);
@@ -31,8 +27,6 @@ const remove = (par, ...sibs) => sibs.map(sib => par.removeChild);
 const query = (qStr, el = document) => el.querySelector(qStr);
 const listener = (qe, name, call, opt = {}) => ((qe = qryEl(qe)).addEventListener(name, call, opt), qe);
 const elements = obj => (Object.entries(obj).forEach(([n, q]) => obj[n] = query(q)), obj);
-
-
 const keys = {
   ArrowLeft: false,
   ArrowRight: false,
@@ -56,11 +50,11 @@ function Touch(forElement = window) {
 		touchmove: updatePoints,
 		touchstart: updatePoints,
 		touchend: removePoints,
-	};	
+	};
 	const points = new Map();
 	function Point(touch) {
 		this.x = this.startX = touch.pageX;
-		this.y = this.startY = touch.pageY;		
+		this.y = this.startY = touch.pageY;
 		this.dy = this.dx = 0;
 		this.dist = 0;
 		this.dirAA = directions.UNKNOWN;
@@ -82,7 +76,6 @@ function Touch(forElement = window) {
 			} else {
 				this.dirAA = directions.UNKNOWN;
 			}
-            
 		}
 	}
     var preventDefault = false;
@@ -92,9 +85,8 @@ function Touch(forElement = window) {
 		directions,
 		get points() { return [...points.values()] },
         get hasPoints() { return points.size > 0 },
-        set preventDefault(val) { if (val !== preventDefault) { preventDefault = val; defaultSet() } }, 
+        set preventDefault(val) { if (val !== preventDefault) { preventDefault = val; defaultSet() } },
         get hasTouched() { return hasTouched },
-		
 	};
 	function removePoints(updates) {
 		var idx = updates.length;
@@ -110,30 +102,24 @@ function Touch(forElement = window) {
 			p.update(touch);
 		}
 	}
-	function defaultSet() { 
+	function defaultSet() {
         if (document === forElement) {
-            forElement.body.style.touchAction = preventDefault ? "none" : null;     
+            forElement.body.style.touchAction = preventDefault ? "none" : null;
         } else {
-            forElement.style.touchAction = preventDefault ? "none" : null;             
+            forElement.style.touchAction = preventDefault ? "none" : null;
         }
-    }			
+    }
 	function handleEvent(e) {
 		HANDLERS[e.type](e.changedTouches);
-		preventDefault && e.preventDefault();		
+		preventDefault && e.preventDefault();
         hasTouched = true;
 	}
 	forElement.addEventListener("touchstart", handleEvent, false);
 	forElement.addEventListener("touchend", handleEvent, false);
 	forElement.addEventListener("touchmove", handleEvent, false);
-	
-	
 	return API;
 }
-
 const touches = Touch(document);
-
-
-
 const styles = `
         body { background: #CA9; }
         .gameUI {
@@ -150,7 +136,7 @@ const styles = `
             text-align: center;
             width: 100%;
             font-size: small;
-        }        
+        }
         .gameHeadings {
             position: absolute;
             font-family : arial;
@@ -175,7 +161,7 @@ const styles = `
         .gameButtons:hover {
             color: black;
             background: #FA2;
-        }        
+        }
         .hideGameUI {
             display: none;
         }
@@ -194,15 +180,14 @@ append(
     heading1 = style(tag("h1", {textContent: "Powers of TWO", className: "gameHeadings"}), {top: "5px"}),
     heading2 = style(tag("h3", {textContent: "Select game type to start", className: "gameHeadings"}), {bottom: "60px"}),
     heading2 = style(tag("div", {textContent: "NOW with swipe play BETA V0.1 :(", className: "noSwipe"}), {top: "2px"}),
-    ...setOf(5, 
+    ...setOf(5,
              i => style(
-                    tag("div", {_game: i, textContent: (i + 4) + " by " + (i + 4), className: "gameButtons"}), 
+                    tag("div", {_game: i, textContent: (i + 4) + " by " + (i + 4), className: "gameButtons"}),
                 {left: ((100 - (4 * 15) - 10) / 2 + i * 15) + "%"}
     ),
             ),
   )
-
-)   
+)
 append(document.body, canvasContainer);
 listener(uiEl, "mouseover", mouseOver);
 listener(uiEl, "click", uiClick);
@@ -222,7 +207,6 @@ const instructions = {
     },
     forKeyboard() {
         instructions.text = instructions.textKeys;
-        
     },
     draw(ctx) {
         const w = ctx.canvas.width, h = ctx.canvas.height, w2 = w / 2, h2 = h / 2, wO = w2 * 0.8, hO = h2 * 0.8;
@@ -230,14 +214,13 @@ const instructions = {
         ctx.setTransform(1,0,0,1,0,0);
         ctx.font = 32 + "px Arial";
         ctx.textAlign = "center";
-        ctx.textBaseline = "middle";        
+        ctx.textBaseline = "middle";
         ctx.fillStyle = "#FFF";
         for (const {x, y, text} of this.text) {
             ctx.fillText(text, w2 + x * hO, h2 + y * hO);
         }
     }
 }
-
 const pathRoundBox = (ctx, cx, cy, w, h, radius) => {
     const w2 = w / 2, h2 = h / 2;
     ctx.arc(cx - w2 + radius, cy - h2 + radius, radius, Math.PI, Math.PI270);
@@ -245,7 +228,6 @@ const pathRoundBox = (ctx, cx, cy, w, h, radius) => {
     ctx.arc(cx + w2 - radius, cy + h2 - radius, radius, 0, Math.PI90);
     ctx.arc(cx - w2 + radius, cy + h2 - radius, radius, Math.PI90, Math.PI);
 }
-
 function Game(size, winTile, speed = 20, newTiles) {
     speed = speed < 1 ? 1 : speed;
     if (size < 4 || size > 8) { throw new Error("Invalid board size. Size limits 4 <= size <= 8") }
@@ -256,7 +238,6 @@ function Game(size, winTile, speed = 20, newTiles) {
     const mergingTiles = [];
     const freeTiles = [];
     const tileOptions = setOf(tileCount,()=> [0,0,0,0]);
-    
     const newTileVal = [];
     const tilesPerMove = newTiles.length;
     const topNew = newTiles[tilesPerMove - 1];
@@ -322,10 +303,10 @@ function Game(size, winTile, speed = 20, newTiles) {
         update() {
             if (this.merging) {
                 this.alpha -= animRate;
-                if (this.alpha <= 0) { 
+                if (this.alpha <= 0) {
                     this.alpha = 0;
                     this.merging = false;
-                }   
+                }
             }
             if (this.anim > 0) {
                 this.anim -= animRate;
@@ -347,7 +328,7 @@ function Game(size, winTile, speed = 20, newTiles) {
             }
             this.animate =  this.flash || this.grow || this.merging || this.anim > 0;
             displayDirty = this.animate ? true : displayDirty;
-            if (this.anim > 0) { 
+            if (this.anim > 0) {
                 const p = eCurve(1 - this.anim);
                 this.x = (this.nx - this.ax) * p + this.ax;
                 this.y = (this.ny - this.ay) * p + this.ay;
@@ -368,7 +349,6 @@ function Game(size, winTile, speed = 20, newTiles) {
             ctx.fillStyle = cols[this.val];
             ctx.beginPath();
             pathRoundBox(ctx, 0, 0, scale - pad * 2, scale - pad * 2, radius);
-
             ctx.fill();
             if (this.flash) {
                 ctx.globalCompositeOperation = "lighter";
@@ -382,9 +362,7 @@ function Game(size, winTile, speed = 20, newTiles) {
             ctx.fillText(this.val, 0, 0 + scale * 0.05);
             ctx.restore()
         }
-        
     }
-    
     function setOptions(idx, val) {
         var i = 0, ii, adding, xx, yy;
         const x = idx % size;
@@ -393,17 +371,16 @@ function Game(size, winTile, speed = 20, newTiles) {
             adding = true;
             xx = x;
             yy = y;
-            i = idx;               
+            i = idx;
             while (adding) {
                 xx += dir[0];
                 yy += dir[1];
-                i += dir[2];                
+                i += dir[2];
                 if (xx >= 0 && xx < size && yy >= 0 && yy < size) {
                     if (board[i] === 0) {
-                        tileOptions[i][dir[3]] = val;                        
+                        tileOptions[i][dir[3]] = val;
                     } else { break }
                 } else { break }
-                
             }
         }
     }
@@ -413,7 +390,6 @@ function Game(size, winTile, speed = 20, newTiles) {
                  (opt[1] === val ? 1 : 0) +
                  (opt[2] === val ? 1 : 0) +
                  (opt[3] === val ? 1 : 0);
-
     }
     function addTile(growDelay) {
         var i = findTileCount;
@@ -429,13 +405,13 @@ function Game(size, winTile, speed = 20, newTiles) {
                     if (ppos !== undefined) {
                         freeTiles.push(ppos);
                         newTileVal.push(vval);
-                    }     
+                    }
                     vval = val;
                     ppos = pos;
                     val = undefined;
                     pos = undefined;
                 }
-            } 
+            }
             if (!i || freeTiles.length === 0 || mScore === 4) {
                 if (mScore) {
                     if (val !== undefined) {
@@ -449,12 +425,12 @@ function Game(size, winTile, speed = 20, newTiles) {
                     setOptions(pos, val);
                 }
                 return;
-            } 
-            if (val !== undefined) {            
-                freeTiles.push(pos);
-                newTileVal.push(val);            
             }
-        } 
+            if (val !== undefined) {
+                freeTiles.push(pos);
+                newTileVal.push(val);
+            }
+        }
     }
     function checkBoard() {
         var i = tileCount, s = state;
@@ -500,7 +476,6 @@ function Game(size, winTile, speed = 20, newTiles) {
             y++;
         }
     }
-    
     const API = {
         states: Object.freeze(states),
         moves: Object.freeze(moves),
@@ -570,7 +545,7 @@ function Game(size, winTile, speed = 20, newTiles) {
             var x, y, str, s;
             if (state === states.over) { return "Game Over!" }
             if (state === states.win) { return "You WON!" }
-            if (state === states.inPlay) { 
+            if (state === states.inPlay) {
                 str = "Moves: " + moveCount + "\n";
                 str += "Target: " + winTile + "\n";
                 y = 0;
@@ -592,8 +567,6 @@ function Game(size, winTile, speed = 20, newTiles) {
     }
     return Object.freeze(API);
 }
-
-
 setTimeout(() => playGame(1, true), 1000);
 function mouseOver(e) {
     if (e.target._game !== undefined) {
@@ -610,7 +583,6 @@ function uiClick(e) {
         playGame(e.target._game);
     }
 }
-
 function createBGImage(img, tiles, pad, radius) {
     const ctx = img.getContext("2d");//, {alpha: false});
     ctx.fillStyle = "#222";
@@ -628,10 +600,58 @@ function createBGImage(img, tiles, pad, radius) {
         ctx.fill();
         i++;
     }
-
     return img
-}   
-    
+}
+
+
+
+const FrameRate = ((targetRate = 60) => {
+    const MAX_FRAME_TIME = 1000 / 15;
+    const Rate = (rate, skip = Math.round(rate / targetRate)) => ({rate, skip, delta: 1000 / rate});
+    var startTime, lastFrame, animLoop, minFrameTime = Infinity, polling, testTime;
+    const knownRates = [Rate(60), Rate(120), Rate(144), Rate(165), Rate(240)];
+    function findFrameRate(fTime) {
+        if (lastFrame) { 
+            const deltaTime = fTime - lastFrame;
+            if (deltaTime > MAX_FRAME_TIME) {  // somethings wrong
+                lastFrame = undefined;
+                minFrameTime = Infinity;
+                requestAnimationFrame(findFrameRate);
+                return;
+            }
+            minFrameTime = Math.min(minFrameTime, deltaTime) 
+        } else { startTime = fTime  }
+        lastFrame = fTime;
+        if (fTime - startTime < testTime) {
+            requestAnimationFrame(findFrameRate);
+        } else {
+            const rate = knownRates.find((rate, i) => i < knownRates.length - 2 ? (minFrameTime > knownRates[i + 1].delta) : true );
+            getRate.rate = rate.rate;
+            getRate.skip = rate.skip;
+            getRate.count = 0;
+            (window.log && log("FPS: " + getRate.rate)) ?? console.log("FPS: " + getRate.rate);
+            requestAnimationFrame(animLoop);
+        }
+    }
+    function getRate(animLoopCB, testCount) {
+        if (!polling) {
+            polling = true;
+            lastFrame = undefined;
+            animLoop = animLoopCB;
+            testTime = testCount * knownRates[0].delta;
+            minFrameTime = Infinity;
+            requestAnimationFrame(findFrameRate);
+        }
+    }
+    getRate.reset = () => { 
+        polling = false;
+        getRate.count = 0;
+        getRate.rate = 0;
+        getRate.skip = 1;
+    }
+    getRate.reset();
+    return getRate;
+})();
 
 
 function playGame(game, showBoardOnly = false) {
@@ -672,12 +692,11 @@ function playGame(game, showBoardOnly = false) {
             [512]:  "#0F8",
             [1024]: "#0FF",
             [2048]: "#FFF",
-        }    
+        }
     }
     ctx.font = (renderTarget.scale * 0.7 | 0) + "px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-  
     const touch = {
         swipeDist: 32,
         inSwipe: false,
@@ -687,17 +706,18 @@ function playGame(game, showBoardOnly = false) {
     };
     touches.preventDefault = !showBoardOnly;
     touches.hasTouched ? instructions.forTouch() : instructions.forKeyboard();
-    
-    
     function animLoop() {
+        if (FrameRate.rate === 0) { return FrameRate(animLoop, 15) }
+        FrameRate.count ++;
+        if (FrameRate.count % FrameRate.skip) { return requestAnimationFrame(animLoop) }
+        
         var m = -1;
         if (keys.ArrowUp) { keys.ArrowUp = false; m = g.moves.up }
         if (keys.ArrowRight) { keys.ArrowRight = false; m = g.moves.right }
         if (keys.ArrowDown) { keys.ArrowDown = false; m = g.moves.down }
         if (keys.ArrowLeft) { keys.ArrowLeft = false; m = g.moves.left }
         if (!showBoardOnly) {
-            
-            if (touches.hasPoints) {                
+            if (touches.hasPoints) {
                 const p = touches.points[0];
                 //console.log(p.id)
                 if (p.uid !== touch.lastId) {
@@ -708,17 +728,14 @@ function playGame(game, showBoardOnly = false) {
                             m = touch.direction;
                             touch.inSwipe = false;
                             touch.lastId = p.uid;
-
                         }
-                    } 
+                    }
                 }
             } else if(touch.inSwipe) {
                 m = touch.direction;
                 touch.inSwipe = false;
-                
             }
         }
-        
         if (m > -1) {
             g.move = m;
         }
@@ -732,26 +749,23 @@ function playGame(game, showBoardOnly = false) {
             if (showBoardOnly) {
                 const scale = (ctx.canvas.height - 160) / ctx.canvas.height;
                 ctx.setTransform(scale,0,0,scale,(canvas.width - SIZE * renderTarget.scale) / 2 + 80, 60);
-                ctx.drawImage(bgImage, 0, 0);              
-              
+                ctx.drawImage(bgImage, 0, 0);
             } else {
                 ctx.setTransform(1,0,0,1,(canvas.width - SIZE * renderTarget.scale) / 2, 0);
-                ctx.drawImage(bgImage, 0, 0);              
+                ctx.drawImage(bgImage, 0, 0);
             }
             g.render(renderTarget);
             if (!showBoardOnly && !instructions.shown) {
                 instructions.draw(ctx);
                 m !== -1 && (instructions.shown = true);
             }
-          
-          
             if (!(state === g.states.inPlay || state === g.states.animating)) {
                 ctx.fillStyle = "#0008";
                 ctx.setTransform(1,0,0,1,0,0);
                 ctx.fillRect(0, 0, ctx.canvas.width,  ctx.canvas.height)
                 ctx.font = (renderTarget.scale * 0.7 | 0) + "px Arial";
                 ctx.textAlign = "center";
-                ctx.textBaseline = "middle";        
+                ctx.textBaseline = "middle";
                 ctx.fillStyle = "#FFF";
                 ctx.strokeStyle = "#000";
                 ctx.lineWidth = unit * 2;
@@ -772,7 +786,6 @@ function playGame(game, showBoardOnly = false) {
                     const mC = g.moveCount;
                     ctx.strokeText("Moves: " + mC, cx + unit / 4, cy + unit * SIZE * 3 + unit / 4)
                     ctx.fillText("Moves: " + mC, cx, cy + unit * SIZE * 3)
-                    
                 } else {
                     ctx.strokeText("GAME OVER", cx + unit / 2, cy + unit / 2)
                     ctx.fillText("GAME OVER", cx, cy)
@@ -784,7 +797,7 @@ function playGame(game, showBoardOnly = false) {
                 uiEl.classList.remove("hideGameUI");
                 touches.preventDefault = false;
                 return;
-            } 
+            }
         }
         (!showBoardOnly || showFrames-- > 0) && requestAnimationFrame(animLoop);
     }

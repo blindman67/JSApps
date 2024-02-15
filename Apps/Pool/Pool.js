@@ -2247,10 +2247,9 @@ function Touch(forElement = window) {
             fullClick.addEventListener("click", () => {
                 ToFull().then(() => {;                
                     waitForFull = false;
-                    // rgba(105,103,147,1) 27%, rgba(103,125,152,1) 63%, rgba(126,126,194,1) 100%);
-                    document.body.style.background = "radial-gradient(circle, rgba(105,103,147,1) 0%, rgba(103,125,152,1) 63%, rgba(126,126,194,1) 100%)";//ctxMain.canvas.style.background;
+                    document.body.style.background = "radial-gradient(circle, rgba(105,103,147,1) 0%, rgba(103,125,152,1) 63%, rgba(126,126,194,1) 100%)";
                     ctxMain.canvas.style.position = "absolute";
-                    ctxMain.canvas.style.top = (API.offsetY =  ((innerHeight - canvas.height) * 0.5 | 0)) + "px";
+                    ctxMain.canvas.style.top =  (API.offsetY =  ((innerHeight - canvas.height) * 0.5 | 0)) + "px";
                     ctxMain.canvas.style.left = (API.offsetX =  ((innerWidth - canvas.width) * 0.5 | 0)) + "px";
                     $R(document.body, fullClick);
                 });
