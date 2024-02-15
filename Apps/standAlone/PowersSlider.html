@@ -629,11 +629,12 @@ const FrameRate = ((targetRate = 60) => {
             getRate.rate = rate.rate;
             getRate.skip = rate.skip;
             getRate.count = 0;
-            (window.log && log("FPS: " + getRate.rate)) ?? console.log("FPS: " + getRate.rate);
+            /*(window.log && log("FPS: " + getRate.rate)) ?? */console.log("FPS: " + getRate.rate);
             requestAnimationFrame(animLoop);
         }
     }
     function getRate(animLoopCB, testCount) {
+    console.log("FPS: " + getRate.rate);
         if (!polling) {
             polling = true;
             lastFrame = undefined;
