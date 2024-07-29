@@ -9,6 +9,7 @@ const Touch = (() => {
         pageY: 0,
         target: document,
         timeStamp: 0,
+        force: 0.0,
     };
     const mEvents = {
         down: {
@@ -39,26 +40,32 @@ const Touch = (() => {
     var primaryTouch;
     const touching = new Array(20).fill(undefined);
     var touchingSize = 0;
-    function updateChanges(e, id) {
+    function updateChanges(tEvent, id) {
         primaryTouch = undefined;
-        e.preventDefault();
+
         var idx = 0;
-        for (const touch of e.changedTouches) {
-            if (touch.identifier === id) {
+        for (const touch of tEvent.touches) {
+            if (touch.identifier === id || (id === -1 && !primaryTouch)) {
                 primaryTouch = touch;
             }
             touching[idx++] = touch;            
         }
         touchingSize = idx;
+        if (idx === 2) {
+            debugAdd("Double touce!", 1000);
+        }
         return primaryTouch !== undefined;
     }
-    function dispatchMouse(mouseEvent, touch) {
+    function dispatchMouse(mouseEvent, tEvent, touch) {
         if (touch) {
-
-            mouseEvent.pageX = touch.pageX;
-            mouseEvent.pageY = touch.pageY;
+            mouseEvent.altKey = tEvent.altKey;
+            mouseEvent.shiftKey = tEvent.shiftKey;
+            mouseEvent.ctrlKey = tEvent.ctrlKey;
+            mouseEvent.pageX = Math.round(touch.pageX);
+            mouseEvent.pageY = Math.round(touch.pageY);
             mouseEvent.target = touch.target;
             mouseEvent.timeStamp = touch.timeStamp;
+            mouseEvent.force = touch.force;
 
             mouseEvents(mouseEvent);
         }
@@ -68,37 +75,45 @@ const Touch = (() => {
         var str = "";
         str += "X: " + mouseEvent.pageX + " : ";
         str += "Y: " + mouseEvent.pageY + " ";
-        str += "Target.id: " + mouseEvent.target.id + " ";
+        str += "ID: " + mouseEvent.target.id + " ";
         str += "Type: " + mouseEvent.type;
         return str;
     }
     const API = {
         listeners: {
             start(e) { 
-                updateChanges(e, -1);
-                primaryTouch =  touching[0];
-                dispatchMouse(mEvents.down, primaryTouch);
-                debugAdd("Down " + touchInfo(mEvents.down));
+                e.preventDefault();
+                if (updateChanges(e, -1)) {
+                    primaryTouch =  touching[0];
+                    dispatchMouse(mEvents.down, e, primaryTouch);
+                    debugAdd("Down " + touchInfo(mEvents.down));
+                } else {
+                    debugAdd("Start touch event missing primary", 2000);
+                }
                 
             },
             end(e) { 
-            
+                e.preventDefault();            
                 if (updateChanges(e, primaryTouch.identifier)) {
                     dispatchMouse(mEvents.up, primaryTouch);
+                    primaryTouch = undefined;
                     debugAdd("End " + touchInfo(mEvents.up));
                 } else {
                     debugAdd("End touch event missing primary", 2000);
                 }
             },
             cancel(e) { 
+                e.preventDefault();
                 if (updateChanges(e, primaryTouch.identifier)) {
                     dispatchMouse(mEvents.up, primaryTouch);
+                    primaryTouch = undefined;
                     debugAdd("Cancel " + touchInfo(mEvents.up));
                 } else {
                     debugAdd("Cancel touch event missing primary", 2000);
                 }
             },
             move(e) { 
+                e.preventDefault();
                 if (updateChanges(e, primaryTouch.identifier)) {
                     dispatchMouse(mEvents.move, primaryTouch);
                     debugAdd("Move " + touchInfo(mEvents.move), 2);
@@ -137,8 +152,8 @@ function startTouch() {
     log.info("Starting touch.");
     
 
-    document.addEventListener("touchstart", Touch.listeners.start);
-    document.addEventListener("touchend", Touch.listeners.end);
+    document.addEventListener("touchstart", Touch.listeners.start, {passive: false});
+    document.addEventListener("touchend", Touch.listeners.end, {passive: false});
     document.addEventListener("touchcancel", Touch.listeners.cancel);
     document.addEventListener("touchmove", Touch.listeners.move);    
     mainCanvas.ctx.setInfoCall(Touch.info);
