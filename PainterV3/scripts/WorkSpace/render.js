@@ -503,6 +503,7 @@ const render = (() => {
         ctx.setBackgroundColor = bgCol => { document.body.style.backgroundColor = bgCol };
         guides.ready();
         ctx.setInfoCall = setInfoCall;
+        ctx.viewUpdate = viewUpdate;
         ctx.restart = () => { requestAnimationFrame(mainLoop) }
         ctx.useViewSprite = state => {
             if (state === undefined) { return useViewSprite };

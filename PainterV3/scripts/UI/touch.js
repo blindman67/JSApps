@@ -65,7 +65,7 @@ const Touch = (() => {
         }
         return primaryTouch !== undefined;
     }
-    function dispatchMouse(mouseEvent, tEvent, touch) {
+    function dispatchMouse(mouseEvent, tEvent, touch, timeOffset = 0) {
         if (touch) {
             mouseEvent.altKey = tEvent.altKey;
             mouseEvent.shiftKey = tEvent.shiftKey;
@@ -73,7 +73,7 @@ const Touch = (() => {
             mouseEvent.pageX = Math.round(touch.pageX);
             mouseEvent.pageY = Math.round(touch.pageY);
             mouseEvent.target = touch.target;
-            mouseEvent.timeStamp = touch.timeStamp;
+            mouseEvent.timeStamp = touch.timeStamp + timeOffset;
             mouseEvent.force = touch.force;
 
             mouseEvents(mouseEvent);
@@ -94,7 +94,8 @@ const Touch = (() => {
                 e.preventDefault();
                 if (updateChanges(e, e.touches, -1)) {
                     primaryTouch =  touching[0];
-                    dispatchMouse(mEvents.moveTo, e, primaryTouch);
+                    dispatchMouse(mEvents.moveTo, e, primaryTouch, -1);
+                    mainCanvas.ctx.viewUpdate();
                     dispatchMouse(mEvents.down, e, primaryTouch);
                     debugAdd("Down " + touchInfo(mEvents.down));
                 } else {
@@ -106,7 +107,7 @@ const Touch = (() => {
                 e.preventDefault();            
                 if (updateChanges(e, e.changedTouches, primaryTouch.identifier)) {
                     dispatchMouse(mEvents.up,  e,primaryTouch);
-                    dispatchMouse(mEvents.moveTo, e, primaryTouch);
+                    dispatchMouse(mEvents.moveTo, e, primaryTouch, 1);
                     primaryTouch = undefined;
                     debugAdd("End " + touchInfo(mEvents.up));
                 } else {
@@ -117,7 +118,7 @@ const Touch = (() => {
                 e.preventDefault();
                 if (updateChanges(e, e.changedTouches, primaryTouch.identifier)) {
                     dispatchMouse(mEvents.up, e, primaryTouch);
-                    dispatchMouse(mEvents.moveTo, e, primaryTouch);
+                    dispatchMouse(mEvents.moveTo, e, primaryTouch, 1);
                     primaryTouch = undefined;
                     debugAdd("Cancel " + touchInfo(mEvents.up));
                 } else {
