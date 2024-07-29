@@ -42,7 +42,7 @@ const Touch = (() => {
     function updateChanges(e, id) {
         primaryTouch = undefined;
         e.preventDefault();
-        const idx = 0;
+        var idx = 0;
         for (const touch of e.changedTouches) {
             if (touch.identifier === id) {
                 primaryTouch = touch;
@@ -82,6 +82,7 @@ const Touch = (() => {
                 
             },
             end(e) { 
+            
                 if (updateChanges(e, primaryTouch.identifier)) {
                     dispatchMouse(mEvents.up, primaryTouch);
                     debugAdd("End " + touchInfo(mEvents.up));

@@ -20,15 +20,11 @@ function initDevice() {
     showDeviceInfo();
 }
 function showDeviceInfo() {
-
-    
-    
     if (deviceInfo.inputCaps?.firesTouchEvents) {
         log.info("Detected touch device.");
     } else {
         log.info("Detected mouse device.");
     }
-    
 }
 
 function addLoadedMedia(name){
