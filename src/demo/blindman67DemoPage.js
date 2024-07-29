@@ -78,7 +78,7 @@ const Page = FZ({
         }),
         apps: FZ([
             FZ({  // Painter
-                name: content("Painter V3. For all thing game creation", css.head),
+                name: content("(IN TESTING!!!!). Painter V3. For all thing game creation", css.head),
                 link: FZ({ref: "./PainterV3/PainterV3.html", name: "[Painter V3] Almost ready", desc: descriptions.painter}),
                 images: [sizeImage("./media/PainterScreenShot.png", "Screen capture showing Key-frame/Animation panel\nColour panel\nSprites edit panel\nConsole panel\nSprite list Tab", extras.imageSize)]
             }),

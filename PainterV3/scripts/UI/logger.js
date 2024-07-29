@@ -92,7 +92,14 @@ const logger = (()=>{
                 }
             }
             if (executeOnClick) { $$(logs,prevDiv = $("div",{textContent : text, className, ...WHEEL, logExtra : extra, executeOnClick, logText : text, counting : 1})) }
-            else { $$(logs,prevDiv = $("div",{textContent : text, className, ...WHEEL, logExtra : extra, logText : text, counting : 1})) }
+            else { 
+                if (Touch) {
+                    if (className === "loggerError") {
+                        Touch.debugAdd(text, 10000);                        
+                    }                    
+                }
+                $$(logs,prevDiv = $("div",{textContent : text, className, ...WHEEL, logExtra : extra, logText : text, counting : 1})) ;
+            }
         }
         logs.scrollTop = logs.scrollHeight;
         return prevDiv;
@@ -352,7 +359,9 @@ const logger = (()=>{
         clearErrorLockout(id) { errorLockoutPassId = undefined },
         error(data, id) {
             if(errorLockoutPassId === undefined || id === errorLockoutPassId) {
-                API.flash(API.flashTypes.error); heartBeat.addAlert("error"); addLog(data, "loggerError");
+                API.flash(API.flashTypes.error); 
+                heartBeat.addAlert("error"); 
+                addLog(data, "loggerError");
             }
         },
         info(...data) { 

@@ -123,14 +123,16 @@ const Touch = (() => {
             debugStack.length = t;
             debugInfo.length = t;
             return debugInfo;
-        }
+        },
+        debugAdd,
     };
+    setTimeout(API.listeners.start, 1000);
     
     return API;
 })();
 function startTouch() {
     
-    
+    try {
     log.info("Starting touch.");
     
 
@@ -139,5 +141,9 @@ function startTouch() {
     document.addEventListener("touchcancel", Touch.listeners.cancel);
     document.addEventListener("touchmove", Touch.listeners.move);    
     mainCanvas.ctx.setInfoCall(Touch.info);
+    } catch(e) {
+        Touch.debugAdd(e.message, 10000);
+        
+    }
     
 }
