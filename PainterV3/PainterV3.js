@@ -3,30 +3,28 @@ const settingsSetup = [
     () => { setTimeout(() => webGLFilterMenus.loadGLFilters(), 500) },
     () => { setTimeout(() => pens.firstRun(), 2) },
     () => { setTimeout(() => { if(settings.localMedia) {  media.getMediaDeviceList()}}, 50) },
-    () => { setTimeout(() => mouse.listen(), 50) },
+    () => { setTimeout(() => initDevice(), 50) },
     () => { setTimeout(() => functionLinkBuilder.start(), 5) },
-    () => { setTimeout(() => showDeviceInfo(), 250) },
+
 ];
 settingsHandler.onchange = () => { setTimeout(()=>mainCanvas.ctx.setBackgroundColor(settings.backgroundColor),10) };
 function saveSettings() { localStorage[APPNAME + "_settings"] = JSON.stringify(settings); }
 
 const deviceInfo = {
-    inputCaps: window.InputDeviceCapabilities ? new InputDeviceCapabilities() : {},
+    inputCaps: window.InputDeviceCapabilities ? new InputDeviceCapabilities() : {inputCaps: {firesTouchEvents: false}},
 };
+function initDevice() {
+    mouse.listen();
+    deviceInfo.inputCaps?.firesTouchEvents && startTouch();
+    showDeviceInfo();
+}
 function showDeviceInfo() {
-    if (deviceInfo) {
-        if (deviceInfo.inputCaps.firesTouchEvents) {
-            log.info("Is touch device.");
-        } else {
-            log.info("Is mouse device.");
-        }
-        
+    if (deviceInfo.inputCaps?.firesTouchEvents) {
+        log.info("Detected touch device.");
     } else {
-        log.warn("Could not query device info. Default desktop.");
-         deviceInfo.inputCaps = {
-             firesTouchEvents: false,
-         }
+        log.info("Detected mouse device.");
     }
+    
 }
 
 function addLoadedMedia(name){
