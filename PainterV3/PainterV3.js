@@ -15,8 +15,8 @@ const deviceInfo = {
 };
 function initDevice() {
         deviceInfo.inputCaps.firesTouchEvents = true;
-    mouse.listen();
-    deviceInfo.inputCaps?.firesTouchEvents && startTouch();
+    //mouse.listen();
+    deviceInfo.inputCaps?.firesTouchEvents ? startTouch() : mouse.listen();
     showDeviceInfo();
 }
 function showDeviceInfo() {

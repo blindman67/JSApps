@@ -2,6 +2,7 @@ body {
     user-select: none;
     -moz-user-select: none;
     overflow: hidden;
+    touch-action: none;
 }
 ::-webkit-scrollbar {
     width: 8px;

@@ -589,7 +589,7 @@ const settings = {
     useOffscreenCanvas: false,
     maxImageDependencyRate: 4,
     timelineMaxTracks: 32,
-
+    usePointer : true,
     // Current experimental settings.
     limitDrawTime: false,          // This option is currently ignored as with maxDrawTime. Avalible only with experimental versions of Painter3
     maxDrawTime: 10,               // in ms. Some draw functions can be slow. This sets the max time a draw function can have befor exiting the function
@@ -727,6 +727,7 @@ const settingsHandler = {
             wheelScaleRate : "Value is a multiplier. Reverse by  1 over ?",
             wheelScaleResponse : "Amount of time one wheel step scales for. Value MUST be < 1 and >= 0",
             scaleRate : ""  ,
+            usePointer : "When using touch devices if this\n is true input is via the Pointer API\nRequiers restart.",
             gridLineSnapDistance : "Pixel distance that snap mode 1 will snap to",
             gridMix: "Alpha value of grid overlay. Values  0 <= gridMix <= 1",
             gridSize: "Size of one grid unit. Values 4 <= gridSize <= 32",
