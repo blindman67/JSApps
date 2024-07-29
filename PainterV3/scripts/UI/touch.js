@@ -70,7 +70,7 @@ const Touch = (() => {
         str += "Y: " + mouseEvent.pageY + " ";
         str += "Target.id: " + mouseEvent.target.id + " ";
         str += "Type: " + mouseEvent.type;
-        return string;
+        return str;
     }
     const API = {
         listeners: {
@@ -127,7 +127,7 @@ const Touch = (() => {
         },
         debugAdd,
     };
-    setTimeout(API.listeners.start, 1000);
+
     
     return API;
 })();
