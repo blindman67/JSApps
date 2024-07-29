@@ -326,9 +326,10 @@ const render = (() => {
                 let idx = 0;
                 while(idx < lines.length) {
                     info = lines[idx];
-                    
-                    ctx.strokeText(info , mid, yy );
-                    ctx.fillText(info , mid, yy);
+                    if (yy > 10) {
+                        ctx.strokeText(info , mid, yy );
+                        ctx.fillText(info , mid, yy);
+                    }
                     yy += 14;
                     idx ++;
                 }

@@ -88,7 +88,7 @@ const Touch = (() => {
                     dispatchMouse(mEvents.down, e, primaryTouch);
                     debugAdd("Down " + touchInfo(mEvents.down));
                 } else {
-                    debugAdd("Start touch event missing primary", 2000);
+                    debugAdd("Start touch event missing primary");
                 }
                 
             },
@@ -99,7 +99,7 @@ const Touch = (() => {
                     primaryTouch = undefined;
                     debugAdd("End " + touchInfo(mEvents.up));
                 } else {
-                    debugAdd("End touch event missing primary", 2000);
+                    debugAdd("End touch event missing primary");
                 }
             },
             cancel(e) { 
@@ -109,7 +109,7 @@ const Touch = (() => {
                     primaryTouch = undefined;
                     debugAdd("Cancel " + touchInfo(mEvents.up));
                 } else {
-                    debugAdd("Cancel touch event missing primary", 2000);
+                    debugAdd("Cancel touch event missing primary");
                 }
             },
             move(e) { 
@@ -118,7 +118,7 @@ const Touch = (() => {
                     dispatchMouse(mEvents.move, primaryTouch);
                     debugAdd("Move " + touchInfo(mEvents.move), 2);
                 } else {
-                    debugAdd("Move touch event missing primary", 2000);
+                    debugAdd("Move touch event missing primary");
                 }
                 
             },
