@@ -297,6 +297,14 @@ const render = (() => {
             widget.draw();
         }
     }
+    var showInfoOverride;
+    function setInfoCall(call) {
+        if (call instanceof Function) {
+            showInfoOverride = call;
+        } else {
+            showInfoOverride = undefined;
+        }
+    }
 	function showInfo() {
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.fillStyle = "#fff";
@@ -306,33 +314,53 @@ const render = (() => {
         ctx.globalAlpha = 1;
 		const mid = ctx.canvas.width / 2 | 0;
 		const bot = ctx.canvas.height - 7;
-        var info = "";
-        if (cMouse.over) {
-            info += (cMouse.rx | 0) + ", " + (cMouse.ry | 0) + "";
-            if (selection.length === 1) {
-                const spr = selection[0];
-                if (spr.key.over) {
-                    if (spr.type.subSprite) {
-                        info += " Mxy:{" + (spr.key.lx - spr.subSprite.x | 0) + ", " + (spr.key.ly - spr.subSprite.y | 0) +  "}";
-                        info += "  Sub: " + spr.subSpriteIdx + " of " +  spr.image.desc.subSprCount + " {X " + (spr.subSprite.x | 0) + " Y " +  (spr.subSprite.y | 0) + " W " + (spr.subSprite.w | 0) + " H: " +(spr.subSprite.h | 0) + "} ";
-                    } else { info += "  Mxy:{" + (spr.key.lx | 0) + ", " + (spr.key.ly | 0) +  "}" }
-                    if (spr.type.linked) {
-                        let linkPos = 0
-                        for (const lSpr of spr.linked.linkers.values()) {
-                            if (lSpr === spr) { break; }
-                            linkPos += 1;
-                        }
-                        info += " Link: " + linkPos + " "; 
-                    }
-                } 
-                info += "  {X " + (spr.x | 0) + " Y " + (spr.y | 0) + " W " + (spr.w * spr.sx | 0) + " H " + (spr.h * spr.sy | 0) + "}";
-            }
-            info += " " + emojiIcons.keyboard + " " + keyboard.modeDisplayName;
-        } else { info += emojiIcons.keyboard + " " + keyboard.modeDisplayName }
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 2;
-        ctx.strokeText(info , mid, bot );
         ctx.fillStyle = "#fff";
+        
+        var info = "";
+        if (showInfoOverride) {
+            const lines = showInfoOverride();
+            if (Array.isArray(lines)) {
+                let yy = bot - 14 * lines.length;
+                let idx = 0;
+                while(idx < lines.length) {
+                    info = lines[idx];
+                    
+                    ctx.strokeText(info , mid, yy );
+                    ctx.fillText(info , mid, yy);
+                    yy += 14;
+                    idx ++;
+                }
+                return;
+            } else {
+                info = lines;
+            }
+        } else {
+            if (cMouse.over) {
+                info += (cMouse.rx | 0) + ", " + (cMouse.ry | 0) + "";
+                if (selection.length === 1) {
+                    const spr = selection[0];
+                    if (spr.key.over) {
+                        if (spr.type.subSprite) {
+                            info += " Mxy:{" + (spr.key.lx - spr.subSprite.x | 0) + ", " + (spr.key.ly - spr.subSprite.y | 0) +  "}";
+                            info += "  Sub: " + spr.subSpriteIdx + " of " +  spr.image.desc.subSprCount + " {X " + (spr.subSprite.x | 0) + " Y " +  (spr.subSprite.y | 0) + " W " + (spr.subSprite.w | 0) + " H: " +(spr.subSprite.h | 0) + "} ";
+                        } else { info += "  Mxy:{" + (spr.key.lx | 0) + ", " + (spr.key.ly | 0) +  "}" }
+                        if (spr.type.linked) {
+                            let linkPos = 0
+                            for (const lSpr of spr.linked.linkers.values()) {
+                                if (lSpr === spr) { break; }
+                                linkPos += 1;
+                            }
+                            info += " Link: " + linkPos + " "; 
+                        }
+                    } 
+                    info += "  {X " + (spr.x | 0) + " Y " + (spr.y | 0) + " W " + (spr.w * spr.sx | 0) + " H " + (spr.h * spr.sy | 0) + "}";
+                }
+                info += " " + emojiIcons.keyboard + " " + keyboard.modeDisplayName;
+            } else { info += emojiIcons.keyboard + " " + keyboard.modeDisplayName }
+        }
+        ctx.strokeText(info , mid, bot );
         ctx.fillText(info , mid, bot);
 	}
     function sleeping() {
@@ -473,6 +501,7 @@ const render = (() => {
         resize();
         ctx.setBackgroundColor = bgCol => { document.body.style.backgroundColor = bgCol };
         guides.ready();
+        ctx.setInfoCall = setInfoCall;
         ctx.restart = () => { requestAnimationFrame(mainLoop) }
         ctx.useViewSprite = state => {
             if (state === undefined) { return useViewSprite };

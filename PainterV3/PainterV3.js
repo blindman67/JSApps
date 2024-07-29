@@ -11,14 +11,18 @@ settingsHandler.onchange = () => { setTimeout(()=>mainCanvas.ctx.setBackgroundCo
 function saveSettings() { localStorage[APPNAME + "_settings"] = JSON.stringify(settings); }
 
 const deviceInfo = {
-    inputCaps: window.InputDeviceCapabilities ? new InputDeviceCapabilities() : {inputCaps: {firesTouchEvents: false}},
+    inputCaps: /*window.InputDeviceCapabilities ? new InputDeviceCapabilities() :*/ {inputCaps: {firesTouchEvents: false}},
 };
 function initDevice() {
+        deviceInfo.inputCaps.firesTouchEvents = true;
     mouse.listen();
     deviceInfo.inputCaps?.firesTouchEvents && startTouch();
     showDeviceInfo();
 }
 function showDeviceInfo() {
+
+    
+    
     if (deviceInfo.inputCaps?.firesTouchEvents) {
         log.info("Detected touch device.");
     } else {
