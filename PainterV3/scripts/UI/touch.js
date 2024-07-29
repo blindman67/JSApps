@@ -33,10 +33,10 @@ const Touch = (() => {
     };
     const debugStack = [];
     const debugInfo = [];
-    function debugAdd(text, count = 70) {
+    function debugAdd(text, count = 10) {
         debugStack.push({text, count});
     }
-    debugAdd("Touch debug on!", 1000);
+    debugAdd("Touch debug on!", 10);
     var primaryTouch;
     const touching = new Array(20).fill(undefined);
     var touchingSize = 0;
@@ -45,6 +45,7 @@ const Touch = (() => {
 
         var idx = 0;
         for (const touch of tEvent.touches) {
+            debugAdd("T: " + touch.identifier + " idx: " + idx, 60);
             if (touch.identifier === id || (id === -1 && !primaryTouch)) {
                 primaryTouch = touch;
             }
@@ -52,7 +53,7 @@ const Touch = (() => {
         }
         touchingSize = idx;
         if (idx === 2) {
-            debugAdd("Double touce!", 1000);
+            //debugAdd("Double touce!", 1000);
         }
         return primaryTouch !== undefined;
     }
