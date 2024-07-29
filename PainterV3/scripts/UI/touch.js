@@ -57,7 +57,7 @@ const Touch = (() => {
 
             mouseEvent.pageX = touch.pageX;
             mouseEvent.pageY = touch.pageY;
-            mouseEvent.target = touchtarget;
+            mouseEvent.target = touch.target;
             mouseEvent.timeStamp = touch.timeStamp;
 
             mouseEvents(mouseEvent);
