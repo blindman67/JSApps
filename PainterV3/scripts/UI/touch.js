@@ -44,7 +44,7 @@ const Touch = (() => {
     function debugAdd(text, count = 160) {
         debugStack.push({text, count});
     }
-    debugAdd("Touch debug on!");
+    //debugAdd("Touch debug on!");
     var primaryTouch;
     const touching = new Array(20).fill(undefined);
     var touchingSize = 0;
@@ -97,9 +97,9 @@ const Touch = (() => {
                     dispatchMouse(mEvents.moveTo, e, primaryTouch, -1);
                     mainCanvas.ctx.viewUpdate();
                     dispatchMouse(mEvents.down, e, primaryTouch);
-                    debugAdd("Down " + touchInfo(mEvents.down));
+                    //debugAdd("Down " + touchInfo(mEvents.down));
                 } else {
-                    debugAdd("Start touch event missing primary");
+                    //debugAdd("Start touch event missing primary");
                 }
                 
             },
@@ -109,9 +109,9 @@ const Touch = (() => {
                     dispatchMouse(mEvents.up,  e,primaryTouch);
                     dispatchMouse(mEvents.moveTo, e, primaryTouch, 1);
                     primaryTouch = undefined;
-                    debugAdd("End " + touchInfo(mEvents.up));
+                    //debugAdd("End " + touchInfo(mEvents.up));
                 } else {
-                    debugAdd("End touch event missing primary");
+                    //debugAdd("End touch event missing primary");
                 }
             },
             cancel(e) { 
@@ -120,18 +120,18 @@ const Touch = (() => {
                     dispatchMouse(mEvents.up, e, primaryTouch);
                     dispatchMouse(mEvents.moveTo, e, primaryTouch, 1);
                     primaryTouch = undefined;
-                    debugAdd("Cancel " + touchInfo(mEvents.up));
+                   // debugAdd("Cancel " + touchInfo(mEvents.up));
                 } else {
-                    debugAdd("Cancel touch event missing primary");
+                   // debugAdd("Cancel touch event missing primary");
                 }
             },
             move(e) { 
                 e.preventDefault();
                 if (updateChanges(e, e.touches, primaryTouch.identifier)) {
                     dispatchMouse(mEvents.move, e, primaryTouch);
-                    debugAdd("Move " + touchInfo(mEvents.move), 5);
+                    //debugAdd("Move " + touchInfo(mEvents.move), 5);
                 } else {
-                    debugAdd("Move touch event missing primary");
+                   // debugAdd("Move touch event missing primary");
                 }
                 
             },
