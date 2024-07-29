@@ -5,9 +5,30 @@ const settingsSetup = [
     () => { setTimeout(() => { if(settings.localMedia) {  media.getMediaDeviceList()}}, 50) },
     () => { setTimeout(() => mouse.listen(), 50) },
     () => { setTimeout(() => functionLinkBuilder.start(), 5) },
+    () => { setTimeout(() => showDeviceInfo(), 250) },
 ];
 settingsHandler.onchange = () => { setTimeout(()=>mainCanvas.ctx.setBackgroundColor(settings.backgroundColor),10) };
 function saveSettings() { localStorage[APPNAME + "_settings"] = JSON.stringify(settings); }
+
+const deviceInfo = {
+    inputCaps: window.InputDeviceCapabilities ? new InputDeviceCapabilities() : {},
+};
+function showDeviceInfo() {
+    if (deviceInfo) {
+        if (deviceInfo.inputCaps.firesTouchEvents) {
+            log.info("Is touch device.");
+        } else {
+            log.info("Is mouse device.");
+        }
+        
+    } else {
+        log.warn("Could not query device info. Default desktop.");
+         deviceInfo.inputCaps = {
+             firesTouchEvents: false,
+         }
+    }
+}
+
 function addLoadedMedia(name){
     settings.recent = settings.recent.filter(n => n !== name);
     settings.recent.push(name);
