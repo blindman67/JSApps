@@ -161,7 +161,7 @@ const Touch = (() => {
             },
             move(e) { 
                 //e.preventDefault();
-                if (updateChanges(e, e?.touches, primaryTouch.identifier ?? primaryTouch.pointerId)) {
+                if (updateChanges(e, e?.touches, primaryTouch?.identifier ?? primaryTouch?.pointerId ?? -1)) {
                     dispatchMouse(mEvents.move, e, primaryTouch);
                 }
                 
