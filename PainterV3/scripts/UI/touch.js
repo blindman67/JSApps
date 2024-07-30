@@ -161,8 +161,15 @@ const Touch = (() => {
             },
             move(e) { 
                 //e.preventDefault();
-                if (updateChanges(e, e?.touches, primaryTouch?.identifier ?? primaryTouch?.pointerId ?? -1)) {
-                    dispatchMouse(mEvents.move, e, primaryTouch);
+                if (!primaryTouch) {
+                    if (updateChanges(e, e?.touches, -1)) {
+                        dispatchMouse(mEvents.move, e, primaryTouch);
+                    }
+                    
+                } else {
+                    if (updateChanges(e, e?.touches, primaryTouch.identifier)) {
+                        dispatchMouse(mEvents.move, e, primaryTouch);
+                    }
                 }
                 
             },
