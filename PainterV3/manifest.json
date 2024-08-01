@@ -49,7 +49,7 @@
             "label": "Workspace and UI panels"
         }
     ],
-    "file_handlers_": [{
+    "file_handlers": [{
             "action": "PainterV3.html",
             "accept": {
                 "image/.png": [".png"],
