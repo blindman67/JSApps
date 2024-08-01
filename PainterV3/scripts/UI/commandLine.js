@@ -2278,6 +2278,90 @@ var commandLine = (()=>{
                 }
             }
         },
+        pan: {
+            help : "> Pan workspace `pan ?` for help",
+            helpExtended : [
+                "> pan : Set default workspace position",
+                "> pan up [num]    : Move down. num (amount)",
+                "> pan u [num]     : Move down. num (amount)",
+                "> pan down [num]  : Move up.   num (amount)",
+                "> pan d [num]     : Move up.   num (amount)",
+                "> pan left [num]  : Move right num (amount)",
+                "> pan l [num]     : Move right num (amount)",
+                "> pan right [num] : Move left. num (amount)",
+                "> pan r [num]     : Move left. num (amount)",
+                "> Info: [num] is optional. Defaults 1",
+                ">       One unit of pan is 1/4th of workspace.",
+            ],
+            f(args){
+                if (showHelp("pan", args)) { return  }
+                args = tokenize(args);
+                args.shift();
+                if(args.length === 0) {
+                    view.setPos(view.width * 0.5, view.height * 0.5);
+                } else {
+                    const a1 = args.shiftVal();
+                    const a2 = args.shiftVal();
+                    if (isNaN(a1) && typeof a1 === "string") {
+                        let vScale = view.scale;
+                        let w = view.width * 0.5;
+                        let h = view.height * 0.5;
+                        let x = 0;
+                        let y = 0;
+                        let scaleBy = 1;
+                        if (a2 !== undefined && !isNaN(a2)) { scaleBy = Math.min(120, Math.max(0.02, Number(a2))) }
+                        if (a1.toLowerCase() === "up" || a1.toLowerCase() === "u")         { y = h *  0.5 * scaleBy } 
+                        else if (a1.toLowerCase() === "down" || a1.toLowerCase() === "d")  { y = h * -0.5 * scaleBy } 
+                        else if (a1.toLowerCase() === "right" || a1.toLowerCase() === "r") { x = w * -0.5 * scaleBy } 
+                        else if (a1.toLowerCase() === "left" || a1.toLowerCase() === "l")  { x = w *  0.5 * scaleBy } 
+                        view.movePos(x, y);
+                    } else { 
+                        log.warn("Pan? unknown argument.");
+                    }
+                }
+            }                    
+        },
+        zoom: {
+            help : "> Zoom workspace in and out `zoom ?` for help",
+            helpExtended : [
+                "> zoom : Set default zoom",
+                "> zoom in [num] : Increase zoom. Optional num (amount)",
+                "> zoom + [num]  : Increase zoom. Optional num (amount)",
+                "> zoom out [num]: Decrease zoom. Optional num (amount)",
+                "> zoom - [num]  : Decrease zoom. Optional num (amount)",
+                "> Info. Zoom zooms at center of visible workspace.",
+                ">       Use pan to pan workspace.",
+            ],
+            f(args){
+                if (showHelp("zoom", args)) { return  }
+                args = tokenize(args);
+                args.shift();
+                if(args.length === 0) {
+                    let w = view.width * 0.5;
+                    let h = view.height * 0.5;
+                    let vScale = view.scale;
+                    let scaleBy = 1 / vScale;
+                    view.scaleAt(w, h, scaleBy);
+                } else {
+                    const a1 = args.shiftVal();
+                    const a2 = args.shiftVal();
+                    if (isNaN(a1) && typeof a1 === "string") {
+                        let w = view.width * 0.5;
+                        let h = view.height * 0.5;
+                        let vScale = view.scale;
+                        let scaleBy = 1;
+                        if (a2 !== undefined && !isNaN(a2))                { scaleBy = Math.min(120, Math.max(0.02, Number(a2))) }
+                        if (a1.toLowerCase() === "in" || a1 === "+")       { scaleBy = settings.wheelScaleRate * scaleBy } 
+                        else if (a1.toLowerCase() === "out" || a1 === "-") { scaleBy = 1 / (settings.wheelScaleRate * scaleBy) }
+                        if (vScale * scaleBy > 120)       { scaleBy = 120 / vScale; }
+                        else if (vScale * scaleBy < 0.02) { scaleBy = 0.02 / vScale; }
+                        view.scaleAt(w, h, scaleBy);
+                    } else { 
+                        log.warn("Zoom? unknown argument.");
+                    }
+                }
+            }                    
+        },
         pos : {
             batchOnly: true,
             help : "> Positions selected sprites at x,y `pos ?` for help",
