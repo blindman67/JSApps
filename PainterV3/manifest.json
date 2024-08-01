@@ -58,7 +58,13 @@
                 "image/svg": [".svg"],
                 "image/jpeg": [".jpeg"],
                 "image/webp": [".webp"]
-            }
+            },
+            "icons": [{
+                "src": "icons/icon-256x256.png",
+                "type": "image/png",
+                "sizes": "256x256"
+            }],            
+            "launch_type": "single-client"
         }
     ]
 
