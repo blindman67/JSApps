@@ -139,14 +139,16 @@ const Touch = (() => {
             },
             end(e) { 
                 //e.preventDefault();            
-                if (updateChanges(e, e?.changedTouches, primaryTouch.identifier ?? primaryTouch.pointerId)) {
-                    //showInfo(e);
-                    dispatchMouse(mEvents.up,  e, primaryTouch);
-                    dispatchMouse(mEvents.moveTo, e, primaryTouch, 1);
-                    if (pointerAPI) {
-                        //document.body.releasePointerCapture(primaryTouch.pointerId);
+                if (primaryTouch) {
+                    if (updateChanges(e, e?.changedTouches, primaryTouch.identifier ?? primaryTouch.pointerId)) {
+                        //showInfo(e);
+                        dispatchMouse(mEvents.up,  e, primaryTouch);
+                        dispatchMouse(mEvents.moveTo, e, primaryTouch, 1);
+                        if (pointerAPI) {
+                            //document.body.releasePointerCapture(primaryTouch.pointerId);
+                        }
+                        primaryTouch = undefined;
                     }
-                    primaryTouch = undefined;
                 }
             },
             cancel(e) { 
