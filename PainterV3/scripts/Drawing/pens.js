@@ -245,6 +245,7 @@ const pens = (()=>{
     const selectionClip = Extent();
     var useSelectionClip = false;
     var drawModeMouseLocked = false;
+    var showPenLocationGuide = true;
     const shapeModStates = {
         shift: false,
         alt: false,
@@ -7930,10 +7931,12 @@ const pens = (()=>{
             const xLen = common.vWidth;
             const yLen = common.vHeight
             ctx.beginPath();
-            ctx.lineTo(mx - xLen, my);
-            ctx.lineTo(mx + xLen, my);
-            ctx.moveTo(mx, my - yLen);
-            ctx.lineTo(mx, my + yLen);
+            if (showPenLocationGuide) {
+                ctx.lineTo(mx - xLen, my);
+                ctx.lineTo(mx + xLen, my);
+                ctx.moveTo(mx, my - yLen);
+                ctx.lineTo(mx, my + yLen);
+            }
             if (API.showPenAreaInner  !==  0 || API.showPenAreaOuter !== 0) {
                 if (API.showPenAreaInner > 0) {
                    // var radMin = paint.lengthFade / 2;
@@ -8944,5 +8947,10 @@ const pens = (()=>{
         colorModes : [...Object.keys(renderFunctions.colorModes)],
 		imageRecycle: ["Standard", "AlphaBleed", "Bleed", "Zoom", "Twist","AlphaBleedZoom",],
     };
+    function getSettings(){
+        showPenLocationGuide = settings.showPenLocationGuide;
+    }
+    getSettings();
+    settingsHandler.onchange = getSettings;   
     return API;
 })()

@@ -590,6 +590,7 @@ const settings = {
     maxImageDependencyRate: 4,
     timelineMaxTracks: 32,
     usePointer : true,
+    showPenLocationGuide: true,
     // Current experimental settings.
     limitDrawTime: false,          // This option is currently ignored as with maxDrawTime. Avalible only with experimental versions of Painter3
     maxDrawTime: 10,               // in ms. Some draw functions can be slow. This sets the max time a draw function can have befor exiting the function
@@ -763,6 +764,7 @@ const settingsHandler = {
             zoomOnLoadedOn: "When true and view loaded is true loaded content is zoomed to fit workspace",
             addLoadedAsCollection: "When true loaded content is added as a collection given the name of the file",
             smallLockIndicator: "When true the image locked (progress) graphic is reduced in size and not over the sprite",
+            showPenLocationGuide: "Drawing feedback. If true draw dashed lines to help locate cursor position.",
         },
         sprites: {
             newSpriteLockScale: "If true new sprites have scale locked by default",
