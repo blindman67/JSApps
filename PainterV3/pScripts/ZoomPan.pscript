@@ -6,9 +6,9 @@ menu exit "Exit"
 
 $options = ""
 
-$options = $options + "home,"
-$options = $options + "{,in,up,out,},"
-$options = $options + "{,left,down,right,},"
+$options = $options + "{,!home,!fit selected,},"
+$options = $options + "{,!in,!up,!out,},"
+$options = $options + "{,!left,!down,!right,},"
 
 
 menu options $options
@@ -33,6 +33,10 @@ if $opt === "exit" {
 if $opt === "home" {
     zoom
     pan
+    jump doAgain
+}
+if $opt === "fit selected" {
+    com edSprResetViewFit
     jump doAgain
 }
 if $opt === "up" {

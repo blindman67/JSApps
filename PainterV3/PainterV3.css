@@ -489,7 +489,8 @@ body {
     background: #8BF6;
 }
 .textButtonBigButton { /* used in floating menus/dialogs */
-    font-size: 16px;
+    font-size: 14px;
+    padding-top: 4px;
 }
 .textButtonRowItem {
     text-align: center;
