@@ -140,6 +140,7 @@ const Touch = (() => {
             end(e) { 
                 //e.preventDefault();            
                 if (primaryTouch) {
+                    showInfo(e);
                     if (updateChanges(e, e?.changedTouches, primaryTouch.identifier ?? primaryTouch.pointerId)) {
                         //showInfo(e);
                         dispatchMouse(mEvents.up,  e, primaryTouch);
