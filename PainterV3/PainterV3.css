@@ -611,7 +611,7 @@ td {
 .trackName.compact {background: #882449aa; color: #FFF; border-color: #000 }
 .trackKey {
     cursor : pointer;
-    background-image: url('/PainterV3/icons/keyIconsA.png');
+    background-image: url(icons/keyIconsA.png);
     background-repeat: no-repeat;
 }
 .trackKey.Selected {
