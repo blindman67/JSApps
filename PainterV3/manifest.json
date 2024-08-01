@@ -1,17 +1,16 @@
 {
     "name": "PainterV3",
     "short_name": "PV3",
-    "start_url": "/PainterV3.html",
-    "id": "/PainterV3.html",
+    "start_url": "PainterV3.html",
+    "id": "PainterV3.html",
     "display_override": ["fullscreen", "minimal-ui"],
     "display": "standalone",
     "background_color": "#000",
     "description": "2D game art editor",    
     "lang": "en-us",
-    "scope": "/",
     "orientation": "any",
     "file_handlers": [{ 
-            "action": "/PainterV3.html",
+            "action": "PainterV3.html",
             "accept": { "image/png": [".png"] },
             "launch_type": "single-client"
         }
