@@ -1,7 +1,7 @@
 {
     "name": "PainterV3",
     "short_name": "PV3",
-    "start_url": ".",
+    "start_url": "PainterV3.html",
     "display_override": ["fullscreen", "minimal-ui"],
     "display": "standalone",
     "background_color": "#000",
