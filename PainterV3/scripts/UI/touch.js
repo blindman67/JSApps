@@ -163,7 +163,7 @@ const Touch = (() => {
                 }*/
             },
             move(e) { 
-                e.preventDefault();
+                //e.preventDefault();
                 if (!primaryTouch) {
                     if (updateChanges(e, e?.touches, -1)) {
                         dispatchMouse(mEvents.move, e, primaryTouch);
@@ -236,7 +236,7 @@ function startTouch() {
         const opts = {passive: true};
         log.info("Starting touch via pointer.");
         document.addEventListener("pointerdown",         Touch.listeners.start, opts);
-        document.addEventListener("pointermove",         Touch.listeners.move, {passive: false});
+        document.addEventListener("pointermove",         Touch.listeners.move, opts);
         document.addEventListener("pointerup",           Touch.listeners.end, opts );
         document.addEventListener("pointercancel",       Touch.listeners.cancel, opts );
         //document.addEventListener("pointerover",         Touch.listeners.debug );
