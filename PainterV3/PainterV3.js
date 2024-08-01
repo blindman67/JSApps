@@ -5,6 +5,7 @@ const settingsSetup = [
     () => { setTimeout(() => { if(settings.localMedia) {  media.getMediaDeviceList()}}, 50) },
     () => { setTimeout(() => initDevice(), 50) },
     () => { setTimeout(() => functionLinkBuilder.start(), 5) },
+    () => { setTimeout(() => TestApp(), 1005) },
 
 ];
 settingsHandler.onchange = () => { setTimeout(()=>mainCanvas.ctx.setBackgroundColor(settings.backgroundColor),10) };
@@ -25,6 +26,26 @@ function showDeviceInfo() {
     } else {
         log.info("Detected mouse device.");
     }
+}
+
+function TestApp() {
+    log.info("Test app called.");
+    if ("launchQueue" in window) {
+        window.launchQueue.setConsumer((launchParams) => {
+            if (launchParams.files && launchParams.files.length) {
+                var idx = 0;
+                while (idx < launchParams.files.length) {
+                    const file = launchParams.files[idx];
+                    log(file.kind);
+                    log(file.name);
+                    idx++;
+                }
+            }
+            
+        }
+      });
+    }    
+    
 }
 
 function addLoadedMedia(name){

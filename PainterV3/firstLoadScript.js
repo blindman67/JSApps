@@ -831,3 +831,6 @@ function getGlobalSettings(){
 var SVGDig = 2, SVGIndent = "    ", SVGForNum;
 getGlobalSettings();
 settingsHandler.onchange = getGlobalSettings;
+
+
+

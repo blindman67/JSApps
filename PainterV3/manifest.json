@@ -50,20 +50,7 @@
         }
     ],
     "file_handlers_": [{
-            "action": "/handlerURL_Audio",
-            "accept": {
-                "audio/wav": [".wav"],
-                "audio/mpeg": [".mp3"],
-                "audio/ogg": [".ogg"],
-                "application/ogg": [".ogg"]
-            }
-        }, {
-            "action": "/handlerURL_JSON",
-            "accept": {
-                "application/.json": [".json"]
-            }
-        }, {
-            "action": "/handlerURL_Image",
+            "action": "PainterV3.html",
             "accept": {
                 "image/.png": [".png"],
                 "image/.gif": [".gif"],
@@ -72,14 +59,7 @@
                 "image/.jpeg": [".jpeg"],
                 "image/.webp": [".webp"]
             }
-        }, {
-            "action": "/handlerURL_Video",
-            "accept": {
-                "image/.mpg": [".mpg"],
-                "image/.mp4": [".mp4"],
-                "image/.webm": [".webm"]
-            }
-        }
+        },
     ]
 
 }
