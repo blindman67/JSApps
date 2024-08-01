@@ -52,12 +52,12 @@
     "file_handlers": [{
             "action": "PainterV3.html",
             "accept": {
-                "image/.png": [".png"],
-                "image/.gif": [".gif"],
-                "image/.jpg": [".jpg"],
-                "image/.svg": [".svg"],
-                "image/.jpeg": [".jpeg"],
-                "image/.webp": [".webp"]
+                "image/png": [".png"],
+                "image/gif": [".gif"],
+                "image/jpg": [".jpg"],
+                "image/svg": [".svg"],
+                "image/jpeg": [".jpeg"],
+                "image/webp": [".webp"]
             }
         }
     ]
