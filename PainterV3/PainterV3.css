@@ -1315,6 +1315,12 @@ td {
 .extrasHelpersTesting .foldItem:hover { background: hsl(0, 18%, 55%); }
 .extrasHelpersTesting .listItem:hover { background: hsl(0, 60%, 30%); }
 
+.extrasHelpersWorkspace .foldItem { background: hsl(20, 22%, 49%); }
+.extrasHelpersWorkspace .listItem { background: hsl(20, 25%, 42%); }
+.extrasHelpersWorkspace .foldItem:hover { background: hsl(20, 18%, 55%); }
+.extrasHelpersWorkspace .listItem:hover { background: hsl(20, 60%, 30%); }
+
+
 .extrasImageProcessing .foldItem { background: hsl(150, 22%, 49%); }
 .extrasImageProcessing .listItem { background: hsl(150, 24%, 42%); }
 .extrasImageProcessing .foldItem:hover { background: hsl(150, 18%, 55%); }
