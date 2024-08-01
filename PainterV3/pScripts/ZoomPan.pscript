@@ -1,0 +1,64 @@
+
+
+menu title "10 Workspace Nav"
+menu exit "Exit"
+
+
+$options = ""
+
+$options = $options + "home,"
+$options = $options + "{,in,up,out,},"
+$options = $options + "{,left,down,right,},"
+
+
+menu options $options
+$menuOn = true
+menu keep
+
+
+//=======================================================================================================================
+// Start of main menu loop
+//=======================================================================================================================
+label doAgain
+$opt = call menu
+
+
+if $opt === "cancel" {
+    exit
+}
+if $opt === "exit" {
+    exit
+}
+
+if $opt === "home" {
+    zoom
+    pan
+    jump doAgain
+}
+if $opt === "up" {
+    pan up
+    jump doAgain
+}
+if $opt === "down" {
+    pan down
+    jump doAgain
+}
+if $opt === "left" {
+    pan left
+    jump doAgain
+}
+if $opt === "right" {
+    pan right
+    jump doAgain
+}
+if $opt === "in" {
+    zoom in
+    jump doAgain
+}
+if $opt === "out" {
+    zoom out
+    jump doAgain
+}
+
+jump doAgain
+
