@@ -964,7 +964,8 @@ const spriteList = (()=>{
         return new Promise(ok => {
             if (media.hasUnused()) {
                 if (commandLine.quickMenuOpen()) { log.warn("Save canceled. Close active dialogs first"); ok("Cancel"); return   }
-                const saveUnused = buttons.quickMenu( "30 Save option?|Cancel,All,Used only|textCenter Media contains unused images!,textCenter Select All to save all media.,textCenter Select Used only to save only used media,textCenter Or cancel save.");
+                const saveText = "30 " + (saveToLocal ? "Save to localStorage" : "Save to downloads");
+                const saveUnused = buttons.quickMenu( saveText + "?|Cancel,All,Used only|textCenter Media contains unused images!,textCenter Select All to save all media.,textCenter Select Used only to save only used media,textCenter Or cancel save.");
                 saveUnused.onclosed = () => {
                     if(saveUnused.exitClicked === "All") {
                          ok("All");
