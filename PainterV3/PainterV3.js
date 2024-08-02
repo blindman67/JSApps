@@ -5,7 +5,7 @@ const settingsSetup = [
     () => { setTimeout(() => { if(settings.localMedia) {  media.getMediaDeviceList()}}, 50) },
     () => { setTimeout(() => initDevice(), 50) },
     () => { setTimeout(() => functionLinkBuilder.start(), 5) },
-    () => { setTimeout(() => TestApp(), 1005) },
+    //() => { setTimeout(() => TestApp(), 1005) },
 
 ];
 settingsHandler.onchange = () => { setTimeout(()=>mainCanvas.ctx.setBackgroundColor(settings.backgroundColor),10) };
@@ -27,7 +27,7 @@ function showDeviceInfo() {
         log.info("Detected mouse device.");
     }
 }
-
+/*
 function TestApp() {
     log.info("Test app called.");
     if ("launchQueue" in window) {
@@ -46,7 +46,7 @@ function TestApp() {
     }
 
     
-}
+}*/
 
 function addLoadedMedia(name){
     settings.recent = settings.recent.filter(n => n !== name);

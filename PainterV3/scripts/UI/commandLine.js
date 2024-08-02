@@ -3208,18 +3208,38 @@ var commandLine = (()=>{
             help : "> Load media",
             helpExtended : [
                 "> load * : Clickable file history list",
+                "> load file : Load a file via file dialog",
                 "> load mediaURL : mediaURL location of file",
                 "> load painter.json : Loads a JSON URL and if",
                 "                       correctly formated loads",
                 "                       its content. Must include .json ",
                 "                       in the name. ",
             ],
-            f(args){
+            async f(args){
+                
+                async function fileDialog() {
+                    const pickerOpts = {
+                        id: 10,
+                        startIn: "downloads",
+                        types: [{
+                            description: "Images",
+                            accept: {"image/*": [".png", ".gif", ".jpeg", ".jpg", ".webp"]},
+                        }],
+                        excludeAcceptAllOption: true,
+                        multiple: true,
+                    };   
+                    var fileHandles = await window.showOpenFilePicker(pickerOpts);
+                    for (const fHdl of fileHandles) {
+                        if (fHdl.kind === "file") { await DM.loadFile(await fHdl.getFile()) }
+                    } 
+                }                    
+                
                 if (showHelp("load",args)) { return  }
                 if (args.toLowerCase().trim() === "load *") {
                     lineCommands.com.f("com sysShowFileHistory");
                     return;
                 }
+                if (args.toLowerCase().trim() === "load file") { await fileDialog(); return }
                 args = args.toLowerCase().replace(/ +/g," ").split(" ");
                 if(args[1].indexOf(".json") === args[1].length - 5) {
                     storage.loadJSON(args[1])
