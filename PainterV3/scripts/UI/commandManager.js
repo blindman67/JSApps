@@ -21,6 +21,7 @@ const commandLineCommands = [
     commands.sysHideUIToggle,
     commands.sysHideUIFull,
     commands.sysShowUITemp,
+    commands.sysForceRightButton,
     commands.sysShowTimeBarTemp,
     commands.sysCommandManagerQueueCallback,
     commands.sysGlobalEscape,

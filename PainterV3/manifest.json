@@ -11,7 +11,10 @@
     "orientation": "any",
     "file_handlers": [{ 
             "action": "PainterV3.html",
-            "accept": { "image/png": [".png"] },
+            "accept": { 
+                "image/jpeg": [".jpg", ".jpeg"],
+                "image/png": [".png"] 
+            },
             "launch_type": "single-client"
         }
     ],

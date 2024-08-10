@@ -14,6 +14,16 @@ const system = (()=>{
                 }
                 system.fireEvent("globalescape");
             },
+            [commands.sysForceRightButton]() {
+                if (mouse.forceRight) {
+                    if (mouse.forceRightLocked === false) { mouse.forceRightLocked = true } 
+                    else { mouse.forceRight = false }
+                } else {
+                    mouse.forceRightLocked = false
+                    mouse.forceRight = true;                    
+                }
+                setTimeout(editSprites.updateSysButtons, 0); 
+            },
             [commands.sysHideUIFull]() {
                 displaySizer({
                     hideUI: true,

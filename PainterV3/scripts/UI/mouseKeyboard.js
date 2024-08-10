@@ -53,6 +53,8 @@ const mouse = {
     cursor : "defualt",
     cursorName : "default",
     cursorAngle : undefined,
+    forceRight: false,
+    forceRightLocked: false,
     accessKey: 0,
     setAccessKey(id, key) {
         if (mouse.captured === id) { mouse.accessKey = key; }
@@ -322,7 +324,7 @@ function mouseEvents(e) {  // This function will also handle DOM LIKE events
         else if (target.onMove && target.onMove(mouse,e)) { mouse.mouseout = target }
     }else if (e.type === "mousedown") {
         mouse.oldButton = mouse.button;
-        mouse.button |= mouse.buttons[e.which-1];
+        mouse.button |= mouse.forceRight ? mouse.buttons[2] : mouse.buttons[e.which - 1];
         mouse.downOn = target;
 		mouse.downOnEvent = e;
         mouse.clickId = mouse.clickId ? mouse.clickId : (mouse.oldClickId = mouse.clickId, mouse.eventTime); // all buttons down between click start and end has the same  click id
@@ -339,7 +341,16 @@ function mouseEvents(e) {  // This function will also handle DOM LIKE events
     } else if (e.type === "mouseup") {
         if (mouse.repeaterHandle) { mouse.stopRepeater() }
         mouse.oldButton = mouse.button;
-        mouse.button &= mouse.buttons[e.which + 2];
+        if (mouse.forceRight) {
+            mouse.button &= mouse.buttons[5];
+            if (mouse.forceRightLocked !== true) {
+                typeof editSprites !== "undefined" && setTimeout(() => { // window.editSprites is always undefined????? so using workaround
+                        if (!mouse.forceRightLocked) { mouse.forceRight = false; } // NOTE mouse.forceRightLocked befor this timer event fires
+                        editSprites.updateSysButtons();
+                    }, 0
+                );
+            }
+        } else { mouse.button &= mouse.buttons[e.which + 2]; }
         if ((mouse.button & mouse.buttonMask) === 0) { mouse.oldClickId = mouse.clickId; mouse.clickId = 0 }
         if (mouse.onbutton) { mouse.onbutton(mouse,e) }
         if (mouse.captured === 0 && (mouse.downOn !== null && (mouse.downOn === target || (e.timeStamp - mouse.downOnEvent.timeStamp) < mouseClickTime))){

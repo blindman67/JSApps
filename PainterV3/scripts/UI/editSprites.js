@@ -3776,9 +3776,16 @@ const editSprites = (()=>{
                 }
 
             }
+            API.updateSysButtons();
             //API.fireEvent("update",API);
             API.fireUpdate();
-        }
+        },        
+        updateSysButtons() {
+
+            if (mouse.forceRight && mouse.forceRightLocked) { buttonMap.get(commands.sysForceRightButton).setSprite(2) } 
+            else if (mouse.forceRight)                      { buttonMap.get(commands.sysForceRightButton).setSprite(1) } 
+            else                                            { buttonMap.get(commands.sysForceRightButton).setSprite(0) }
+        },
     };
     var lastSel = false;
     Object.assign(API, Events(API));

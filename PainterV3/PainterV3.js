@@ -12,11 +12,10 @@ settingsHandler.onchange = () => { setTimeout(()=>mainCanvas.ctx.setBackgroundCo
 function saveSettings() { localStorage[APPNAME + "_settings"] = JSON.stringify(settings); }
 
 const deviceInfo = {
-    inputCaps: /*window.InputDeviceCapabilities ? new InputDeviceCapabilities() :*/ {inputCaps: {firesTouchEvents: false}},
+    inputCaps: window.InputDeviceCapabilities ? new InputDeviceCapabilities() : {inputCaps: {firesTouchEvents: false}},
 };
 function initDevice() {
-        deviceInfo.inputCaps.firesTouchEvents = true;
-    //mouse.listen();
+    //deviceInfo.inputCaps.firesTouchEvents = true;
     deviceInfo.inputCaps?.firesTouchEvents ? startTouch() : mouse.listen();
     showDeviceInfo();
 }

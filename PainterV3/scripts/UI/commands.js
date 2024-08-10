@@ -32,6 +32,7 @@ const commands = (()=>{
         sysGlobalEscape: i++, // This is issued to all handlers and is triggered by the user hitting the ESC key
         sysUp: i++,
         sysDown: i++,
+        csysForceRightButton: i++,
         sysCommandManagerQueueCallback: i++,
         sysCommandsEnd: i++, // just a marker
 
