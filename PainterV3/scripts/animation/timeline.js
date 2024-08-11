@@ -1209,7 +1209,8 @@ const timeline = (()=> {
             value = value < 0 ? 0 : value;
             if(value !== timelineFrameStep) {
                 timelineFrameStep = value;
-                buttonMap.get(commands.animFrameStep).element.textContent = timelineFrameStep;
+                const btn = buttonMap.get(commands.animFrameStep);
+                btn && (btn.element.textContent = timelineFrameStep);
             }
         },
         activate(on) {
@@ -1249,10 +1250,10 @@ const timeline = (()=> {
             flasher = elementFlasher(editSprites.getButton(commands.animTimeSecondSlider).element, {keyFrameAddSec: "sliderFlash"});
             const fsi  = buttonMap.get(commands.animIncreaseFrameStep);
             const fsd  = buttonMap.get(commands.animDecreaseFrameStep);
-            fsi.element.repeater = true;
-            fsd.element.repeater = true;
-            fsi.element.repeatRate = 500;
-            fsd.element.repeatRate = 500;
+            fsi && (fsi.element.repeater = true);
+            fsd && (fsd.element.repeater = true);
+            fsi && (fsi.element.repeatRate = 500);
+            fsd && (fsd.element.repeatRate = 500);
             buttonMap.get(commands.animRecallKeySelection).disable();
             buttonMap.get(commands.animStoreKeySelection).disable();
             times.end = buttonMap.get(commands.animEndTime);
@@ -2397,12 +2398,14 @@ const timeline = (()=> {
                     times.totalSlide.element.height = TOTAL_SLIDE_HEIGHT;
                     times.totalSlide.element.style.height = TOTAL_SLIDE_HEIGHT+"px";
                 }
-                var mark = timeMarks.get(animation.time);
-                if(mark) {
-                    buttonMap.get(commands.animAddMark).element.textContent = mark.name;
-                } else {
-                    buttonMap.get(commands.animAddMark).element.textContent = "Add";
-                }
+                /*if (showTrackMarkUI) {  // Not optional in online version of PainterV3
+                    const mark = timeMarks.get(animation.time);
+                    if(mark) {
+                        buttonMap.get(commands.animAddMark).element.textContent = mark.name;
+                    } else {
+                        buttonMap.get(commands.animAddMark).element.textContent = "Add";
+                    }
+                }*/
                 timePosX = ((time - start) / (end-start)) * (slideBounds.width - timePosSize.width);
                 times.pos.style.left = timePosX + "px";
                 var idx = 0;
